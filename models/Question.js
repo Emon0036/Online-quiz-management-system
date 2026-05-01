@@ -7,6 +7,8 @@ const questionSchema = new mongoose.Schema(
     type: { type: String, enum: ['multiple-choice', 'true-false', 'short-answer'], required: true },
     options: [{ type: String, trim: true }],
     correctAnswer: { type: String, trim: true },
+    // Explanation for the correct answer - shown to students after quiz submission
+    explanation: { type: String, trim: true, default: '' },
     marks: { type: Number, required: true, min: 1, default: 1 },
   },
   { timestamps: true }

@@ -35,6 +35,7 @@ exports.takeQuiz = async (req, res) => {
 };
 
 exports.submitQuiz = async (req, res) => {
+  // Fetch the published quiz with all its questions
   const quiz = await Quiz.findOne({ _id: req.params.quizId, status: 'published' }).populate('questions');
   if (!quiz) {
     req.flash('error', 'Quiz is not available.');
@@ -45,9 +46,11 @@ exports.submitQuiz = async (req, res) => {
   let score = 0;
   let hasManualReview = false;
 
+  // Process each question and grade the answer
   const answers = quiz.questions.map((question) => {
     const answer = String(submittedAnswers[question._id] || '').trim();
 
+    // Short answer questions require teacher review - mark for manual review
     if (question.type === 'short-answer') {
       hasManualReview = true;
       return {
@@ -59,13 +62,17 @@ exports.submitQuiz = async (req, res) => {
       };
     }
 
+    // For multiple choice and true/false, auto-grade the answer
     const isCorrect = question.checkAnswer(answer);
     const marksObtained = isCorrect ? question.marks : 0;
     score += marksObtained;
     return { question: question._id, answer, isCorrect, marksObtained, needsManualReview: false };
   });
 
+  // Calculate percentage score
   const percentage = quiz.totalMarks ? Math.round((score / quiz.totalMarks) * 100) : 0;
+  
+  // Create an attempt record storing all answers, scores, and metadata
   const attempt = await Attempt.create({
     student: req.user._id,
     quiz: quiz._id,
@@ -79,6 +86,7 @@ exports.submitQuiz = async (req, res) => {
     submittedAt: new Date(),
   });
 
+  // Create result record for tracking overall performance
   await Result.create({
     student: req.user._id,
     quiz: quiz._id,
@@ -89,6 +97,7 @@ exports.submitQuiz = async (req, res) => {
     status: hasManualReview ? 'pending-review' : percentage >= quiz.passingMarks ? 'pass' : 'fail',
   });
 
+  // Update leaderboard if all answers are auto-graded
   if (!hasManualReview) {
     const leaderboard = await Leaderboard.findOneAndUpdate({ quiz: quiz._id }, { $setOnInsert: { quiz: quiz._id } }, { upsert: true, new: true });
     await leaderboard.recordAttempt(req.user._id, score, percentage);
@@ -98,14 +107,23 @@ exports.submitQuiz = async (req, res) => {
   return res.redirect(`/student/results/${attempt._id}`);
 };
 
+// Fetch student's specific quiz attempt and populate all related question data
+// This allows us to display the correct answer and explanation for each question
 exports.result = async (req, res) => {
   const attempt = await Attempt.findOne({ _id: req.params.attemptId, student: req.user._id })
     .populate('quiz')
-    .populate('answers.question');
+    .populate({
+      path: 'answers.question',
+      // Populate the full question data including explanation and correct answer
+      select: 'questionText type options correctAnswer explanation marks'
+    });
+  
   if (!attempt) {
     req.flash('error', 'Result not found.');
     return res.redirect('/student/history');
   }
+  
+  // Send attempt data to result view where correct answers and explanations will be displayed
   return res.render('student/result', { title: 'Quiz Result', attempt });
 };
 

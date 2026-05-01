@@ -1,21 +1,69 @@
 <% layout('layouts/main') %>
 <section class="container py-4">
+  <!-- Result Summary Section -->
   <div class="result-hero">
     <span class="eyebrow">Result</span>
     <h1><%= attempt.quiz.title %></h1>
+    <!-- Display overall percentage score in a visual circle -->
     <div class="score-circle"><%= attempt.percentage %>%</div>
+    <!-- Show pass/fail/pending status -->
     <p class="lead"><%= attempt.status === 'pending-review' ? 'Pending manual review' : attempt.passed ? 'Passed' : 'Needs improvement' %></p>
+    <!-- Show marks breakdown: obtained vs total -->
     <p><%= attempt.score %> out of <%= attempt.totalMarks %> marks</p>
   </div>
+
+  <!-- Detailed Answer Review Section -->
   <div class="form-panel mt-4">
+    <h2 class="mb-3">Answer Review</h2>
+    
     <% attempt.answers.forEach((answer, index) => { %>
-      <div class="review-item">
-        <strong><%= index + 1 %>. <%= answer.question.questionText %></strong>
-        <p class="mb-1 text-muted">Your answer: <%= answer.answer || 'Not answered' %></p>
-        <span class="badge <%= answer.needsManualReview ? 'text-bg-warning' : answer.isCorrect ? 'text-bg-success' : 'text-bg-danger' %>">
-          <%= answer.needsManualReview ? 'Waiting review' : `${answer.marksObtained}/${answer.question.marks}` %>
-        </span>
+      <div class="review-item mb-4 p-3 border rounded">
+        <!-- Question Number and Text -->
+        <div class="mb-2">
+          <strong class="d-block mb-2">
+            <span class="badge bg-primary me-2"><%= index + 1 %></span>
+            <%= answer.question.questionText %>
+          </strong>
+        </div>
+
+        <!-- Display Student's Answer -->
+        <div class="mb-3">
+          <p class="mb-1 text-muted">
+            <strong>Your Answer:</strong>
+            <span class="<%= answer.isCorrect ? 'text-success' : answer.needsManualReview ? 'text-warning' : 'text-danger' %>">
+              <%= answer.answer || '(Not answered)' %>
+            </span>
+          </p>
+        </div>
+
+        <!-- Status Badge: Shows if answer is correct, pending review, or wrong -->
+        <div class="mb-3">
+          <span class="badge <%= answer.needsManualReview ? 'text-bg-warning' : answer.isCorrect ? 'text-bg-success' : 'text-bg-danger' %>">
+            <%= answer.needsManualReview ? 'Waiting for teacher review' : `${answer.marksObtained}/${answer.question.marks} marks` %>
+          </span>
+        </div>
+
+        <!-- Show Correct Answer (only if not pending manual review) -->
+        <% if (!answer.needsManualReview && !answer.isCorrect) { %>
+          <div class="alert alert-info mb-2">
+            <strong>Correct Answer:</strong> <%= answer.question.correctAnswer %>
+          </div>
+        <% } %>
+
+        <!-- Display Explanation (if available) -->
+        <% if (answer.question.explanation && answer.question.explanation.trim()) { %>
+          <div class="alert alert-light border border-secondary mb-0">
+            <strong>Explanation:</strong>
+            <p class="mb-0 mt-2"><%= answer.question.explanation %></p>
+          </div>
+        <% } %>
       </div>
     <% }) %>
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="mt-4 mb-4">
+    <a href="/student/quizzes" class="btn btn-primary">Take Another Quiz</a>
+    <a href="/student/history" class="btn btn-outline-secondary">View History</a>
   </div>
 </section>

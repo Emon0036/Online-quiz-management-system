@@ -9,6 +9,8 @@ const flash = require('express-flash');
 const passport = require('passport');
 const methodOverride = require('method-override');
 const engine = require('ejs-mate');
+const problemRoutes = require("./routes/problemRoutes");
+const submissionRoutes = require("./routes/submissionRoutes");
 
 const authRoutes = require('./routes/authRoutes');
 const publicRoutes = require('./routes/publicRoutes');
@@ -74,6 +76,8 @@ app.use('/auth', authRoutes);
 app.use('/admin', adminRoutes);
 app.use('/teacher', teacherRoutes);
 app.use('/student', studentRoutes);
+app.use("/problems", problemRoutes);
+app.use("/submissions", submissionRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
