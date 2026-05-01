@@ -1,0 +1,18 @@
+<% layout('layouts/main') %>
+<section class="container py-4">
+  <div class="page-heading"><div><span class="eyebrow">Analytics</span><h1><%= quiz.title %></h1></div><a class="btn btn-outline-secondary" href="/teacher/quizzes">Back</a></div>
+  <div class="row g-3">
+    <div class="col-md-4"><div class="stat-tile"><span>Total Attempts</span><strong><%= attempts.length %></strong></div></div>
+    <div class="col-md-4"><div class="stat-tile"><span>Average Score</span><strong><%= average %>%</strong></div></div>
+    <div class="col-md-4"><div class="stat-tile"><span>Pass Count</span><strong><%= passCount %></strong></div></div>
+  </div>
+  <div class="table-card mt-4">
+    <h2 class="h5">Score Distribution</h2>
+    <% attempts.forEach((attempt) => { %>
+      <div class="mb-3">
+        <div class="d-flex justify-content-between small"><span><%= attempt.submittedAt.toLocaleDateString() %></span><span><%= attempt.percentage %>%</span></div>
+        <div class="progress"><div class="progress-bar" style="width:<%= attempt.percentage %>%"></div></div>
+      </div>
+    <% }) %>
+  </div>
+</section>

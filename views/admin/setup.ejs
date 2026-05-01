@@ -1,0 +1,14 @@
+<% layout('layouts/main') %>
+<section class="auth-wrap">
+  <div class="auth-card">
+    <h1>Create first admin</h1>
+    <p class="text-muted">Set up the first admin account directly in the database through this page.</p>
+    <form action="/admin/setup" method="POST" class="vstack gap-3">
+      <input class="form-control" name="name" placeholder="Full name" required>
+      <input class="form-control" type="email" name="email" placeholder="Email address" required>
+      <input class="form-control" type="password" name="password" placeholder="Password" minlength="6" required>
+      <button class="btn btn-primary w-100" type="submit">Create Admin</button>
+    </form>
+    <p class="small text-center mt-3">Already created? <a href="/auth/login">Login</a></p>
+  </div>
+</section>

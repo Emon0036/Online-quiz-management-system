@@ -1,0 +1,21 @@
+<% layout('layouts/main') %>
+<section class="container py-4">
+  <div class="result-hero">
+    <span class="eyebrow">Result</span>
+    <h1><%= attempt.quiz.title %></h1>
+    <div class="score-circle"><%= attempt.percentage %>%</div>
+    <p class="lead"><%= attempt.status === 'pending-review' ? 'Pending manual review' : attempt.passed ? 'Passed' : 'Needs improvement' %></p>
+    <p><%= attempt.score %> out of <%= attempt.totalMarks %> marks</p>
+  </div>
+  <div class="form-panel mt-4">
+    <% attempt.answers.forEach((answer, index) => { %>
+      <div class="review-item">
+        <strong><%= index + 1 %>. <%= answer.question.questionText %></strong>
+        <p class="mb-1 text-muted">Your answer: <%= answer.answer || 'Not answered' %></p>
+        <span class="badge <%= answer.needsManualReview ? 'text-bg-warning' : answer.isCorrect ? 'text-bg-success' : 'text-bg-danger' %>">
+          <%= answer.needsManualReview ? 'Waiting review' : `${answer.marksObtained}/${answer.question.marks}` %>
+        </span>
+      </div>
+    <% }) %>
+  </div>
+</section>

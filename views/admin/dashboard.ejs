@@ -1,0 +1,81 @@
+<% layout('layouts/main') %>
+<section class="container py-4">
+  <div class="page-heading">
+    <div><span class="eyebrow">Admin</span><h1>Dashboard</h1></div>
+  </div>
+
+  <div class="row g-3 mb-4">
+    <div class="col-md"><div class="stat-tile"><span>Students</span><strong><%= stats.students %></strong></div></div>
+    <div class="col-md"><div class="stat-tile"><span>Teachers</span><strong><%= stats.teachers %></strong></div></div>
+    <div class="col-md"><div class="stat-tile"><span>Pending Teachers</span><strong><%= stats.pendingTeachers %></strong></div></div>
+    <div class="col-md"><div class="stat-tile"><span>Admins</span><strong><%= stats.admins %></strong></div></div>
+  </div>
+
+  <div class="row g-4 mb-4">
+    <div class="col-lg-6">
+      <div class="form-panel h-100">
+        <h2 class="h5">Give Teacher Access by Email</h2>
+        <form action="/admin/teachers/grant" method="POST" class="d-flex gap-2">
+          <input class="form-control" type="email" name="email" placeholder="user@example.com" required>
+          <button class="btn btn-primary" type="submit">Grant</button>
+        </form>
+      </div>
+    </div>
+    <div class="col-lg-6">
+      <div class="form-panel h-100">
+        <h2 class="h5">Create Admin</h2>
+        <form action="/admin/admins" method="POST" class="row g-2">
+          <div class="col-md-4"><input class="form-control" name="name" placeholder="Name" required></div>
+          <div class="col-md-4"><input class="form-control" type="email" name="email" placeholder="Email" required></div>
+          <div class="col-md-4"><input class="form-control" type="password" name="password" placeholder="Password" minlength="6" required></div>
+          <div class="col-12"><button class="btn btn-outline-primary" type="submit">Create Admin</button></div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="table-card mb-4">
+    <h2 class="h5 mb-3">Pending Teacher Requests</h2>
+    <% if (pendingTeachers.length === 0) { %>
+      <p class="text-muted mb-0">No teacher requests are waiting.</p>
+    <% } else { %>
+      <div class="table-responsive">
+        <table class="table align-middle">
+          <thead><tr><th>Name</th><th>Email</th><th>Requested</th><th class="text-end">Action</th></tr></thead>
+          <tbody>
+            <% pendingTeachers.forEach((teacher) => { %>
+              <tr>
+                <td><%= teacher.name %></td>
+                <td><%= teacher.email %></td>
+                <td><%= teacher.createdAt.toLocaleDateString() %></td>
+                <td class="text-end">
+                  <form action="/admin/teachers/<%= teacher._id %>/approve?_method=PATCH" method="POST" class="d-inline">
+                    <button class="btn btn-sm btn-success" type="submit">Approve</button>
+                  </form>
+                  <form action="/admin/teachers/<%= teacher._id %>/reject?_method=PATCH" method="POST" class="d-inline">
+                    <button class="btn btn-sm btn-outline-danger" type="submit">Reject</button>
+                  </form>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    <% } %>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-6">
+      <div class="table-card">
+        <h2 class="h5 mb-3">Students</h2>
+        <%- include('user-table', { users: students, emptyText: 'No students yet.' }) %>
+      </div>
+    </div>
+    <div class="col-lg-6">
+      <div class="table-card">
+        <h2 class="h5 mb-3">Teachers</h2>
+        <%- include('user-table', { users: teachers, emptyText: 'No teachers yet.' }) %>
+      </div>
+    </div>
+  </div>
+</section>

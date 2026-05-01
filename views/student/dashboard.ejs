@@ -1,0 +1,15 @@
+<% layout('layouts/main') %>
+<section class="container py-4">
+  <div class="page-heading">
+    <div><span class="eyebrow">Student</span><h1>Dashboard</h1></div>
+    <a href="/student/quizzes" class="btn btn-primary">Browse Quizzes</a>
+  </div>
+  <div class="row g-3 mb-4">
+    <div class="col-md-6"><div class="stat-tile"><span>Available Quizzes</span><strong><%= stats.availableQuizCount %></strong></div></div>
+    <div class="col-md-6"><div class="stat-tile"><span>Completed Attempts</span><strong><%= stats.completedCount %></strong></div></div>
+  </div>
+  <div class="table-card">
+    <h2 class="h5 mb-3">Recent Attempts</h2>
+    <%- include('history-table', { attempts: recentAttempts }) %>
+  </div>
+</section>

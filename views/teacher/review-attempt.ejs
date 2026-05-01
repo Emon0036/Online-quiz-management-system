@@ -1,0 +1,19 @@
+<% layout('layouts/main') %>
+<section class="container py-4">
+  <div class="page-heading"><div><span class="eyebrow">Manual Review</span><h1><%= attempt.student.name %> - <%= attempt.quiz.title %></h1></div></div>
+  <form action="/teacher/attempts/<%= attempt._id %>/review?_method=PATCH" method="POST" class="form-panel">
+    <% attempt.answers.forEach((answer, index) => { %>
+      <div class="review-item">
+        <strong><%= index + 1 %>. <%= answer.question.questionText %></strong>
+        <p class="mb-1 text-muted">Student answer: <%= answer.answer || 'Not answered' %></p>
+        <% if (answer.needsManualReview) { %>
+          <label class="form-label">Marks out of <%= answer.question.marks %></label>
+          <input class="form-control" type="number" min="0" max="<%= answer.question.marks %>" name="marks[<%= index %>]" value="<%= answer.marksObtained %>">
+        <% } else { %>
+          <span class="badge <%= answer.isCorrect ? 'text-bg-success' : 'text-bg-danger' %>"><%= answer.marksObtained %>/<%= answer.question.marks %></span>
+        <% } %>
+      </div>
+    <% }) %>
+    <button class="btn btn-primary">Save Review</button>
+  </form>
+</section>

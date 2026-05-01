@@ -1,0 +1,29 @@
+<% layout('layouts/main') %>
+<section class="container py-4">
+  <div class="page-heading"><div><span class="eyebrow">Student</span><h1>Available Quizzes</h1></div></div>
+  <form class="filter-bar" method="GET">
+    <input class="form-control" name="category" placeholder="Category" value="<%= query.category || '' %>">
+    <select class="form-select" name="difficulty">
+      <option value="">All difficulties</option>
+      <% ['Easy','Medium','Hard'].forEach((level) => { %><option value="<%= level %>" <%= query.difficulty === level ? 'selected' : '' %>><%= level %></option><% }) %>
+    </select>
+    <button class="btn btn-outline-primary">Filter</button>
+  </form>
+  <div class="row g-3 mt-1">
+    <% if (quizzes.length === 0) { %><div class="col-12"><div class="empty-state">No quizzes found.</div></div><% } %>
+    <% quizzes.forEach((quiz) => { %>
+      <div class="col-md-6 col-lg-4">
+        <div class="quiz-card h-100">
+          <div class="d-flex justify-content-between"><span class="badge text-bg-light"><%= quiz.category %></span><span class="badge text-bg-primary"><%= quiz.difficulty %></span></div>
+          <h2 class="h5 mt-3"><%= quiz.title %></h2>
+          <p class="text-muted"><%= quiz.description || 'No description provided.' %></p>
+          <div class="small text-muted mb-3"><%= quiz.duration %> minutes | <%= quiz.totalMarks %> marks | Pass <%= quiz.passingMarks %>%</div>
+          <div class="d-flex gap-2">
+            <a class="btn btn-primary btn-sm" href="/student/quizzes/<%= quiz._id %>/take">Start</a>
+            <a class="btn btn-outline-secondary btn-sm" href="/student/quizzes/<%= quiz._id %>/leaderboard">Leaderboard</a>
+          </div>
+        </div>
+      </div>
+    <% }) %>
+  </div>
+</section>

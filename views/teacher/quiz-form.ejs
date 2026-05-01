@@ -1,0 +1,60 @@
+<% layout('layouts/main') %>
+<section class="container py-4">
+  <div class="page-heading">
+    <div><span class="eyebrow">Teacher</span><h1><%= title %></h1></div>
+    <a href="/teacher/quizzes" class="btn btn-outline-secondary">Back</a>
+  </div>
+  <div class="row g-4">
+    <div class="col-lg-5">
+      <form class="form-panel" action="<%= action %>" method="POST">
+        <h2 class="h5">Quiz Details</h2>
+        <input class="form-control" name="title" placeholder="Quiz title" value="<%= quiz.title || '' %>" required>
+        <textarea class="form-control" name="description" rows="4" placeholder="Description"><%= quiz.description || '' %></textarea>
+        <input class="form-control" name="category" placeholder="Category" value="<%= quiz.category || 'General Knowledge' %>" required>
+        <select class="form-select" name="difficulty">
+          <% ['Easy','Medium','Hard'].forEach((level) => { %><option value="<%= level %>" <%= quiz.difficulty === level ? 'selected' : '' %>><%= level %></option><% }) %>
+        </select>
+        <div class="row g-2">
+          <div class="col"><input class="form-control" type="number" name="duration" min="1" placeholder="Duration minutes" value="<%= quiz.duration || '' %>" required></div>
+          <div class="col"><input class="form-control" type="number" name="passingMarks" min="0" max="100" placeholder="Passing %" value="<%= quiz.passingMarks || '' %>" required></div>
+        </div>
+        <button class="btn btn-primary" type="submit">Save Quiz</button>
+      </form>
+    </div>
+    <div class="col-lg-7">
+      <% if (quiz._id) { %>
+        <div class="form-panel mb-4">
+          <h2 class="h5">Add Question</h2>
+          <form action="/teacher/quizzes/<%= quiz._id %>/questions" method="POST" class="vstack gap-3">
+            <textarea class="form-control" name="questionText" rows="3" placeholder="Question text" required></textarea>
+            <select class="form-select question-type" name="type" required>
+              <option value="multiple-choice">Multiple Choice</option>
+              <option value="true-false">True/False</option>
+              <option value="short-answer">Short Answer</option>
+            </select>
+            <div class="options-box">
+              <input class="form-control mb-2" name="options[]" placeholder="Option 1">
+              <input class="form-control mb-2" name="options[]" placeholder="Option 2">
+              <input class="form-control mb-2" name="options[]" placeholder="Option 3">
+              <input class="form-control mb-2" name="options[]" placeholder="Option 4">
+            </div>
+            <input class="form-control" name="correctAnswer" placeholder="Correct answer" required>
+            <input class="form-control" type="number" min="1" name="marks" value="1" placeholder="Marks" required>
+            <button class="btn btn-outline-primary" type="submit">Add Question</button>
+          </form>
+        </div>
+        <div class="table-card">
+          <h2 class="h5 mb-3">Questions (<%= questions.length %>)</h2>
+          <% questions.forEach((question, index) => { %>
+            <div class="question-item">
+              <div><strong><%= index + 1 %>. <%= question.questionText %></strong><div class="small text-muted"><%= question.type %> | <%= question.marks %> marks | Answer: <%= question.correctAnswer || 'Manual review' %></div></div>
+              <form action="/teacher/quizzes/<%= quiz._id %>/questions/<%= question._id %>?_method=DELETE" method="POST"><button class="btn btn-sm btn-outline-danger">Remove</button></form>
+            </div>
+          <% }) %>
+        </div>
+      <% } else { %>
+        <div class="empty-state">Save quiz details first. Then you can add questions.</div>
+      <% } %>
+    </div>
+  </div>
+</section>

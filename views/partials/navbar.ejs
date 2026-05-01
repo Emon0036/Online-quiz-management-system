@@ -1,0 +1,41 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-brand sticky-top">
+  <div class="container">
+    <a class="navbar-brand fw-bold" href="/"><i class="fa-solid fa-circle-question me-2"></i><%= appName %></a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="mainNavbar">
+      <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
+        <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+        <li class="nav-item"><a class="nav-link" href="/about">About</a></li>
+        <% if (!currentUser) { %>
+          <li class="nav-item"><a class="nav-link" href="/auth/login">Login</a></li>
+          <li class="nav-item"><a class="btn btn-light btn-sm" href="/auth/register">Register</a></li>
+        <% } else if (currentUser.role === 'admin') { %>
+          <li class="nav-item"><a class="nav-link" href="/admin/dashboard">Admin</a></li>
+          <li class="nav-item">
+            <form action="/auth/logout" method="POST"><button class="nav-link btn btn-link" type="submit">Logout</button></form>
+          </li>
+        <% } else if (currentUser.role === 'teacher') { %>
+          <% if (currentUser.teacherStatus === 'pending' || currentUser.teacherStatus === 'rejected') { %>
+            <li class="nav-item"><a class="nav-link" href="/auth/teacher-pending">Teacher Access</a></li>
+          <% } else { %>
+          <li class="nav-item"><a class="nav-link" href="/teacher/dashboard">Dashboard</a></li>
+          <li class="nav-item"><a class="nav-link" href="/teacher/quizzes">Quizzes</a></li>
+          <li class="nav-item"><a class="btn btn-light btn-sm" href="/teacher/quizzes/new">Create Quiz</a></li>
+          <% } %>
+          <li class="nav-item">
+            <form action="/auth/logout" method="POST"><button class="nav-link btn btn-link" type="submit">Logout</button></form>
+          </li>
+        <% } else { %>
+          <li class="nav-item"><a class="nav-link" href="/student/dashboard">Dashboard</a></li>
+          <li class="nav-item"><a class="nav-link" href="/student/quizzes">Quizzes</a></li>
+          <li class="nav-item"><a class="nav-link" href="/student/history">History</a></li>
+          <li class="nav-item">
+            <form action="/auth/logout" method="POST"><button class="nav-link btn btn-link" type="submit">Logout</button></form>
+          </li>
+        <% } %>
+      </ul>
+    </div>
+  </div>
+</nav>

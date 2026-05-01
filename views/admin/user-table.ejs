@@ -1,0 +1,19 @@
+<% if (users.length === 0) { %>
+  <p class="text-muted mb-0"><%= emptyText %></p>
+<% } else { %>
+  <div class="table-responsive">
+    <table class="table align-middle">
+      <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th></tr></thead>
+      <tbody>
+        <% users.forEach((user) => { %>
+          <tr>
+            <td><%= user.name %></td>
+            <td><%= user.email %></td>
+            <td><span class="badge text-bg-light"><%= user.role %></span></td>
+            <td><%= user.role === 'teacher' ? (user.teacherStatus || 'approved') : 'active' %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+<% } %>

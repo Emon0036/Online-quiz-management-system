@@ -1,0 +1,60 @@
+<% layout('layouts/main') %>
+
+<section class="hero-band">
+  <div class="container py-5">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-7">
+        <span class="eyebrow">Online Quiz Management System</span>
+        <h1 class="display-4 fw-bold mt-3">Create, deliver, and review quizzes from one clean dashboard.</h1>
+        <p class="lead text-muted mt-3">Teachers can build quizzes with multiple question types. Students can take timed quizzes, see results, review attempts, and track rank.</p>
+        <div class="d-flex flex-wrap gap-2 mt-4">
+          <a class="btn btn-primary btn-lg" href="/auth/register">Get Started</a>
+          <a class="btn btn-outline-primary btn-lg" href="/student/quizzes">Browse Quizzes</a>
+        </div>
+      </div>
+      <div class="col-lg-5">
+        <div class="hero-panel">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <strong>Live Quiz</strong><span class="badge text-bg-success">Published</span>
+          </div>
+          <div class="progress mb-3" style="height: 10px;"><div class="progress-bar" style="width: 72%;"></div></div>
+          <div class="d-grid gap-3">
+            <div class="mini-row"><i class="fa-solid fa-clock"></i><span>Timed attempts</span></div>
+            <div class="mini-row"><i class="fa-solid fa-chart-simple"></i><span>Instant analytics</span></div>
+            <div class="mini-row"><i class="fa-solid fa-trophy"></i><span>Leaderboards</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="container py-5">
+  <div class="row g-4">
+    <div class="col-md-4"><div class="feature-card"><i class="fa-solid fa-pen-to-square"></i><h3>Teacher Tools</h3><p>Create, edit, publish, review, and analyze quizzes.</p></div></div>
+    <div class="col-md-4"><div class="feature-card"><i class="fa-solid fa-user-graduate"></i><h3>Student Flow</h3><p>Browse quizzes, take timed attempts, and view history.</p></div></div>
+    <div class="col-md-4"><div class="feature-card"><i class="fa-solid fa-shield-halved"></i><h3>Secure Access</h3><p>Passport sessions, local auth, Google OAuth, and role checks.</p></div></div>
+  </div>
+</section>
+
+<section class="container pb-5">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="h4 mb-0">Recently Published</h2>
+    <a href="/student/quizzes" class="btn btn-sm btn-outline-primary">View all</a>
+  </div>
+  <div class="row g-3">
+    <% if (featuredQuizzes.length === 0) { %>
+      <div class="col-12"><div class="empty-state">No published quizzes yet.</div></div>
+    <% } %>
+    <% featuredQuizzes.forEach((quiz) => { %>
+      <div class="col-md-6 col-lg-4">
+        <div class="quiz-card h-100">
+          <span class="badge text-bg-light"><%= quiz.category %></span>
+          <h3 class="h5 mt-3"><%= quiz.title %></h3>
+          <p class="text-muted"><%= quiz.description || 'A focused quiz for practice and assessment.' %></p>
+          <div class="small text-muted"><i class="fa-regular fa-clock me-1"></i><%= quiz.duration %> min</div>
+        </div>
+      </div>
+    <% }) %>
+  </div>
+</section>

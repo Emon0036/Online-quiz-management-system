@@ -1,0 +1,18 @@
+<% layout('layouts/main') %>
+<section class="container py-4">
+  <div class="page-heading">
+    <div><span class="eyebrow">Teacher</span><h1>Dashboard</h1></div>
+    <a href="/teacher/quizzes/new" class="btn btn-primary"><i class="fa-solid fa-plus me-2"></i>Create Quiz</a>
+  </div>
+  <div class="row g-3 mb-4">
+    <div class="col-md"><div class="stat-tile"><span>Total Quizzes</span><strong><%= stats.totalQuizzes %></strong></div></div>
+    <div class="col-md"><div class="stat-tile"><span>Published</span><strong><%= stats.publishedQuizzes %></strong></div></div>
+    <div class="col-md"><div class="stat-tile"><span>Drafts</span><strong><%= stats.draftQuizzes %></strong></div></div>
+    <div class="col-md"><div class="stat-tile"><span>Attempts</span><strong><%= stats.totalAttempts %></strong></div></div>
+    <div class="col-md"><div class="stat-tile"><span>Manual Review</span><strong><%= stats.pendingReviews %></strong></div></div>
+  </div>
+  <div class="table-card">
+    <div class="d-flex justify-content-between align-items-center mb-3"><h2 class="h5 mb-0">Recent Quizzes</h2><a href="/teacher/quizzes">Manage all</a></div>
+    <%- include('quiz-table', { quizzes }) %>
+  </div>
+</section>

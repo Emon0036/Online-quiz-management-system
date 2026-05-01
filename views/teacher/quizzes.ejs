@@ -1,0 +1,8 @@
+<% layout('layouts/main') %>
+<section class="container py-4">
+  <div class="page-heading">
+    <div><span class="eyebrow">Teacher</span><h1>Manage Quizzes</h1></div>
+    <a href="/teacher/quizzes/new" class="btn btn-primary"><i class="fa-solid fa-plus me-2"></i>Create Quiz</a>
+  </div>
+  <div class="table-card"><%- include('quiz-table', { quizzes }) %></div>
+</section>

@@ -1,0 +1,27 @@
+<% layout('layouts/main') %>
+<section class="container py-4">
+  <div class="quiz-header">
+    <div><span class="eyebrow"><%= quiz.category %></span><h1><%= quiz.title %></h1></div>
+    <div class="timer" data-duration="<%= quiz.duration %>"><i class="fa-regular fa-clock me-2"></i><span id="timerText"><%= quiz.duration %>:00</span></div>
+  </div>
+  <form id="quizForm" action="/student/quizzes/<%= quiz._id %>/submit" method="POST" class="form-panel">
+    <input type="hidden" name="timeSpent" id="timeSpent" value="0">
+    <% quiz.questions.forEach((question, index) => { %>
+      <div class="question-block">
+        <h2 class="h5"><%= index + 1 %>. <%= question.questionText %> <span class="text-muted small">(<%= question.marks %> marks)</span></h2>
+        <% if (question.type === 'short-answer') { %>
+          <textarea class="form-control" name="answers[<%= question._id %>]" rows="3" placeholder="Write your answer"></textarea>
+        <% } else { %>
+          <% question.options.forEach((option) => { %>
+            <label class="answer-option">
+              <input type="radio" name="answers[<%= question._id %>]" value="<%= option %>">
+              <span><%= option %></span>
+            </label>
+          <% }) %>
+        <% } %>
+      </div>
+    <% }) %>
+    <button class="btn btn-primary btn-lg" type="submit">Submit Quiz</button>
+  </form>
+</section>
+<script src="/js/quizTimer.js"></script>
