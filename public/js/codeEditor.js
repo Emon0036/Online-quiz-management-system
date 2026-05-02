@@ -40,7 +40,8 @@ async function runCode(problemId) {
 
     // Check if execution was successful
     if (!response.ok) {
-      showStatus(`Error: ${result.error}`, 'danger');
+      const details = result.details ? `: ${result.details}` : '';
+      showStatus(`Error: ${result.error}${details}`, 'danger');
       return;
     }
 
@@ -114,7 +115,8 @@ async function submitCode(problemId) {
 
     // Check if submission was successful
     if (!response.ok) {
-      showStatus(`Error: ${result.error}`, 'danger');
+      const details = result.details ? `: ${result.details}` : '';
+      showStatus(`Error: ${result.error}${details}`, 'danger');
       return;
     }
 

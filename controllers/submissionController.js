@@ -2,6 +2,18 @@ const Submission = require("../models/Submission");
 const Problem = require("../models/Problem");
 const { executeCode, generateVerdict } = require("../utils/piston");
 
+function isExecutionServiceError(executionResult) {
+  if (executionResult?.success !== false) return false;
+  return executionResult.errorCode !== 'ECONNABORTED';
+}
+
+function sendExecutionServiceError(res, executionResult) {
+  return res.status(503).json({
+    error: 'Code execution service is unavailable',
+    details: executionResult?.stderr || executionResult?.error || 'Unable to reach the code execution service.',
+  });
+}
+
 /**
  * Run code without submitting
  * Used for testing code before final submission
@@ -22,6 +34,10 @@ exports.runCode = async (req, res) => {
 
     // Execute the code using Piston API
     const executionResult = await executeCode(code, language, input);
+
+    if (isExecutionServiceError(executionResult)) {
+      return sendExecutionServiceError(res, executionResult);
+    }
 
     // Return execution result to frontend
     res.json({
@@ -82,6 +98,10 @@ exports.submitCode = async (req, res) => {
       // No grading data available: treat "Accepted" as "ran successfully without errors".
       finalExecutionResult = await executeCode(code, language, '');
 
+      if (isExecutionServiceError(finalExecutionResult)) {
+        return sendExecutionServiceError(res, finalExecutionResult);
+      }
+
       if (finalExecutionResult.compileOutput && finalExecutionResult.compileOutput.trim()) {
         verdict = 'Compilation Error';
       } else if (!finalExecutionResult.success || (finalExecutionResult.stderr && finalExecutionResult.stderr.trim())) {
@@ -98,6 +118,11 @@ exports.submitCode = async (req, res) => {
         const testCase = evaluationCases[i] || {};
         const caseExpectedOutput = String(testCase.expectedOutput ?? '');
         finalExecutionResult = await executeCode(code, language, String(testCase.input ?? ''));
+
+        if (isExecutionServiceError(finalExecutionResult)) {
+          return sendExecutionServiceError(res, finalExecutionResult);
+        }
+
         verdict = generateVerdict(finalExecutionResult, caseExpectedOutput);
 
         if (verdict === 'Accepted') {

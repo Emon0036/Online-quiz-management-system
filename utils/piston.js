@@ -1,7 +1,8 @@
 const axios = require('axios');
 
 // Piston API endpoint for code execution
-const PISTON_API = 'https://emkc.org/api/v2/piston/execute';
+// Use self-hosted instance or public API (requires whitelist)
+const PISTON_API = process.env.PISTON_API_URL || 'http://localhost:2000/api/v2/piston/execute';
 
 // Mapping of language names to Piston language identifiers
 const languageMap = {
@@ -60,6 +61,7 @@ async function executeCode(code, language, input = '') {
     if (error.code === 'ECONNABORTED') {
       return {
         success: false,
+        errorCode: error.code,
         error: 'Code execution timeout (> 10 seconds)',
         output: '',
         stderr: 'Execution timed out',
@@ -70,6 +72,7 @@ async function executeCode(code, language, input = '') {
     // Handle other errors
     return {
       success: false,
+      errorCode: error.code || error.response?.status || 'EXECUTION_SERVICE_ERROR',
       error: error.message || 'Code execution failed',
       output: '',
       stderr: error.response?.data?.message || error.message || '',
