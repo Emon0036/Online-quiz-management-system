@@ -26,20 +26,34 @@
         <div class="form-panel mb-4">
           <h2 class="h5">Add Question</h2>
           <form action="/teacher/quizzes/<%= quiz._id %>/questions" method="POST" class="vstack gap-3">
+            <!-- Question Text Input -->
             <textarea class="form-control" name="questionText" rows="3" placeholder="Question text" required></textarea>
+            
+            <!-- Question Type Selection -->
             <select class="form-select question-type" name="type" required>
               <option value="multiple-choice">Multiple Choice</option>
               <option value="true-false">True/False</option>
               <option value="short-answer">Short Answer</option>
             </select>
+            
+            <!-- Multiple Choice Options (shown only for multiple-choice questions) -->
             <div class="options-box">
               <input class="form-control mb-2" name="options[]" placeholder="Option 1">
               <input class="form-control mb-2" name="options[]" placeholder="Option 2">
               <input class="form-control mb-2" name="options[]" placeholder="Option 3">
               <input class="form-control mb-2" name="options[]" placeholder="Option 4">
             </div>
+            
+            <!-- Correct Answer Input -->
             <input class="form-control" name="correctAnswer" placeholder="Correct answer" required>
+            
+            <!-- Explanation Field: Will be displayed to students after quiz submission -->
+            <textarea class="form-control" name="explanation" rows="2" placeholder="Explanation (optional - shown to students after quiz submission)"></textarea>
+            
+            <!-- Marks for this question -->
             <input class="form-control" type="number" min="1" name="marks" value="1" placeholder="Marks" required>
+            
+            <!-- Submit button to add question -->
             <button class="btn btn-outline-primary" type="submit">Add Question</button>
           </form>
         </div>
@@ -47,8 +61,23 @@
           <h2 class="h5 mb-3">Questions (<%= questions.length %>)</h2>
           <% questions.forEach((question, index) => { %>
             <div class="question-item">
-              <div><strong><%= index + 1 %>. <%= question.questionText %></strong><div class="small text-muted"><%= question.type %> | <%= question.marks %> marks | Answer: <%= question.correctAnswer || 'Manual review' %></div></div>
-              <form action="/teacher/quizzes/<%= quiz._id %>/questions/<%= question._id %>?_method=DELETE" method="POST"><button class="btn btn-sm btn-outline-danger">Remove</button></form>
+              <!-- Display question number, text, and metadata -->
+              <div>
+                <strong><%= index + 1 %>. <%= question.questionText %></strong>
+                <div class="small text-muted">
+                  <%= question.type %> | 
+                  <%= question.marks %> marks | 
+                  Answer: <%= question.correctAnswer || 'Manual review' %>
+                  <!-- Show indicator if explanation exists -->
+                  <% if (question.explanation && question.explanation.trim()) { %>
+                    | <span class="badge bg-info">Has explanation</span>
+                  <% } %>
+                </div>
+              </div>
+              <!-- Delete button to remove question -->
+              <form action="/teacher/quizzes/<%= quiz._id %>/questions/<%= question._id %>?_method=DELETE" method="POST">
+                <button class="btn btn-sm btn-outline-danger">Remove</button>
+              </form>
             </div>
           <% }) %>
         </div>

@@ -1,0 +1,134 @@
+<% layout('layouts/main') %>
+<section class="container-fluid py-4">
+  <div class="page-heading mb-4">
+    <div><span class="eyebrow">Coding Challenge</span><h1><%= problem.title %></h1></div>
+    <a href="/problems" class="btn btn-outline-secondary">← Back to Problems</a>
+  </div>
+
+  <div class="row g-3">
+    <!-- Problem Description Panel (Left Side) -->
+    <div class="col-lg-5">
+      <div class="form-panel sticky-top" style="top: 20px;">
+        <h2 class="h5 mb-3">Problem Description</h2>
+        <p><%= problem.description %></p>
+        
+        <!-- Input Format Section -->
+        <% if (problem.inputFormat) { %>
+          <div class="mt-4 pt-4 border-top">
+            <h3 class="h6 text-muted">Input Format</h3>
+            <p class="small"><%= problem.inputFormat %></p>
+          </div>
+        <% } %>
+
+        <!-- Output Format Section -->
+        <% if (problem.outputFormat) { %>
+          <div class="mt-3">
+            <h3 class="h6 text-muted">Output Format</h3>
+            <p class="small"><%= problem.outputFormat %></p>
+          </div>
+        <% } %>
+
+        <!-- Sample Test Case Section -->
+        <% if (problem.sampleInput || problem.sampleOutput) { %>
+          <div class="mt-4 pt-4 border-top">
+            <h3 class="h6 mb-2">Sample Test Case</h3>
+            <% if (problem.sampleInput) { %>
+              <p class="small mb-1"><strong>Input:</strong></p>
+              <pre class="bg-light p-2 rounded small" style="max-height: 100px; overflow-y: auto;"><%= problem.sampleInput %></pre>
+            <% } %>
+            <% if (problem.sampleOutput) { %>
+              <p class="small mb-1 mt-2"><strong>Expected Output:</strong></p>
+              <pre class="bg-light p-2 rounded small" style="max-height: 100px; overflow-y: auto;"><%= problem.sampleOutput %></pre>
+            <% } %>
+          </div>
+        <% } %>
+
+        <!-- Difficulty Badge -->
+        <div class="mt-4">
+          <span class="badge text-bg-<%= problem.difficulty === 'Easy' ? 'success' : problem.difficulty === 'Medium' ? 'warning' : 'danger' %>">
+            <%= problem.difficulty %> Difficulty
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Code Editor Panel (Right Side) -->
+    <div class="col-lg-7">
+      <!-- Language Selection -->
+      <div class="form-panel mb-3">
+        <label class="form-label mb-2"><strong>Programming Language</strong></label>
+        <select id="language" class="form-select">
+          <option value="c">C</option>
+          <option value="cpp">C++</option>
+          <option value="java">Java</option>
+          <option value="javascript">JavaScript</option>
+          <option value="python" selected>Python</option>
+        </select>
+      </div>
+
+      <!-- Code Editor -->
+      <div class="form-panel mb-3">
+        <label class="form-label mb-2"><strong>Code Editor</strong></label>
+        <textarea id="code" class="form-control font-monospace" rows="12" placeholder="// Write your code here
+// Your solution will be tested against sample input/output" style="font-family: 'Courier New', monospace; font-size: 13px;"></textarea>
+      </div>
+
+      <!-- Custom Input Section -->
+      <div class="form-panel mb-3">
+        <label class="form-label mb-2"><strong>Custom Input (Optional)</strong></label>
+        <textarea id="input" class="form-control font-monospace" rows="3" placeholder="Enter custom input to test your code" style="font-family: 'Courier New', monospace; font-size: 13px;"></textarea>
+      </div>
+
+      <!-- Run and Submit Buttons -->
+      <div class="d-grid gap-2 d-sm-flex mb-3">
+        <button onclick="runCode('<%= problem._id %>')" class="btn btn-outline-primary btn-lg flex-grow-1">
+          <i class="fa-solid fa-play me-2"></i>Run Code
+        </button>
+        <button onclick="submitCode('<%= problem._id %>')" class="btn btn-success btn-lg flex-grow-1">
+          <i class="fa-solid fa-check me-2"></i>Submit
+        </button>
+      </div>
+
+      <!-- Status Message (Loading, Error, etc.) -->
+      <div id="status" class="mb-3"></div>
+
+      <!-- Verdict Badge -->
+      <div id="verdict" class="mb-3"></div>
+
+      <!-- Output Section -->
+      <div class="form-panel mb-3" id="outputSection" style="display: none;">
+        <h3 class="h6 mb-2">
+          <i class="fa-solid fa-terminal me-2"></i>Output
+        </h3>
+        <pre id="output" class="bg-dark text-light p-3 rounded small" style="max-height: 200px; overflow-y: auto; min-height: 50px;"></pre>
+      </div>
+
+      <!-- Expected Output Section (Shown on submit) -->
+      <div class="form-panel mb-3" id="expectedSection" style="display: none;">
+        <h3 class="h6 mb-2">
+          <i class="fa-solid fa-check-circle me-2"></i>Expected Output
+        </h3>
+        <pre id="expectedOutput" class="bg-light p-3 rounded small" style="max-height: 200px; overflow-y: auto; min-height: 50px;"></pre>
+      </div>
+
+      <!-- Error Section -->
+      <div id="errorSection" class="alert alert-danger mb-3" style="display: none;">
+        <h6 class="alert-heading">
+          <i class="fa-solid fa-triangle-exclamation me-2"></i>Error
+        </h6>
+        <pre id="errorMessage" class="mb-0 small" style="max-height: 150px; overflow-y: auto;"></pre>
+      </div>
+
+      <!-- Stderr Section (Compilation/Runtime Errors) -->
+      <div id="stderrSection" class="alert alert-warning mb-3" style="display: none;">
+        <h6 class="alert-heading">
+          <i class="fa-solid fa-exclamation-circle me-2"></i>Compilation/Runtime Error
+        </h6>
+        <pre id="stderrMessage" class="mb-0 small" style="max-height: 150px; overflow-y: auto;"></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Include code editor JavaScript -->
+<script src="/js/codeEditor.js"></script>

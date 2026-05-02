@@ -2,7 +2,10 @@
 <section class="container py-4">
   <div class="page-heading">
     <div><span class="eyebrow">Teacher</span><h1>Dashboard</h1></div>
-    <a href="/teacher/quizzes/new" class="btn btn-primary"><i class="fa-solid fa-plus me-2"></i>Create Quiz</a>
+    <div class="d-flex gap-2">
+      <a href="/teacher/quizzes/new" class="btn btn-primary"><i class="fa-solid fa-plus me-2"></i>Create Quiz</a>
+      <a href="/problems/create/new" class="btn btn-outline-primary"><i class="fa-solid fa-code me-2"></i>Create Problem</a>
+    </div>
   </div>
   <div class="row g-3 mb-4">
     <div class="col-md"><div class="stat-tile"><span>Total Quizzes</span><strong><%= stats.totalQuizzes %></strong></div></div>

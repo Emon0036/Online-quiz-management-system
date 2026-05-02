@@ -115,24 +115,30 @@ exports.togglePublish = async (req, res) => {
 };
 
 exports.addQuestion = async (req, res) => {
+  // Verify the quiz exists and belongs to the current teacher
   const quiz = await getTeacherQuiz(req.params.quizId, req.user._id);
   if (!quiz) {
     req.flash('error', 'Quiz not found.');
     return res.redirect('/teacher/quizzes');
   }
 
+  // Create a new question with all details including explanation
   const question = await Question.create({
     quiz: quiz._id,
     questionText: req.body.questionText,
     type: req.body.type,
     options: normalizeQuestionBody(req.body),
     correctAnswer: req.body.correctAnswer,
+    // Explanation field is saved here and will be shown to students after quiz submission
+    explanation: req.body.explanation || '',
     marks: Number(req.body.marks || 1),
   });
 
+  // Add question reference to quiz and update total marks
   quiz.questions.push(question._id);
   quiz.totalMarks += question.marks;
   await quiz.save();
+  
   req.flash('success', 'Question added.');
   return res.redirect(`/teacher/quizzes/${quiz._id}/edit`);
 };

@@ -8,11 +8,14 @@
       <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
         <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
         <li class="nav-item"><a class="nav-link" href="/about">About</a></li>
+        <li class="nav-item"><a class="nav-link" href="/problems">Coding Challenges</a></li>
         <% if (!currentUser) { %>
           <li class="nav-item"><a class="nav-link" href="/auth/login">Login</a></li>
           <li class="nav-item"><a class="btn btn-light btn-sm" href="/auth/register">Register</a></li>
         <% } else if (currentUser.role === 'admin') { %>
           <li class="nav-item"><a class="nav-link" href="/admin/dashboard">Admin</a></li>
+          <li class="nav-item"><a class="nav-link" href="/problems/manage">Manage Problems</a></li>
+          <li class="nav-item"><a class="btn btn-light btn-sm" href="/problems/create/new">Create Problem</a></li>
           <li class="nav-item">
             <form action="/auth/logout" method="POST"><button class="nav-link btn btn-link" type="submit">Logout</button></form>
           </li>
@@ -22,7 +25,9 @@
           <% } else { %>
           <li class="nav-item"><a class="nav-link" href="/teacher/dashboard">Dashboard</a></li>
           <li class="nav-item"><a class="nav-link" href="/teacher/quizzes">Quizzes</a></li>
+          <li class="nav-item"><a class="nav-link" href="/problems/manage">Problems</a></li>
           <li class="nav-item"><a class="btn btn-light btn-sm" href="/teacher/quizzes/new">Create Quiz</a></li>
+          <li class="nav-item"><a class="btn btn-light btn-sm" href="/problems/create/new">Create Problem</a></li>
           <% } %>
           <li class="nav-item">
             <form action="/auth/logout" method="POST"><button class="nav-link btn btn-link" type="submit">Logout</button></form>
