@@ -10,9 +10,9 @@ exports.showForgotPassword = (req, res) => res.render('auth/forgot-password', { 
 exports.showTeacherPending = (req, res) => res.render('auth/teacher-pending', { title: 'Teacher approval' });
 
 exports.register = async (req, res) => {
-  const { name, email, password, confirmPassword, role } = req.body;
+  const { name, email, password, confirmPassword } = req.body;
 
-  if (!name || !email || !password || !confirmPassword || !role) {
+  if (!name || !email || !password || !confirmPassword) {
     req.flash('error', 'Please fill in every required field.');
     return res.redirect('/auth/register');
   }
@@ -24,10 +24,6 @@ exports.register = async (req, res) => {
     req.flash('error', 'Passwords do not match.');
     return res.redirect('/auth/register');
   }
-  if (!['teacher', 'student'].includes(role)) {
-    req.flash('error', 'Please choose a valid role.');
-    return res.redirect('/auth/register');
-  }
 
   const existingUser = await User.findOne({ email: email.toLowerCase() });
   if (existingUser) {
@@ -35,19 +31,23 @@ exports.register = async (req, res) => {
     return res.redirect('/auth/register');
   }
 
-  await User.create({
+  // All registrations are students. Teachers are created by admins only.
+  const newUser = await User.create({
     name,
     email,
     password,
-    role,
-    teacherStatus: role === 'teacher' ? 'pending' : 'none',
+    role: 'student',
+    teacherStatus: 'none',
   });
-  req.flash(
-    'success',
-    role === 'teacher'
-      ? 'Teacher account created. An admin must approve it before you can create quizzes.'
-      : 'Account created. Please log in.'
-  );
+
+  // Initialize progress and leaderboard for new student
+  const Progress = require('../models/Progress');
+  const GlobalLeaderboard = require('../models/GlobalLeaderboard');
+  
+  await Progress.create({ student: newUser._id });
+  await GlobalLeaderboard.create({ student: newUser._id });
+
+  req.flash('success', 'Account created successfully! Please log in.');
   return res.redirect('/auth/login');
 };
 
@@ -71,7 +71,6 @@ exports.logout = (req, res, next) => {
 };
 
 exports.startGoogle = (req, res, next) => {
-  req.session.oauthRole = req.query.role === 'teacher' ? 'teacher' : 'student';
   passport.authenticate('google', { scope: ['profile', 'email'] })(req, res, next);
 };
 
@@ -81,7 +80,6 @@ exports.googleCallback = [
     failureFlash: true,
   }),
   (req, res) => {
-    delete req.session.oauthRole;
     req.flash('success', `Welcome, ${req.user.name}.`);
     res.redirect(dashboardPathFor(req.user));
   },

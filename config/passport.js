@@ -45,8 +45,8 @@ module.exports = (passport) => {
             email,
             googleId: profile.id,
             profileImage: profile.photos?.[0]?.value,
-            role: req.session.oauthRole === 'teacher' ? 'teacher' : 'student',
-            teacherStatus: req.session.oauthRole === 'teacher' ? 'pending' : 'none',
+            role: 'student',
+            teacherStatus: 'none',
           });
 
           return done(null, user);

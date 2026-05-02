@@ -2,11 +2,59 @@
 <section class="container py-4">
   <div class="page-heading">
     <div><span class="eyebrow">Student</span><h1>Dashboard</h1></div>
-    <a href="/student/quizzes" class="btn btn-primary">Browse Quizzes</a>
+    <div class="d-flex gap-2">
+      <a href="/enrollments/browse" class="btn btn-primary">Browse Exams</a>
+      <a href="/enrollments/my-quizzes" class="btn btn-outline-primary">My Exams</a>
+    </div>
   </div>
   <div class="row g-3 mb-4">
-    <div class="col-md-6"><div class="stat-tile"><span>Available Quizzes</span><strong><%= stats.availableQuizCount %></strong></div></div>
-    <div class="col-md-6"><div class="stat-tile"><span>Completed Attempts</span><strong><%= stats.completedCount %></strong></div></div>
+    <div class="col-md-3"><div class="stat-tile"><span>Enrolled Exams</span><strong><%= stats.enrolledCount %></strong></div></div>
+    <div class="col-md-3"><div class="stat-tile"><span>Available Exams</span><strong><%= stats.availableQuizCount %></strong></div></div>
+    <div class="col-md-3"><div class="stat-tile"><span>Total Points</span><strong><%= progress.totalPoints %></strong></div></div>
+    <div class="col-md-3"><div class="stat-tile"><span>Avg Score</span><strong><%= progress.averageScore %>%</strong></div></div>
+  </div>
+
+  <div class="row g-3 mb-4">
+    <div class="col-md-6 col-lg-3">
+      <a class="quiz-card h-100 d-block text-decoration-none" href="/enrollments/my-quizzes?type=quiz">
+        <div class="d-flex justify-content-between align-items-center">
+          <span class="badge text-bg-secondary">Category</span>
+          <span class="badge text-bg-primary"><%= examTypeCounts.quiz %></span>
+        </div>
+        <h2 class="h5 mt-3 mb-1">Quiz</h2>
+        <p class="text-muted mb-0">MCQ & mixed exams</p>
+      </a>
+    </div>
+    <div class="col-md-6 col-lg-3">
+      <a class="quiz-card h-100 d-block text-decoration-none" href="/enrollments/my-quizzes?type=true-false">
+        <div class="d-flex justify-content-between align-items-center">
+          <span class="badge text-bg-secondary">Category</span>
+          <span class="badge text-bg-primary"><%= examTypeCounts['true-false'] %></span>
+        </div>
+        <h2 class="h5 mt-3 mb-1">True / False</h2>
+        <p class="text-muted mb-0">Quick concept checks</p>
+      </a>
+    </div>
+    <div class="col-md-6 col-lg-3">
+      <a class="quiz-card h-100 d-block text-decoration-none" href="/enrollments/my-quizzes?type=short-answer">
+        <div class="d-flex justify-content-between align-items-center">
+          <span class="badge text-bg-secondary">Category</span>
+          <span class="badge text-bg-primary"><%= examTypeCounts['short-answer'] %></span>
+        </div>
+        <h2 class="h5 mt-3 mb-1">Short Question</h2>
+        <p class="text-muted mb-0">Teacher-reviewed answers</p>
+      </a>
+    </div>
+    <div class="col-md-6 col-lg-3">
+      <a class="quiz-card h-100 d-block text-decoration-none" href="/problems">
+        <div class="d-flex justify-content-between align-items-center">
+          <span class="badge text-bg-secondary">Category</span>
+          <span class="badge text-bg-primary">Code</span>
+        </div>
+        <h2 class="h5 mt-3 mb-1">Coding Test</h2>
+        <p class="text-muted mb-0">Practice & submissions</p>
+      </a>
+    </div>
   </div>
   <div class="table-card">
     <h2 class="h5 mb-3">Recent Attempts</h2>

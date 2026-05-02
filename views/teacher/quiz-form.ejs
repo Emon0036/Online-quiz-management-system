@@ -11,6 +11,12 @@
         <input class="form-control" name="title" placeholder="Quiz title" value="<%= quiz.title || '' %>" required>
         <textarea class="form-control" name="description" rows="4" placeholder="Description"><%= quiz.description || '' %></textarea>
         <input class="form-control" name="category" placeholder="Category" value="<%= quiz.category || 'General Knowledge' %>" required>
+<select class="form-select" name="examType">
+          <option value="quiz" <%= (quiz.examType || 'quiz') === 'quiz' ? 'selected' : '' %>>Quiz (Mixed / MCQ)</option>
+          <option value="true-false" <%= quiz.examType === 'true-false' ? 'selected' : '' %>>True / False</option>
+          <option value="short-answer" <%= quiz.examType === 'short-answer' ? 'selected' : '' %>>Short Question</option>
+          <option value="coding-test" <%= quiz.examType === 'coding-test' ? 'selected' : '' %>>Coding Exam</option>
+        </select>
         <select class="form-select" name="difficulty">
           <% ['Easy','Medium','Hard'].forEach((level) => { %><option value="<%= level %>" <%= quiz.difficulty === level ? 'selected' : '' %>><%= level %></option><% }) %>
         </select>
@@ -25,15 +31,25 @@
       <% if (quiz._id) { %>
         <div class="form-panel mb-4">
           <h2 class="h5">Add Question</h2>
+          <% const lockedType = quiz.examType === 'true-false' ? 'true-false' : quiz.examType === 'short-answer' ? 'short-answer' : null; %>
           <form action="/teacher/quizzes/<%= quiz._id %>/questions" method="POST" class="vstack gap-3">
             <!-- Question Text Input -->
             <textarea class="form-control" name="questionText" rows="3" placeholder="Question text" required></textarea>
             
             <!-- Question Type Selection -->
             <select class="form-select question-type" name="type" required>
-              <option value="multiple-choice">Multiple Choice</option>
-              <option value="true-false">True/False</option>
-              <option value="short-answer">Short Answer</option>
+              <% if (!lockedType) { %>
+                <option value="multiple-choice">Multiple Choice</option>
+                <option value="true-false">True/False</option>
+                <option value="short-answer">Short Answer</option>
+                <option value="coding">Coding</option>
+              <% } else if (lockedType === 'true-false') { %>
+                <option value="true-false">True/False</option>
+              <% } else if (lockedType === 'short-answer') { %>
+                <option value="short-answer">Short Answer</option>
+              <% } else if (lockedType === 'coding-test') { %>
+                <option value="coding">Coding</option>
+              <% } %>
             </select>
             
             <!-- Multiple Choice Options (shown only for multiple-choice questions) -->

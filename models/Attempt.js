@@ -21,9 +21,13 @@ const attemptSchema = new mongoose.Schema(
     percentage: { type: Number, default: 0 },
     status: { type: String, enum: ['submitted', 'pending-review', 'reviewed'], default: 'submitted' },
     passed: { type: Boolean, default: false },
+    autoSubmitted: { type: Boolean, default: false },
+    autoSubmitReason: { type: String, default: '' },
     startedAt: { type: Date, default: Date.now },
     submittedAt: { type: Date, default: Date.now },
     timeSpent: { type: Number, default: 0 },
+    progressUpdated: { type: Boolean, default: false, index: true },
+    pointsAwarded: { type: Number, default: 0, min: 0 },
   },
   { timestamps: true }
 );

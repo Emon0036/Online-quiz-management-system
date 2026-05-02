@@ -1,12 +1,15 @@
 <div class="table-responsive">
   <table class="table align-middle">
-    <thead><tr><th>Title</th><th>Category</th><th>Marks</th><th>Status</th><th class="text-end">Actions</th></tr></thead>
+    <% const examTypeLabels = { quiz: 'Quiz', 'true-false': 'True/False', 'short-answer': 'Short Question' }; %>
+    <thead><tr><th>Title</th><th>Type</th><th>Category</th><th>Enrolled</th><th>Marks</th><th>Status</th><th class="text-end">Actions</th></tr></thead>
     <tbody>
-      <% if (quizzes.length === 0) { %><tr><td colspan="5" class="text-center text-muted py-4">No quizzes yet.</td></tr><% } %>
+      <% if (quizzes.length === 0) { %><tr><td colspan="7" class="text-center text-muted py-4">No quizzes yet.</td></tr><% } %>
       <% quizzes.forEach((quiz) => { %>
         <tr>
           <td><strong><%= quiz.title %></strong><div class="small text-muted"><%= quiz.duration %> minutes</div></td>
+          <td><span class="badge text-bg-secondary"><%= examTypeLabels[quiz.examType || 'quiz'] %></span></td>
           <td><%= quiz.category %></td>
+          <td><%= quiz.enrolledCount || 0 %></td>
           <td><%= quiz.totalMarks %></td>
           <td><span class="badge <%= quiz.status === 'published' ? 'text-bg-success' : 'text-bg-secondary' %>"><%= quiz.status %></span></td>
           <td class="text-end">

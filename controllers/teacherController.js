@@ -3,6 +3,8 @@ const Question = require('../models/Question');
 const Attempt = require('../models/Attempt');
 const Result = require('../models/Result');
 const Leaderboard = require('../models/Leaderboard');
+const Enrollment = require('../models/Enrollment');
+const { finalizeQuizAttempt } = require('../utils/quizProgress');
 
 async function getTeacherQuiz(quizId, teacherId) {
   return Quiz.findOne({ _id: quizId, createdBy: teacherId }).populate('questions');
@@ -34,6 +36,24 @@ exports.dashboard = async (req, res) => {
   const quizIds = quizzes.map((quiz) => quiz._id);
   const totalAttempts = await Attempt.countDocuments({ quiz: { $in: quizIds } });
   const pendingReviews = await Attempt.countDocuments({ quiz: { $in: quizIds }, status: 'pending-review' });
+  const enrollmentStats = quizIds.length
+    ? await Enrollment.aggregate([
+        { $match: { quiz: { $in: quizIds } } },
+        {
+          $group: {
+            _id: '$quiz',
+            enrolledCount: { $sum: 1 },
+            completedCount: { $sum: { $cond: [{ $eq: ['$status', 'completed'] }, 1, 0] } },
+          },
+        },
+      ])
+    : [];
+  const statsByQuiz = new Map(enrollmentStats.map((item) => [String(item._id), item]));
+  quizzes.forEach((quiz) => {
+    const stat = statsByQuiz.get(String(quiz._id));
+    quiz.enrolledCount = stat?.enrolledCount || 0;
+    quiz.completedCount = stat?.completedCount || 0;
+  });
 
   res.render('teacher/dashboard', {
     title: 'Teacher Dashboard',
@@ -50,6 +70,25 @@ exports.dashboard = async (req, res) => {
 
 exports.listQuizzes = async (req, res) => {
   const quizzes = await Quiz.find({ createdBy: req.user._id }).sort('-createdAt');
+  const quizIds = quizzes.map((quiz) => quiz._id);
+  const enrollmentStats = quizIds.length
+    ? await Enrollment.aggregate([
+        { $match: { quiz: { $in: quizIds } } },
+        {
+          $group: {
+            _id: '$quiz',
+            enrolledCount: { $sum: 1 },
+            completedCount: { $sum: { $cond: [{ $eq: ['$status', 'completed'] }, 1, 0] } },
+          },
+        },
+      ])
+    : [];
+  const statsByQuiz = new Map(enrollmentStats.map((item) => [String(item._id), item]));
+  quizzes.forEach((quiz) => {
+    const stat = statsByQuiz.get(String(quiz._id));
+    quiz.enrolledCount = stat?.enrolledCount || 0;
+    quiz.completedCount = stat?.completedCount || 0;
+  });
   res.render('teacher/quizzes', { title: 'Manage Quizzes', quizzes });
 };
 
@@ -213,6 +252,7 @@ exports.updateReview = async (req, res) => {
 
   const leaderboard = await Leaderboard.findOneAndUpdate({ quiz: attempt.quiz._id }, { $setOnInsert: { quiz: attempt.quiz._id } }, { upsert: true, new: true });
   await leaderboard.recordAttempt(attempt.student, attempt.score, attempt.percentage);
+  await finalizeQuizAttempt(attempt._id);
 
   req.flash('success', 'Manual review saved.');
   return res.redirect(`/teacher/quizzes/${attempt.quiz._id}/attempts`);

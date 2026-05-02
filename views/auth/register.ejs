@@ -2,22 +2,17 @@
 <section class="auth-wrap">
   <div class="auth-card">
     <h1>Create account</h1>
-    <p class="text-muted">Teacher accounts are reviewed by an admin before quiz tools open.</p>
+    <p class="text-muted">Only students can register here. Admins can promote a student to teacher from the Admin Dashboard.</p>
     <form action="/auth/register" method="POST" class="vstack gap-3">
       <input class="form-control" name="name" placeholder="Full name" required>
       <input class="form-control" type="email" name="email" placeholder="Email address" required>
-      <select class="form-select" name="role" required>
-        <option value="student">Student</option>
-        <option value="teacher">Teacher</option>
-      </select>
       <input class="form-control" type="password" name="password" placeholder="Password" minlength="6" required>
       <input class="form-control" type="password" name="confirmPassword" placeholder="Confirm password" minlength="6" required>
       <button class="btn btn-primary w-100" type="submit">Register</button>
     </form>
     <div class="divider">or</div>
     <div class="d-grid gap-2">
-      <a class="btn btn-outline-danger" href="/auth/google?role=student"><i class="fa-brands fa-google me-2"></i>Continue as Student</a>
-      <a class="btn btn-outline-danger" href="/auth/google?role=teacher"><i class="fa-brands fa-google me-2"></i>Continue as Teacher</a>
+      <a class="btn btn-outline-danger" href="/auth/google"><i class="fa-brands fa-google me-2"></i>Continue with Google</a>
     </div>
     <p class="small text-center mt-3">Already registered? <a href="/auth/login">Login</a></p>
   </div>

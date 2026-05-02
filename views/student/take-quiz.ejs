@@ -4,8 +4,14 @@
     <div><span class="eyebrow"><%= quiz.category %></span><h1><%= quiz.title %></h1></div>
     <div class="timer" data-duration="<%= quiz.duration %>"><i class="fa-regular fa-clock me-2"></i><span id="timerText"><%= quiz.duration %>:00</span></div>
   </div>
+  <div class="alert alert-warning py-2 small">
+    <i class="fa-solid fa-shield-halved me-2"></i>
+    Leaving this tab/window will auto-submit your exam.
+  </div>
   <form id="quizForm" action="/student/quizzes/<%= quiz._id %>/submit" method="POST" class="form-panel">
     <input type="hidden" name="timeSpent" id="timeSpent" value="0">
+    <input type="hidden" name="autoSubmitted" id="autoSubmitted" value="0">
+    <input type="hidden" name="autoSubmitReason" id="autoSubmitReason" value="">
     <% quiz.questions.forEach((question, index) => { %>
       <div class="question-block">
         <h2 class="h5"><%= index + 1 %>. <%= question.questionText %> <span class="text-muted small">(<%= question.marks %> marks)</span></h2>

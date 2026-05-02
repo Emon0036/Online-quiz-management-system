@@ -5,6 +5,13 @@ const quizSchema = new mongoose.Schema(
     title: { type: String, required: true, trim: true, maxlength: 200 },
     description: { type: String, trim: true },
     category: { type: String, required: true, trim: true, default: 'General Knowledge' },
+    // Student dashboard grouping (Quiz / True-False / Short Question / Coding Test).
+    examType: {
+      type: String,
+      enum: ['quiz', 'true-false', 'short-answer', 'coding-test'],
+      default: 'quiz',
+      index: true,
+    },
     difficulty: { type: String, enum: ['Easy', 'Medium', 'Hard'], default: 'Medium' },
     duration: { type: Number, required: true, min: 1 },
     passingMarks: { type: Number, required: true, min: 0, max: 100 },
@@ -17,6 +24,7 @@ const quizSchema = new mongoose.Schema(
 );
 
 quizSchema.index({ status: 1, category: 1, difficulty: 1 });
+quizSchema.index({ status: 1, examType: 1, category: 1 });
 quizSchema.index({ createdBy: 1, createdAt: -1 });
 
 module.exports = mongoose.model('Quiz', quizSchema);

@@ -1,0 +1,60 @@
+<% layout('layouts/main') %>
+<section class="container py-4">
+  <div class="page-heading">
+    <div><span class="eyebrow">Student</span><h1>Your Progress</h1></div>
+    <div class="d-flex gap-2">
+      <a href="/enrollments/my-quizzes" class="btn btn-outline-primary">My Exams</a>
+      <a href="/enrollments/leaderboard" class="btn btn-primary">Leaderboard</a>
+    </div>
+  </div>
+
+  <% const completionRate = progress.totalQuizzes ? Math.round((progress.completedQuizzes / progress.totalQuizzes) * 100) : 0; %>
+
+  <div class="row g-3 mb-4">
+    <div class="col-md-3"><div class="stat-tile"><span>Total Points</span><strong><%= progress.totalPoints %></strong></div></div>
+    <div class="col-md-3"><div class="stat-tile"><span>Average Score</span><strong><%= progress.averageScore %>%</strong></div></div>
+    <div class="col-md-3"><div class="stat-tile"><span>Completed Exams</span><strong><%= progress.completedQuizzes %>/<%= progress.totalQuizzes %></strong></div></div>
+    <div class="col-md-3"><div class="stat-tile"><span>Streak</span><strong><%= progress.streak %> day(s)</strong></div></div>
+  </div>
+
+  <div class="form-panel mb-4">
+    <h2 class="h5 mb-2">Completion</h2>
+    <div class="progress" role="progressbar" aria-label="Completion" aria-valuenow="<%= completionRate %>" aria-valuemin="0" aria-valuemax="100">
+      <div class="progress-bar" style="width: <%= completionRate %>%"><%= completionRate %>%</div>
+    </div>
+    <div class="small text-muted mt-2">
+      Attempts: <strong><%= progress.totalAttempts %></strong> · Passed: <strong><%= progress.passedQuizzes %></strong> · Failed: <strong><%= progress.failedQuizzes %></strong>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h2 class="h5 mb-0">By Category</h2>
+      <a href="/enrollments/browse">Enroll more</a>
+    </div>
+    <div class="table-responsive">
+      <table class="table align-middle">
+        <thead>
+          <tr>
+            <th>Category</th>
+            <th>Completed</th>
+            <th>Average</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (!progress.quizzesByCategory || progress.quizzesByCategory.length === 0) { %>
+            <tr><td colspan="3" class="text-center text-muted py-4">No progress yet.</td></tr>
+          <% } %>
+          <% (progress.quizzesByCategory || []).forEach((item) => { %>
+            <tr>
+              <td><strong><%= item.category %></strong></td>
+              <td><%= item.completed %> / <%= item.total %></td>
+              <td><%= item.averageScore %>%</td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
