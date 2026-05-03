@@ -459,3 +459,29 @@ body {
     width: 100%;
   }
 }
+
+
+.modern-question-form {
+  background: linear-gradient(180deg, #fff, #f8fbff);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 1rem;
+}
+
+.modern-question-form .form-control,
+.modern-question-form .form-select {
+  border-radius: 10px;
+  border-color: #d7e3ef;
+}
+
+.modern-question-form .form-control:focus,
+.modern-question-form .form-select:focus {
+  box-shadow: 0 0 0 0.2rem rgba(35, 87, 137, 0.15);
+}
+
+.options-box {
+  background: #f8fbff;
+  border: 1px dashed #c9dced;
+  border-radius: 10px;
+  padding: 0.8rem;
+}
