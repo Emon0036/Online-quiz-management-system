@@ -31,10 +31,11 @@
       <% if (quiz._id) { %>
         <div class="form-panel mb-4">
           <h2 class="h5">Add Question</h2>
-          <% const lockedType = quiz.examType === 'true-false' ? 'true-false' : quiz.examType === 'short-answer' ? 'short-answer' : null; %>
-          <form action="/teacher/quizzes/<%= quiz._id %>/questions" method="POST" class="vstack gap-3">
-            <!-- Question Text Input -->
-            <textarea class="form-control" name="questionText" rows="3" placeholder="Question text" required></textarea>
+          <p class="text-muted small mb-3">1) Write your question. 2) Add options if needed. 3) Select the correct answer. The form auto-adjusts to your selected type.</p>
+          <% const lockedType = ['true-false', 'short-answer', 'coding-test'].includes(quiz.examType) ? quiz.examType : null; %>
+          <form action="/teacher/quizzes/<%= quiz._id %>/questions" method="POST" class="vstack gap-3 modern-question-form">
+            <label class="form-label fw-semibold mb-1">Question to create</label>
+            <textarea class="form-control" name="questionText" rows="3" placeholder="Enter the question statement" required></textarea>
             
             <!-- Question Type Selection -->
             <select class="form-select question-type" name="type" id="questionType" required>
@@ -52,8 +53,10 @@
               <% } %>
             </select>
             
+            <label class="form-label fw-semibold mb-1">Question type</label>
             <!-- Multiple Choice Options (shown only for multiple-choice questions) -->
             <div class="options-box" id="optionsBox">
+              <label class="form-label fw-semibold mb-1">Options</label>
               <input class="form-control mb-2" name="options[]" placeholder="Option 1">
               <input class="form-control mb-2" name="options[]" placeholder="Option 2">
               <input class="form-control mb-2" name="options[]" placeholder="Option 3">
@@ -61,7 +64,8 @@
             </div>
             
             <!-- Correct Answer Input -->
-            <input class="form-control" id="correctAnswerField" name="correctAnswer" placeholder="Correct answer" required>
+            <label class="form-label fw-semibold mb-1">Correct option / answer</label>
+            <input class="form-control" id="correctAnswerField" name="correctAnswer" placeholder="Enter exact correct answer" required>
             
             <!-- Coding Question Fields -->
             <div id="codingFields" style="display: none;">
@@ -97,18 +101,43 @@
             <button class="btn btn-outline-primary mt-3" type="submit">Add Question</button>
             
             <script>
-              document.getElementById('questionType').addEventListener('change', function() {
-                const isCoding = this.value === 'coding';
-                document.getElementById('optionsBox').style.display = isCoding ? 'none' : 'block';
-                document.getElementById('correctAnswerField').style.display = isCoding ? 'none' : 'block';
-                document.getElementById('correctAnswerField').required = !isCoding;
-                document.getElementById('codingFields').style.display = isCoding ? 'block' : 'none';
-                if (isCoding) {
-                  document.querySelectorAll('#optionsBox input').forEach(el => el.required = false);
-                } else {
-                  document.querySelectorAll('#optionsBox input').forEach(el => el.required = true);
+              const questionTypeField = document.getElementById('questionType');
+              const optionsBox = document.getElementById('optionsBox');
+              const correctAnswerField = document.getElementById('correctAnswerField');
+              const codingFields = document.getElementById('codingFields');
+              const optionInputs = document.querySelectorAll('#optionsBox input');
+
+              function applyQuestionMode() {
+                const type = questionTypeField.value;
+                const isCoding = type === 'coding';
+                const isShortAnswer = type === 'short-answer';
+                const isTrueFalse = type === 'true-false';
+
+                codingFields.style.display = isCoding ? 'block' : 'none';
+                optionsBox.style.display = (!isCoding && !isShortAnswer) ? 'block' : 'none';
+                correctAnswerField.style.display = isCoding ? 'none' : 'block';
+                correctAnswerField.required = !isCoding;
+
+                if (isTrueFalse) {
+                  optionInputs[0].value = 'True';
+                  optionInputs[1].value = 'False';
+                  optionInputs[2].value = '';
+                  optionInputs[3].value = '';
                 }
-              });
+
+                optionInputs.forEach((el, index) => {
+                  if (isCoding || isShortAnswer) {
+                    el.required = false;
+                  } else if (isTrueFalse) {
+                    el.required = index < 2;
+                  } else {
+                    el.required = true;
+                  }
+                });
+              }
+
+              questionTypeField.addEventListener('change', applyQuestionMode);
+              applyQuestionMode();
               
               function addTestCase() {
                 const container = document.getElementById('testCasesContainer');

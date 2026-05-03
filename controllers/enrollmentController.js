@@ -120,7 +120,7 @@ exports.getEnrolledQuizzes = async (req, res) => {
     const includeCoding = selectedType === 'all' || selectedType === 'coding-test';
     const includeQuizzes = selectedType !== 'coding-test';
 
-    const grouped = { quiz: [], 'true-false': [], 'short-answer': [] };
+    const grouped = { quiz: [], 'true-false': [], 'short-answer': [], 'coding-test': [] };
 
     let codingProblems = [];
 
