@@ -161,17 +161,46 @@ exports.addQuestion = async (req, res) => {
     return res.redirect('/teacher/quizzes');
   }
 
-  // Create a new question with all details including explanation
-  const question = await Question.create({
+  const questionData = {
     quiz: quiz._id,
     questionText: req.body.questionText,
     type: req.body.type,
-    options: normalizeQuestionBody(req.body),
-    correctAnswer: req.body.correctAnswer,
-    // Explanation field is saved here and will be shown to students after quiz submission
     explanation: req.body.explanation || '',
     marks: Number(req.body.marks || 1),
-  });
+  };
+
+  // Handle different question types
+  if (req.body.type === 'coding') {
+    // For coding questions, parse test cases
+    questionData.language = req.body.language || 'javascript';
+    questionData.codeTemplate = req.body.codeTemplate || '';
+    
+    // Parse test cases - they come as arrays from the form
+    const testCasesInputs = Array.isArray(req.body.testCaseInputs) ? req.body.testCaseInputs : [req.body.testCaseInputs || ''];
+    const testCasesOutputs = Array.isArray(req.body.testCaseOutputs) ? req.body.testCaseOutputs : [req.body.testCaseOutputs || ''];
+    
+    questionData.testCases = [];
+    for (let i = 0; i < testCasesInputs.length; i++) {
+      if (testCasesInputs[i] && testCasesInputs[i].trim()) {
+        questionData.testCases.push({
+          input: String(testCasesInputs[i]).trim(),
+          expectedOutput: String(testCasesOutputs[i] || '').trim(),
+        });
+      }
+    }
+    
+    if (questionData.testCases.length === 0) {
+      req.flash('error', 'Add at least one test case for coding questions.');
+      return res.redirect(`/teacher/quizzes/${quiz._id}/edit`);
+    }
+  } else {
+    // For non-coding questions
+    questionData.options = normalizeQuestionBody(req.body);
+    questionData.correctAnswer = req.body.correctAnswer;
+  }
+
+  // Create a new question with all details
+  const question = await Question.create(questionData);
 
   // Add question reference to quiz and update total marks
   quiz.questions.push(question._id);

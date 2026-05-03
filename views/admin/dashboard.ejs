@@ -1,8 +1,21 @@
 <% layout('layouts/main') %>
-<section class="container py-4">
-  <div class="page-heading">
-    <div><span class="eyebrow">Admin</span><h1>Dashboard</h1></div>
+<section class="dashboard-hero">
+  <div class="container">
+    <div class="hero-content">
+      <div class="greeting-section">
+        <div class="greeting-icon">
+          <i class="fa-solid fa-crown"></i>
+        </div>
+        <div class="greeting-text">
+          <h1>Welcome back, <%= currentUser.name %>!</h1>
+          <p>Manage your quiz management system with full administrative control</p>
+        </div>
+      </div>
+    </div>
   </div>
+</section>
+
+<section class="container py-4">
 
   <div class="row g-3 mb-4">
     <div class="col-md"><div class="stat-tile"><span>Students</span><strong><%= stats.students %></strong></div></div>

@@ -10,6 +10,7 @@ if (timer && quizForm && timerText) {
   const startedAt = Date.now();
   let remaining = totalSeconds;
   let alreadySubmitted = false;
+  let focusLost = false;
 
   function syncTimeSpent() {
     if (!timeSpent) return;
@@ -28,6 +29,7 @@ if (timer && quizForm && timerText) {
     else quizForm.submit();
   }
 
+  // Timer countdown
   const interval = setInterval(() => {
     remaining -= 1;
     const minutes = Math.floor(remaining / 60);
@@ -47,9 +49,57 @@ if (timer && quizForm && timerText) {
     syncTimeSpent();
   });
 
+  // Tab visibility change - auto submit when tab hidden
   document.addEventListener('visibilitychange', () => {
-    if (document.hidden) submitNow('tab_hidden');
+    if (document.hidden && !alreadySubmitted) {
+      focusLost = true;
+      submitNow('tab_hidden');
+    }
   });
 
-  window.addEventListener('blur', () => submitNow('window_blur'));
+  // Window blur - auto submit when user switches window
+  window.addEventListener('blur', () => {
+    if (!alreadySubmitted) {
+      focusLost = true;
+      submitNow('window_blur');
+    }
+  });
+
+  // Notification API - detect when notification arrives (browser permission required)
+  if ('Notification' in window && Notification.permission === 'granted') {
+    // This will detect if a notification is displayed while quiz is active
+    document.addEventListener('notificationclick', () => {
+      if (!alreadySubmitted && focusLost) {
+        submitNow('notification_received');
+      }
+    });
+  }
+
+  // Prevent right-click and developer tools opening
+  document.addEventListener('keydown', (e) => {
+    // F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+Shift+C
+    if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C'))) {
+      e.preventDefault();
+      submitNow('dev_tools_attempted');
+    }
+  });
+
+  document.addEventListener('contextmenu', (e) => {
+    e.preventDefault();
+  });
+
+  // Warn before closing/navigating away
+  window.addEventListener('beforeunload', (e) => {
+    if (!alreadySubmitted) {
+      e.preventDefault();
+      e.returnValue = 'Are you sure you want to leave? Your exam will be auto-submitted.';
+    }
+  });
+
+  // Prevent back button
+  history.pushState(null, null, window.location.href);
+  window.addEventListener('popstate', () => {
+    history.pushState(null, null, window.location.href);
+  });
 }
+

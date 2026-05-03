@@ -27,14 +27,23 @@
         </div>
 
         <!-- Display Student's Answer -->
-        <div class="mb-3">
-          <p class="mb-1 text-muted">
-            <strong>Your Answer:</strong>
-            <span class="<%= answer.isCorrect ? 'text-success' : answer.needsManualReview ? 'text-warning' : 'text-danger' %>">
-              <%= answer.answer || '(Not answered)' %>
-            </span>
-          </p>
-        </div>
+        <% if (answer.question.type === 'coding') { %>
+          <!-- Coding Question Response -->
+          <div class="mb-3">
+            <p class="mb-1 text-muted"><strong>Your Code:</strong></p>
+            <pre class="bg-light p-3 rounded" style="border-left: 4px solid #007bff; overflow-x: auto;"><code><%= answer.answer || '(No code submitted)' %></code></pre>
+          </div>
+        <% } else { %>
+          <!-- Text/Multiple Choice Response -->
+          <div class="mb-3">
+            <p class="mb-1 text-muted">
+              <strong>Your Answer:</strong>
+              <span class="<%= answer.isCorrect ? 'text-success' : answer.needsManualReview ? 'text-warning' : 'text-danger' %>">
+                <%= answer.answer || '(Not answered)' %>
+              </span>
+            </p>
+          </div>
+        <% } %>
 
         <!-- Status Badge: Shows if answer is correct, pending review, or wrong -->
         <div class="mb-3">
@@ -43,8 +52,8 @@
           </span>
         </div>
 
-        <!-- Show Correct Answer (only if not pending manual review) -->
-        <% if (!answer.needsManualReview && !answer.isCorrect) { %>
+        <!-- Show Correct Answer (only if not pending manual review and not coding) -->
+        <% if (!answer.needsManualReview && !answer.isCorrect && answer.question.type !== 'coding') { %>
           <div class="alert alert-info mb-2">
             <strong>Correct Answer:</strong> <%= answer.question.correctAnswer %>
           </div>

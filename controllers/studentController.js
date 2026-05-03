@@ -75,12 +75,28 @@ exports.submitQuiz = async (req, res) => {
   }
 
   const submittedAnswers = req.body.answers || {};
+  const submittedCode = req.body.code || {};
   let score = 0;
   let hasManualReview = false;
+  let hasCodingQuestions = false;
 
   // Process each question and grade the answer
   const answers = quiz.questions.map((question) => {
     const answer = String(submittedAnswers[question._id] || '').trim();
+    const code = String(submittedCode[question._id] || '').trim();
+
+    // Coding questions require execution/review
+    if (question.type === 'coding') {
+      hasCodingQuestions = true;
+      hasManualReview = true;
+      return {
+        question: question._id,
+        answer: code,
+        needsManualReview: true,
+        marksObtained: 0,
+        isCorrect: false,
+      };
+    }
 
     // Short answer questions require teacher review - mark for manual review
     if (question.type === 'short-answer') {
@@ -151,7 +167,11 @@ exports.submitQuiz = async (req, res) => {
       req.flash('success', `Quiz submitted successfully. Points earned: +${pointsEarned}.`);
     }
   } else {
-    req.flash('success', 'Quiz submitted. Short answers are waiting for teacher review.');
+    if (hasCodingQuestions) {
+      req.flash('success', 'Exam submitted. Coding submissions are being evaluated.');
+    } else {
+      req.flash('success', 'Quiz submitted. Answers are waiting for teacher review.');
+    }
   }
   return res.redirect(`/student/results/${attempt._id}`);
 };

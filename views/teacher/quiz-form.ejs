@@ -37,7 +37,7 @@
             <textarea class="form-control" name="questionText" rows="3" placeholder="Question text" required></textarea>
             
             <!-- Question Type Selection -->
-            <select class="form-select question-type" name="type" required>
+            <select class="form-select question-type" name="type" id="questionType" required>
               <% if (!lockedType) { %>
                 <option value="multiple-choice">Multiple Choice</option>
                 <option value="true-false">True/False</option>
@@ -53,7 +53,7 @@
             </select>
             
             <!-- Multiple Choice Options (shown only for multiple-choice questions) -->
-            <div class="options-box">
+            <div class="options-box" id="optionsBox">
               <input class="form-control mb-2" name="options[]" placeholder="Option 1">
               <input class="form-control mb-2" name="options[]" placeholder="Option 2">
               <input class="form-control mb-2" name="options[]" placeholder="Option 3">
@@ -61,16 +61,67 @@
             </div>
             
             <!-- Correct Answer Input -->
-            <input class="form-control" name="correctAnswer" placeholder="Correct answer" required>
+            <input class="form-control" id="correctAnswerField" name="correctAnswer" placeholder="Correct answer" required>
+            
+            <!-- Coding Question Fields -->
+            <div id="codingFields" style="display: none;">
+              <label class="form-label">Programming Language</label>
+              <select class="form-select" name="language" id="language">
+                <option value="javascript">JavaScript</option>
+                <option value="python">Python</option>
+                <option value="java">Java</option>
+                <option value="cpp">C++</option>
+                <option value="csharp">C#</option>
+              </select>
+              
+              <label class="form-label mt-3">Code Template (Optional)</label>
+              <textarea class="form-control" name="codeTemplate" id="codeTemplate" rows="4" placeholder="// Starter code template for students"></textarea>
+              
+              <label class="form-label mt-3">Test Cases</label>
+              <div id="testCasesContainer">
+                <div class="test-case mb-3">
+                  <input class="form-control mb-2" name="testCaseInputs[]" placeholder="Test Input 1">
+                  <textarea class="form-control" name="testCaseOutputs[]" rows="2" placeholder="Expected Output 1"></textarea>
+                </div>
+              </div>
+              <button type="button" class="btn btn-sm btn-outline-secondary" onclick="addTestCase()">+ Add Test Case</button>
+            </div>
             
             <!-- Explanation Field: Will be displayed to students after quiz submission -->
-            <textarea class="form-control" name="explanation" rows="2" placeholder="Explanation (optional - shown to students after quiz submission)"></textarea>
+            <textarea class="form-control mt-3" name="explanation" rows="2" placeholder="Explanation (optional - shown to students after quiz submission)"></textarea>
             
             <!-- Marks for this question -->
-            <input class="form-control" type="number" min="1" name="marks" value="1" placeholder="Marks" required>
+            <input class="form-control mt-3" type="number" min="1" name="marks" value="1" placeholder="Marks" required>
             
             <!-- Submit button to add question -->
-            <button class="btn btn-outline-primary" type="submit">Add Question</button>
+            <button class="btn btn-outline-primary mt-3" type="submit">Add Question</button>
+            
+            <script>
+              document.getElementById('questionType').addEventListener('change', function() {
+                const isCoding = this.value === 'coding';
+                document.getElementById('optionsBox').style.display = isCoding ? 'none' : 'block';
+                document.getElementById('correctAnswerField').style.display = isCoding ? 'none' : 'block';
+                document.getElementById('correctAnswerField').required = !isCoding;
+                document.getElementById('codingFields').style.display = isCoding ? 'block' : 'none';
+                if (isCoding) {
+                  document.querySelectorAll('#optionsBox input').forEach(el => el.required = false);
+                } else {
+                  document.querySelectorAll('#optionsBox input').forEach(el => el.required = true);
+                }
+              });
+              
+              function addTestCase() {
+                const container = document.getElementById('testCasesContainer');
+                const testCaseCount = container.children.length;
+                const html = `
+                  <div class="test-case mb-3">
+                    <input class="form-control mb-2" name="testCaseInputs[]" placeholder="Test Input ${testCaseCount + 1}">
+                    <textarea class="form-control" name="testCaseOutputs[]" rows="2" placeholder="Expected Output ${testCaseCount + 1}"></textarea>
+                  </div>
+                `;
+                container.insertAdjacentHTML('beforeend', html);
+              }
+            </script>
           </form>
         </div>
         <div class="table-card">
@@ -81,9 +132,13 @@
               <div>
                 <strong><%= index + 1 %>. <%= question.questionText %></strong>
                 <div class="small text-muted">
-                  <%= question.type %> | 
-                  <%= question.marks %> marks | 
-                  Answer: <%= question.correctAnswer || 'Manual review' %>
+                  <span class="badge bg-secondary me-2"><%= question.type %></span>
+                  <%= question.marks %> marks
+                  <% if (question.type === 'coding') { %>
+                    | <%= question.language || 'javascript' %> | <%= question.testCases ? question.testCases.length : 0 %> test cases
+                  <% } else if (question.type !== 'short-answer') { %>
+                    | Answer: <%= question.correctAnswer || 'N/A' %>
+                  <% } %>
                   <!-- Show indicator if explanation exists -->
                   <% if (question.explanation && question.explanation.trim()) { %>
                     | <span class="badge bg-info">Has explanation</span>
