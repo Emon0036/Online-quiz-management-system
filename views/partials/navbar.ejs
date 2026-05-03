@@ -1,20 +1,66 @@
-<nav class="navbar navbar-expand-lg sticky-nav">
+<nav class="navbar navbar-expand-lg navbar-dark bg-brand sticky-top">
   <div class="container">
-    <button class="btn btn-outline-light d-lg-none me-2" data-sidebar-toggle><i class="fa-solid fa-bars"></i></button>
-    <a class="navbar-brand text-white" href="/"><i class="fa-solid fa-circle-question me-2"></i><%= appName %></a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar"><span class="navbar-toggler-icon"></span></button>
+    <a class="navbar-brand fw-bold" href="/"><i class="fa-solid fa-circle-question me-2"></i><%= appName %></a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
+      <span class="navbar-toggler-icon"></span>
+    </button>
     <div class="collapse navbar-collapse" id="mainNavbar">
       <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
-        <li class="nav-item"><a class="nav-link" href="/">Home</a></li><li class="nav-item"><a class="nav-link" href="/about">About</a></li>
-        <li class="nav-item"><button class="btn btn-sm btn-outline-light" data-theme-toggle><i class="fa-solid fa-moon"></i></button></li>
+        <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+        <li class="nav-item"><a class="nav-link" href="/about">About</a></li>
+        <li class="nav-item"><a class="nav-link" href="/problems">Coding Challenges</a></li>
         <% if (!currentUser) { %>
-          <li class="nav-item"><a class="nav-link" href="/auth/login">Login</a></li><li class="nav-item"><a class="btn btn-light btn-sm" href="/auth/register">Register</a></li>
+          <li class="nav-item"><a class="nav-link" href="/auth/login">Login</a></li>
+          <li class="nav-item"><a class="btn btn-light btn-sm" href="/auth/register">Register</a></li>
+        <% } else if (currentUser.role === 'admin') { %>
+          <li class="nav-item dropdown">
+            <button class="btn user-profile-btn dropdown-toggle" type="button" data-bs-toggle="dropdown">
+              <div class="user-avatar"><%= currentUser.name.charAt(0).toUpperCase() %></div>
+              <span><%= currentUser.name %></span>
+            </button>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="/admin/dashboard"><i class="fa-solid fa-gauge me-2"></i>Dashboard</a></li>
+              <li><a class="dropdown-item" href="/problems/manage"><i class="fa-solid fa-code me-2"></i>Manage Problems</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><form action="/auth/logout" method="POST"><button class="dropdown-item" type="submit"><i class="fa-solid fa-sign-out me-2"></i>Logout</button></form></li>
+            </ul>
+          </li>
+        <% } else if (currentUser.role === 'teacher') { %>
+          <% if (currentUser.teacherStatus === 'pending' || currentUser.teacherStatus === 'rejected') { %>
+            <li class="nav-item"><a class="nav-link" href="/auth/teacher-pending">Teacher Access</a></li>
+          <% } else { %>
+          <li class="nav-item dropdown">
+            <button class="btn user-profile-btn dropdown-toggle" type="button" data-bs-toggle="dropdown">
+              <div class="user-avatar"><%= currentUser.name.charAt(0).toUpperCase() %></div>
+              <span><%= currentUser.name %></span>
+            </button>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="/teacher/dashboard"><i class="fa-solid fa-gauge me-2"></i>Dashboard</a></li>
+              <li><a class="dropdown-item" href="/teacher/quizzes"><i class="fa-solid fa-book me-2"></i>My Quizzes</a></li>
+              <li><a class="dropdown-item" href="/problems/manage"><i class="fa-solid fa-code me-2"></i>Problems</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="/teacher/quizzes/new"><i class="fa-solid fa-plus me-2"></i>Create Quiz</a></li>
+              <li><a class="dropdown-item" href="/problems/create/new"><i class="fa-solid fa-code me-2"></i>Create Problem</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><form action="/auth/logout" method="POST"><button class="dropdown-item" type="submit"><i class="fa-solid fa-sign-out me-2"></i>Logout</button></form></li>
+            </ul>
+          </li>
+          <% } %>
         <% } else { %>
           <li class="nav-item dropdown">
-            <button class="btn user-profile-btn dropdown-toggle" type="button" data-bs-toggle="dropdown"><div class="user-avatar"><%= currentUser.name.charAt(0).toUpperCase() %></div><span><%= currentUser.name %></span></button>
-            <ul class="dropdown-menu dropdown-menu-end">
-              <li><a class="dropdown-item" href="/<%= currentUser.role %>/dashboard">Dashboard</a></li>
-              <li><form action="/auth/logout" method="POST"><button class="dropdown-item" type="submit">Logout</button></form></li>
+            <button class="btn user-profile-btn dropdown-toggle" type="button" data-bs-toggle="dropdown">
+              <div class="user-avatar"><%= currentUser.name.charAt(0).toUpperCase() %></div>
+              <span><%= currentUser.name %></span>
+            </button>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="/student/dashboard"><i class="fa-solid fa-gauge me-2"></i>Dashboard</a></li>
+              <li><a class="dropdown-item" href="/enrollments/my-quizzes"><i class="fa-solid fa-book me-2"></i>My Exams</a></li>
+              <li><a class="dropdown-item" href="/enrollments/browse"><i class="fa-solid fa-magnifying-glass me-2"></i>Browse</a></li>
+              <li><a class="dropdown-item" href="/enrollments/progress"><i class="fa-solid fa-chart-line me-2"></i>Progress</a></li>
+              <li><a class="dropdown-item" href="/enrollments/leaderboard"><i class="fa-solid fa-trophy me-2"></i>Leaderboard</a></li>
+              <li><a class="dropdown-item" href="/student/history"><i class="fa-solid fa-history me-2"></i>History</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><form action="/auth/logout" method="POST"><button class="dropdown-item" type="submit"><i class="fa-solid fa-sign-out me-2"></i>Logout</button></form></li>
             </ul>
           </li>
         <% } %>
