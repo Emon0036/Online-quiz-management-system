@@ -1,60 +1,45 @@
 <% layout('layouts/main') %>
 
-<section class="hero-band">
-  <div class="container py-5">
-    <div class="row align-items-center g-5">
-      <div class="col-lg-7">
-        <span class="eyebrow">Online Quiz Management System</span>
-        <h1 class="display-4 fw-bold mt-3">Create, deliver, and review quizzes from one clean dashboard.</h1>
-        <p class="lead text-muted mt-3">Teachers can build quizzes with multiple question types. Students can take timed quizzes, see results, review attempts, and track rank.</p>
-        <div class="d-flex flex-wrap gap-2 mt-4">
-          <a class="btn btn-primary btn-lg" href="/auth/register">Get Started</a>
-          <a class="btn btn-outline-primary btn-lg" href="/student/quizzes">Browse Quizzes</a>
-        </div>
-      </div>
-      <div class="col-lg-5">
-        <div class="hero-panel">
-          <div class="d-flex justify-content-between align-items-center mb-3">
-            <strong>Live Quiz</strong><span class="badge text-bg-success">Published</span>
-          </div>
-          <div class="progress mb-3" style="height: 10px;"><div class="progress-bar" style="width: 72%;"></div></div>
-          <div class="d-grid gap-3">
-            <div class="mini-row"><i class="fa-solid fa-clock"></i><span>Timed attempts</span></div>
-            <div class="mini-row"><i class="fa-solid fa-chart-simple"></i><span>Instant analytics</span></div>
-            <div class="mini-row"><i class="fa-solid fa-trophy"></i><span>Leaderboards</span></div>
-          </div>
-        </div>
-      </div>
+<%- include('partials/header', { eyebrow: 'Online Quiz Management System', heading: 'Modern Quiz Platform', subheading: 'Responsive, animated, and production-style interface for students and teachers.' }) %>
+
+<section class="container dashboard-layout mt-4">
+  <aside class="sidebar glass" data-sidebar>
+    <h2 class="h6">Workspace</h2>
+    <a href="/student/dashboard">Student Dashboard</a>
+    <a href="/teacher/dashboard">Teacher Dashboard</a>
+    <a href="/student/quizzes">Browse Quizzes</a>
+    <a href="/teacher/quizzes/new">Create Quiz</a>
+    <button class="btn btn-sm btn-primary mt-2" data-modal-open="demoModal">Open Modal</button>
+    <button class="btn btn-sm btn-outline-primary mt-2" data-toast="Saved! UI action complete.">Toast Demo</button>
+  </aside>
+
+  <div>
+    <div class="stat-grid reveal mb-4">
+      <article class="stat-tile"><span>Published Quizzes</span><strong data-counter="128">0</strong></article>
+      <article class="stat-tile"><span>Students</span><strong data-counter="942">0</strong></article>
+      <article class="stat-tile"><span>Avg Completion</span><strong data-counter="84">0</strong></article>
     </div>
-  </div>
-</section>
 
-<section class="container py-5">
-  <div class="row g-4">
-    <div class="col-md-4"><div class="feature-card"><i class="fa-solid fa-pen-to-square"></i><h3>Teacher Tools</h3><p>Create, edit, publish, review, and analyze quizzes.</p></div></div>
-    <div class="col-md-4"><div class="feature-card"><i class="fa-solid fa-user-graduate"></i><h3>Student Flow</h3><p>Browse quizzes, take timed attempts, and view history.</p></div></div>
-    <div class="col-md-4"><div class="feature-card"><i class="fa-solid fa-shield-halved"></i><h3>Secure Access</h3><p>Passport sessions, local auth, Google OAuth, and role checks.</p></div></div>
-  </div>
-</section>
+    <div class="progress-modern reveal mb-4"><span style="width:72%"></span></div>
 
-<section class="container pb-5">
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <h2 class="h4 mb-0">Recently Published</h2>
-    <a href="/student/quizzes" class="btn btn-sm btn-outline-primary">View all</a>
-  </div>
-  <div class="row g-3">
-    <% if (featuredQuizzes.length === 0) { %>
-      <div class="col-12"><div class="empty-state">No published quizzes yet.</div></div>
-    <% } %>
-    <% featuredQuizzes.forEach((quiz) => { %>
-      <div class="col-md-6 col-lg-4">
-        <div class="quiz-card h-100">
-          <span class="badge text-bg-light"><%= quiz.category %></span>
-          <h3 class="h5 mt-3"><%= quiz.title %></h3>
-          <p class="text-muted"><%= quiz.description || 'A focused quiz for practice and assessment.' %></p>
-          <div class="small text-muted"><i class="fa-regular fa-clock me-1"></i><%= quiz.duration %> min</div>
-        </div>
-      </div>
-    <% }) %>
+    <div class="row g-4 mb-4">
+      <div class="col-md-4"><div class="feature-card reveal"><i class="fa-solid fa-wand-magic-sparkles"></i><h3>Micro-interactions</h3><p>Smooth transitions, card hovers, and animated counters.</p></div></div>
+      <div class="col-md-4"><div class="feature-card reveal"><i class="fa-solid fa-table"></i><h3>Advanced Tables</h3><p>Hover rows, sorting indicators, and glass styling.</p></div></div>
+      <div class="col-md-4"><div class="feature-card reveal"><i class="fa-solid fa-mobile-screen-button"></i><h3>Mobile First</h3><p>Touch-friendly controls with responsive grids.</p></div></div>
+    </div>
+
+    <div class="table-card reveal mb-4">
+      <h2 class="h5 mb-3">Recent Performance</h2>
+      <table class="table-modern">
+        <thead><tr><th class="sort-indicator">Quiz</th><th class="sort-indicator">Attempts</th><th>Score</th></tr></thead>
+        <tbody><tr><td>JavaScript Basics</td><td>132</td><td>88%</td></tr><tr><td>Node Fundamentals</td><td>97</td><td>84%</td></tr></tbody>
+      </table>
+    </div>
+
+    <div class="row g-3">
+      <% featuredQuizzes.forEach((quiz) => { %>
+        <div class="col-md-6 col-xl-4"><%- include('partials/card', { badge: quiz.category, title: quiz.title, description: quiz.description || 'A focused quiz for practice and assessment.', footer: `<div class='small text-muted'><i class='fa-regular fa-clock me-1'></i>${quiz.duration} min</div>` }) %></div>
+      <% }) %>
+    </div>
   </div>
 </section>
