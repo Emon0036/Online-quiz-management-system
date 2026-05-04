@@ -14,5 +14,7 @@ router.post('/admins', asyncHandler(adminController.createAdmin));
 router.patch('/teachers/:userId/approve', asyncHandler(adminController.approveTeacher));
 router.patch('/teachers/:userId/reject', asyncHandler(adminController.rejectTeacher));
 router.post('/teachers/grant', asyncHandler(adminController.grantTeacherByEmail));
+router.patch('/users/:userId/block', asyncHandler(adminController.blockUser));
+router.patch('/users/:userId/unblock', asyncHandler(adminController.unblockUser));
 
 module.exports = router;

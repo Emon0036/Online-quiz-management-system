@@ -6,22 +6,25 @@
       <% if (quizzes.length === 0) { %><tr><td colspan="7" class="text-center text-muted py-4">No quizzes yet.</td></tr><% } %>
       <% quizzes.forEach((quiz) => { %>
         <tr>
-          <td><strong><%= quiz.title %></strong><div class="small text-muted"><%= quiz.duration %> minutes</div></td>
+          <td>
+            <strong><%= quiz.title %></strong>
+            <div class="small text-muted"><%= quiz.duration %> minutes · <%= quiz.completedCount || 0 %> completed</div>
+          </td>
           <td><span class="badge text-bg-secondary"><%= examTypeLabels[quiz.examType || 'quiz'] %></span></td>
           <td><%= quiz.category %></td>
           <td><%= quiz.enrolledCount || 0 %></td>
           <td><%= quiz.totalMarks %></td>
           <td><span class="badge <%= quiz.status === 'published' ? 'text-bg-success' : 'text-bg-secondary' %>"><%= quiz.status %></span></td>
           <td class="text-end">
-            <div class="btn-group btn-group-sm">
+            <div class="action-stack">
               <a class="btn btn-outline-primary" href="/teacher/quizzes/<%= quiz._id %>/edit">Edit</a>
               <a class="btn btn-outline-secondary" href="/teacher/quizzes/<%= quiz._id %>/attempts">Attempts</a>
               <a class="btn btn-outline-secondary" href="/teacher/quizzes/<%= quiz._id %>/analytics">Analytics</a>
               <a class="btn btn-outline-secondary" href="/teacher/quizzes/<%= quiz._id %>/leaderboard">Leaderboard</a>
             </div>
-            <div class="btn-group btn-group-sm mt-1">
-              <form action="/teacher/quizzes/<%= quiz._id %>/publish?_method=PATCH" method="POST"><button class="btn btn-outline-success"><%= quiz.status === 'published' ? 'Unpublish' : 'Publish' %></button></form>
-              <form action="/teacher/quizzes/<%= quiz._id %>?_method=DELETE" method="POST" onsubmit="return confirm('Delete this quiz?')"><button class="btn btn-outline-danger">Delete</button></form>
+            <div class="action-stack mt-2">
+              <form action="/teacher/quizzes/<%= quiz._id %>/publish?_method=PATCH" method="POST" class="inline-form"><button class="btn btn-outline-success"><%= quiz.status === 'published' ? 'Unpublish' : 'Publish' %></button></form>
+              <form action="/teacher/quizzes/<%= quiz._id %>?_method=DELETE" method="POST" class="inline-form" onsubmit="return confirm('Delete this quiz?')"><button class="btn btn-outline-danger">Delete</button></form>
             </div>
           </td>
         </tr>

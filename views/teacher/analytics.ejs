@@ -1,18 +1,56 @@
 <% layout('layouts/main') %>
-<section class="container py-4">
-  <div class="page-heading"><div><span class="eyebrow">Analytics</span><h1><%= quiz.title %></h1></div><a class="btn btn-outline-secondary" href="/teacher/quizzes">Back</a></div>
-  <div class="row g-3">
-    <div class="col-md-4"><div class="stat-tile"><span>Total Attempts</span><strong><%= attempts.length %></strong></div></div>
-    <div class="col-md-4"><div class="stat-tile"><span>Average Score</span><strong><%= average %>%</strong></div></div>
-    <div class="col-md-4"><div class="stat-tile"><span>Pass Count</span><strong><%= passCount %></strong></div></div>
-  </div>
-  <div class="table-card mt-4">
-    <h2 class="h5">Score Distribution</h2>
-    <% attempts.forEach((attempt) => { %>
-      <div class="mb-3">
-        <div class="d-flex justify-content-between small"><span><%= attempt.submittedAt.toLocaleDateString() %></span><span><%= attempt.percentage %>%</span></div>
-        <div class="progress"><div class="progress-bar" style="width:<%= attempt.percentage %>%"></div></div>
+<section class="page-shell">
+  <div class="page-container page-stack">
+    <div class="page-heading">
+      <div>
+        <span class="eyebrow">Analytics</span>
+        <h1><%= quiz.title %></h1>
+        <p>Track how students are performing, how often they attempt the quiz, and where scores are landing.</p>
       </div>
-    <% }) %>
+      <a class="btn btn-outline-secondary" href="/teacher/quizzes">Back</a>
+    </div>
+
+    <div class="summary-grid">
+      <article class="summary-card">
+        <span>Total Attempts</span>
+        <strong><%= attempts.length %></strong>
+        <small>student submissions on this quiz</small>
+      </article>
+      <article class="summary-card">
+        <span>Average Score</span>
+        <strong><%= average %>%</strong>
+        <small>current average across all attempts</small>
+      </article>
+      <article class="summary-card">
+        <span>Pass Count</span>
+        <strong><%= passCount %></strong>
+        <small>attempts currently marked as passed</small>
+      </article>
+    </div>
+
+    <div class="table-card">
+      <div class="panel-header">
+        <div class="panel-header__copy">
+          <span class="eyebrow">Distribution</span>
+          <h2>Score distribution</h2>
+          <p>Each row shows the score for one attempt over time.</p>
+        </div>
+      </div>
+      <% if (!attempts.length) { %>
+        <div class="empty-state">
+          <h3>No analytics yet</h3>
+          <p>Scores will appear here once students start attempting this quiz.</p>
+        </div>
+      <% } %>
+      <% attempts.forEach((attempt) => { %>
+        <div class="mb-3">
+          <div class="d-flex justify-content-between small mb-2">
+            <span><%= attempt.submittedAt.toLocaleDateString() %></span>
+            <span><%= attempt.percentage %>%</span>
+          </div>
+          <div class="progress"><div class="progress-bar" style="width:<%= attempt.percentage %>%"></div></div>
+        </div>
+      <% }) %>
+    </div>
   </div>
 </section>

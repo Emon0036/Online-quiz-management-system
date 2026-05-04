@@ -5,9 +5,17 @@ const User = require('../models/User');
 const { dashboardPathFor } = require('../middleware/authMiddleware');
 const { saveTabUser, removeTabUser } = require('../middleware/tabSessionMiddleware');
 
-exports.showRegister = (req, res) => res.render('auth/register', { title: 'Register' });
-exports.showLogin = (req, res) => res.render('auth/login', { title: 'Login' });
-exports.showForgotPassword = (req, res) => res.render('auth/forgot-password', { title: 'Forgot password' });
+function authPageOptions(title) {
+  return {
+    title,
+    hideSiteChrome: true,
+    pageClass: 'app-auth',
+  };
+}
+
+exports.showRegister = (req, res) => res.render('auth/register', authPageOptions('Register'));
+exports.showLogin = (req, res) => res.render('auth/login', authPageOptions('Login'));
+exports.showForgotPassword = (req, res) => res.render('auth/forgot-password', authPageOptions('Forgot password'));
 exports.showTeacherPending = (req, res) => res.render('auth/teacher-pending', { title: 'Teacher approval' });
 
 exports.register = async (req, res) => {
@@ -147,7 +155,7 @@ exports.showResetPassword = async (req, res) => {
     req.flash('error', 'This reset link is invalid or expired.');
     return res.redirect('/auth/forgot-password');
   }
-  return res.render('auth/reset-password', { title: 'Reset password', token: req.params.token });
+  return res.render('auth/reset-password', { ...authPageOptions('Reset password'), token: req.params.token });
 };
 
 exports.resetPassword = async (req, res) => {

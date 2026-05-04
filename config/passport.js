@@ -8,6 +8,9 @@ module.exports = (passport) => {
       try {
         const user = await User.findOne({ email: email.toLowerCase() }).select('+password');
         if (!user || !user.password) return done(null, false, { message: 'Invalid email or password.' });
+        if (user.accountStatus === 'blocked') {
+          return done(null, false, { message: 'Your account has been blocked. Please contact an administrator.' });
+        }
 
         const passwordMatches = await user.matchPassword(password);
         if (!passwordMatches) return done(null, false, { message: 'Invalid email or password.' });
@@ -34,6 +37,9 @@ module.exports = (passport) => {
 
           let user = await User.findOne({ $or: [{ googleId: profile.id }, { email }] });
           if (user) {
+            if (user.accountStatus === 'blocked') {
+              return done(null, false, { message: 'Your account has been blocked. Please contact an administrator.' });
+            }
             user.googleId = user.googleId || profile.id;
             user.profileImage = profile.photos?.[0]?.value || user.profileImage;
             await user.save();

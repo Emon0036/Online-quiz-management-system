@@ -1,60 +1,53 @@
-<footer class="bg-white border-t border-gray-200 mt-16">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-      <!-- Brand -->
-      <div class="col-span-1 md:col-span-2">
-        <div class="flex items-center space-x-3 mb-4">
-          <div class="w-10 h-10 bg-brand-100 rounded-lg flex items-center justify-center">
-            <i class="fas fa-circle-question text-brand-600 text-xl"></i>
-          </div>
-          <span class="text-xl font-bold text-gray-900"><%= appName %></span>
-        </div>
-        <p class="text-gray-600 mb-4 max-w-md">
-          Empowering education through innovative quiz management. Create, deliver, and analyze assessments with ease.
+<footer class="site-footer">
+  <div class="page-container footer-shell">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a class="brand-lockup" href="/">
+          <span class="brand-mark">
+            <i class="fa-brands fa-joomla"></i>
+          </span>
+          <span class="brand-copy">
+            <strong><%= appName %></strong>
+            <small>Assess, review, improve</small>
+          </span>
+        </a>
+        <p>
+          A cleaner workspace for building quizzes, tracking progress, and keeping student feedback close at hand.
         </p>
-        <div class="flex space-x-4">
-          <a href="#" class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center text-gray-600 hover:bg-brand-100 hover:text-brand-600 transition-colors">
-            <i class="fab fa-twitter"></i>
-          </a>
-          <a href="#" class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center text-gray-600 hover:bg-brand-100 hover:text-brand-600 transition-colors">
-            <i class="fab fa-linkedin"></i>
-          </a>
-          <a href="#" class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center text-gray-600 hover:bg-brand-100 hover:text-brand-600 transition-colors">
-            <i class="fab fa-github"></i>
-          </a>
+        <div class="footer-tag-list">
+          <span class="footer-tag">Students</span>
+          <span class="footer-tag">Teachers</span>
+          <span class="footer-tag">Admins</span>
         </div>
       </div>
 
-      <!-- Product -->
-      <div>
-        <h3 class="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4">Product</h3>
-        <ul class="space-y-3">
-          <li><a href="/about" class="text-gray-600 hover:text-brand-600 transition-colors">About</a></li>
-          <li><a href="/features" class="text-gray-600 hover:text-brand-600 transition-colors">Features</a></li>
-          <li><a href="/pricing" class="text-gray-600 hover:text-brand-600 transition-colors">Pricing</a></li>
-          <li><a href="/problems" class="text-gray-600 hover:text-brand-600 transition-colors">Coding Challenges</a></li>
-        </ul>
+      <div class="footer-links">
+        <h3>Platform</h3>
+        <a href="/about">About</a>
+        <a href="/features">Features</a>
+        <a href="/pricing">Pricing</a>
       </div>
 
-      <!-- Support -->
-      <div>
-        <h3 class="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4">Support</h3>
-        <ul class="space-y-3">
-          <li><a href="/help" class="text-gray-600 hover:text-brand-600 transition-colors">Help Center</a></li>
-          <li><a href="/contact" class="text-gray-600 hover:text-brand-600 transition-colors">Contact Us</a></li>
-          <li><a href="/privacy" class="text-gray-600 hover:text-brand-600 transition-colors">Privacy Policy</a></li>
-          <li><a href="/terms" class="text-gray-600 hover:text-brand-600 transition-colors">Terms of Service</a></li>
-        </ul>
+      <div class="footer-links">
+        <h3>Support</h3>
+        <a href="/help">Help Center</a>
+        <a href="/contact">Contact</a>
+        <a href="/privacy">Privacy Policy</a>
+        <a href="/terms">Terms of Service</a>
+      </div>
+
+      <div class="footer-links">
+        <h3>Start Here</h3>
+        <a href="/auth/register">Create Account</a>
+        <a href="/auth/login">Sign In</a>
+        <a href="/student/dashboard">Student Dashboard</a>
+        <a href="/teacher/dashboard">Teacher Dashboard</a>
       </div>
     </div>
 
-    <div class="border-t border-gray-200 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
-      <p class="text-gray-600 text-sm">
-        &copy; <%= new Date().getFullYear() %> <%= appName %>. All rights reserved.
-      </p>
-      <p class="text-gray-600 text-sm mt-2 md:mt-0">
-        Made with <i class="fas fa-heart text-red-500 mx-1"></i> for education
-      </p>
+    <div class="footer-meta">
+      <p>&copy; <%= new Date().getFullYear() %> <%= appName %>. All rights reserved.</p>
+      <p>Designed to keep assessment calm, clear, and useful.</p>
     </div>
   </div>
 </footer>

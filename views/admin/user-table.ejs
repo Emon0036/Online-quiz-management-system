@@ -7,20 +7,45 @@
         <tr>
           <th>Name</th>
           <th>Email</th>
-          <th>Role</th>
           <th>Status</th>
+          <th>Action</th>
         </tr>
       </thead>
       <tbody>
         <% users.forEach((user) => {
-             const statusValue = user.role === 'teacher' ? (user.teacherStatus || 'approved') : 'active';
-             const statusClass = statusValue === 'approved' ? 'approved' : statusValue === 'pending' ? 'pending' : 'rejected';
+             const approvalValue = user.role === 'teacher' ? (user.teacherStatus || 'approved') : 'student';
+             const approvalClass = approvalValue === 'approved' || approvalValue === 'student'
+               ? 'approved'
+               : approvalValue === 'pending'
+                 ? 'pending'
+                 : 'rejected';
+             const accountValue = user.accountStatus === 'blocked' ? 'blocked' : 'active';
+             const accountClass = accountValue === 'blocked' ? 'blocked' : 'approved';
         %>
           <tr>
             <td><%= user.name %></td>
             <td><%= user.email %></td>
-            <td><span class="status-pill approved"><%= user.role %></span></td>
-            <td><span class="status-pill <%= statusClass %>"><%= statusValue %></span></td>
+            <td>
+              <div class="status-pill-row">
+                <span class="status-pill <%= accountClass %>"><%= accountValue %></span>
+                <% if (user.role === 'teacher') { %>
+                  <span class="status-pill <%= approvalClass %>"><%= approvalValue %></span>
+                <% } %>
+              </div>
+            </td>
+            <td>
+              <div class="action-stack">
+                <% if (user.accountStatus === 'blocked') { %>
+                  <form action="/admin/users/<%= user._id %>/unblock?_method=PATCH" method="POST" class="inline-form">
+                    <button class="btn btn-outline-success btn-sm" type="submit">Unblock</button>
+                  </form>
+                <% } else { %>
+                  <form action="/admin/users/<%= user._id %>/block?_method=PATCH" method="POST" class="inline-form">
+                    <button class="btn btn-outline-danger btn-sm" type="submit">Block</button>
+                  </form>
+                <% } %>
+              </div>
+            </td>
           </tr>
         <% }) %>
       </tbody>

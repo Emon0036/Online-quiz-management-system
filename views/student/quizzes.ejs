@@ -1,58 +1,82 @@
 <% layout('layouts/main') %>
-<section class="container py-4">
-  <% const examTypeLabels = { quiz: 'Quiz', 'true-false': 'True/False', 'short-answer': 'Short Question', 'coding-test': 'Coding Exam' }; %>
-  <div class="page-heading">
-    <div><span class="eyebrow">Student</span><h1>Browse Exams</h1></div>
-    <a href="/enrollments/my-quizzes" class="btn btn-primary">My Exams</a>
-  </div>
-  <form class="filter-bar" method="GET" action="/enrollments/browse">
-    <select class="form-select" name="type">
-      <option value="all" <%= (selectedType || query.type || 'all') === 'all' ? 'selected' : '' %>>All types</option>
-      <option value="quiz" <%= (selectedType || query.type) === 'quiz' ? 'selected' : '' %>>Quiz (MCQ / Mixed)</option>
-      <option value="true-false" <%= (selectedType || query.type) === 'true-false' ? 'selected' : '' %>>True / False</option>
-      <option value="short-answer" <%= (selectedType || query.type) === 'short-answer' ? 'selected' : '' %>>Short Question</option>
-      <option value="coding-test" <%= (selectedType || query.type) === 'coding-test' ? 'selected' : '' %>>Coding Exam</option>
-    </select>
-    <select class="form-select" name="category">
-      <option value="all" <%= (selectedCategory || query.category || 'all') === 'all' ? 'selected' : '' %>>All categories</option>
-      <% (categories || []).forEach((cat) => { %>
-        <option value="<%= cat %>" <%= (selectedCategory || query.category) === cat ? 'selected' : '' %>><%= cat %></option>
-      <% }) %>
-    </select>
-    <select class="form-select" name="difficulty">
-      <option value="">All difficulties</option>
-      <% ['Easy','Medium','Hard'].forEach((level) => { %><option value="<%= level %>" <%= (selectedDifficulty || query.difficulty) === level ? 'selected' : '' %>><%= level %></option><% }) %>
-    </select>
-    <button class="btn btn-outline-primary">Filter</button>
-  </form>
-  <div class="row g-3 mt-1">
-    <% if (quizzes.length === 0) { %><div class="col-12"><div class="empty-state">No quizzes found.</div></div><% } %>
-    <% quizzes.forEach((quiz) => { %>
-      <% const isEnrolled = (enrolledQuizIds || []).includes(String(quiz._id)); %>
-      <div class="col-md-6 col-lg-4">
-        <div class="quiz-card h-100">
-          <div class="d-flex flex-wrap gap-2 justify-content-between">
-            <div class="d-flex flex-wrap gap-2">
+<section class="page-shell">
+  <div class="page-container page-stack">
+    <% const examTypeLabels = { quiz: 'Quiz', 'true-false': 'True/False', 'short-answer': 'Short Question', 'coding-test': 'Coding Exam' }; %>
+    <div class="page-heading">
+      <div>
+        <span class="eyebrow">Student</span>
+        <h1>Browse Exams</h1>
+        <p>Find published exams by format, category, and difficulty, then enroll or jump straight into an attempt.</p>
+      </div>
+      <div class="toolbar">
+        <a href="/enrollments/my-quizzes" class="btn btn-primary">My Exams</a>
+      </div>
+    </div>
+
+    <form class="filter-bar" method="GET" action="/enrollments/browse">
+      <select class="form-select" name="type">
+        <option value="all" <%= (selectedType || query.type || 'all') === 'all' ? 'selected' : '' %>>All types</option>
+        <option value="quiz" <%= (selectedType || query.type) === 'quiz' ? 'selected' : '' %>>Quiz (MCQ / Mixed)</option>
+        <option value="true-false" <%= (selectedType || query.type) === 'true-false' ? 'selected' : '' %>>True / False</option>
+        <option value="short-answer" <%= (selectedType || query.type) === 'short-answer' ? 'selected' : '' %>>Short Question</option>
+        <option value="coding-test" <%= (selectedType || query.type) === 'coding-test' ? 'selected' : '' %>>Coding Exam</option>
+      </select>
+      <select class="form-select" name="category">
+        <option value="all" <%= (selectedCategory || query.category || 'all') === 'all' ? 'selected' : '' %>>All categories</option>
+        <% (categories || []).forEach((cat) => { %>
+          <option value="<%= cat %>" <%= (selectedCategory || query.category) === cat ? 'selected' : '' %>><%= cat %></option>
+        <% }) %>
+      </select>
+      <select class="form-select" name="difficulty">
+        <option value="">All difficulties</option>
+        <% ['Easy', 'Medium', 'Hard'].forEach((level) => { %>
+          <option value="<%= level %>" <%= (selectedDifficulty || query.difficulty) === level ? 'selected' : '' %>><%= level %></option>
+        <% }) %>
+      </select>
+      <button class="btn btn-outline-primary" type="submit">
+        <i class="fas fa-sliders"></i>
+        Filter
+      </button>
+    </form>
+
+    <% if (quizzes.length === 0) { %>
+      <div class="empty-state">
+        <h3>No exams matched these filters</h3>
+        <p>Try broadening the category, difficulty, or exam type to see more options.</p>
+      </div>
+    <% } else { %>
+      <div class="action-grid">
+        <% quizzes.forEach((quiz) => { %>
+          <% const isEnrolled = (enrolledQuizIds || []).includes(String(quiz._id)); %>
+          <article class="quiz-card">
+            <div class="quiz-card__meta">
               <span class="badge text-bg-light"><%= quiz.category %></span>
               <span class="badge text-bg-secondary"><%= examTypeLabels[quiz.examType || 'quiz'] %></span>
+              <span class="badge text-bg-primary"><%= quiz.difficulty %></span>
             </div>
-            <span class="badge text-bg-primary"><%= quiz.difficulty %></span>
-          </div>
-          <h2 class="h5 mt-3"><%= quiz.title %></h2>
-          <p class="text-muted"><%= quiz.description || 'No description provided.' %></p>
-          <div class="small text-muted mb-3"><%= quiz.duration %> minutes | <%= quiz.totalMarks %> marks | Pass <%= quiz.passingMarks %>%</div>
-          <div class="d-flex gap-2">
-            <% if (isEnrolled) { %>
-              <a class="btn btn-primary btn-sm" href="/student/quizzes/<%= quiz._id %>/take">Attempt</a>
-            <% } else { %>
-              <form action="/enrollments/<%= quiz._id %>/enroll" method="POST">
-                <button class="btn btn-success btn-sm" type="submit">Enroll</button>
-              </form>
-            <% } %>
-            <a class="btn btn-outline-secondary btn-sm" href="/student/quizzes/<%= quiz._id %>/leaderboard">Leaderboard</a>
-          </div>
-        </div>
+            <div>
+              <h2><%= quiz.title %></h2>
+              <p class="mt-2"><%= quiz.description || 'No description provided yet.' %></p>
+            </div>
+            <div class="quiz-card__facts">
+              <span><i class="fas fa-clock me-2"></i><%= quiz.duration %> minutes</span>
+              <span><i class="fas fa-layer-group me-2"></i><%= quiz.totalMarks %> total marks</span>
+              <span><i class="fas fa-bullseye me-2"></i>Pass mark <%= quiz.passingMarks %>%</span>
+              <span><i class="fas fa-user-tie me-2"></i><%= quiz.createdBy?.name || 'Teacher' %></span>
+            </div>
+            <div class="quiz-card__actions">
+              <% if (isEnrolled) { %>
+                <a class="btn btn-primary btn-sm" href="/student/quizzes/<%= quiz._id %>/take">Attempt now</a>
+              <% } else { %>
+                <form action="/enrollments/<%= quiz._id %>/enroll" method="POST">
+                  <button class="btn btn-success btn-sm" type="submit">Enroll</button>
+                </form>
+              <% } %>
+              <a class="btn btn-outline-secondary btn-sm" href="/student/quizzes/<%= quiz._id %>/leaderboard">Leaderboard</a>
+            </div>
+          </article>
+        <% }) %>
       </div>
-    <% }) %>
+    <% } %>
   </div>
 </section>

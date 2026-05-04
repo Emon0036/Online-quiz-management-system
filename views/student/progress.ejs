@@ -1,60 +1,131 @@
 <% layout('layouts/main') %>
-<section class="container py-4">
-  <div class="page-heading">
-    <div><span class="eyebrow">Student</span><h1>Your Progress</h1></div>
-    <div class="d-flex gap-2">
-      <a href="/enrollments/my-quizzes" class="btn btn-outline-primary">My Exams</a>
-      <a href="/enrollments/leaderboard" class="btn btn-primary">Leaderboard</a>
+<section class="page-shell">
+  <div class="page-container page-stack">
+    <div class="page-heading">
+      <div>
+        <span class="eyebrow">Student</span>
+        <h1>Your Progress</h1>
+        <p>Track points, completion, streaks, and how your performance is trending across categories.</p>
+      </div>
+      <div class="toolbar">
+        <a href="/enrollments/my-quizzes" class="btn btn-outline-primary">My Exams</a>
+        <a href="/enrollments/leaderboard" class="btn btn-primary">Leaderboard</a>
+      </div>
     </div>
-  </div>
 
-  <% const completionRate = progress.totalQuizzes ? Math.round((progress.completedQuizzes / progress.totalQuizzes) * 100) : 0; %>
+    <% const completionRate = progress.totalQuizzes ? Math.round((progress.completedQuizzes / progress.totalQuizzes) * 100) : 0; %>
 
-  <div class="row g-3 mb-4">
-    <div class="col-md-3"><div class="stat-tile"><span>Total Points</span><strong><%= progress.totalPoints %></strong></div></div>
-    <div class="col-md-3"><div class="stat-tile"><span>Average Score</span><strong><%= progress.averageScore %>%</strong></div></div>
-    <div class="col-md-3"><div class="stat-tile"><span>Completed Exams</span><strong><%= progress.completedQuizzes %>/<%= progress.totalQuizzes %></strong></div></div>
-    <div class="col-md-3"><div class="stat-tile"><span>Streak</span><strong><%= progress.streak %> day(s)</strong></div></div>
-  </div>
-
-  <div class="form-panel mb-4">
-    <h2 class="h5 mb-2">Completion</h2>
-    <div class="progress" role="progressbar" aria-label="Completion" aria-valuenow="<%= completionRate %>" aria-valuemin="0" aria-valuemax="100">
-      <div class="progress-bar" style="width: <%= completionRate %>%"><%= completionRate %>%</div>
+    <div class="stats-grid">
+      <article class="metric-card">
+        <div class="metric-card__top">
+          <div>
+            <span class="metric-card__label">Total Points</span>
+            <strong class="metric-card__value"><%= progress.totalPoints %></strong>
+            <small class="metric-card__meta">points earned from exams and reviews</small>
+          </div>
+          <span class="metric-card__icon"><i class="fas fa-star"></i></span>
+        </div>
+      </article>
+      <article class="metric-card">
+        <div class="metric-card__top">
+          <div>
+            <span class="metric-card__label">Average Score</span>
+            <strong class="metric-card__value"><%= progress.averageScore %>%</strong>
+            <small class="metric-card__meta">overall average across completed work</small>
+          </div>
+          <span class="metric-card__icon"><i class="fas fa-chart-line"></i></span>
+        </div>
+      </article>
+      <article class="metric-card">
+        <div class="metric-card__top">
+          <div>
+            <span class="metric-card__label">Completed Exams</span>
+            <strong class="metric-card__value"><%= progress.completedQuizzes %>/<%= progress.totalQuizzes %></strong>
+            <small class="metric-card__meta">completion against total enrolled exams</small>
+          </div>
+          <span class="metric-card__icon"><i class="fas fa-check-circle"></i></span>
+        </div>
+      </article>
+      <article class="metric-card">
+        <div class="metric-card__top">
+          <div>
+            <span class="metric-card__label">Streak</span>
+            <strong class="metric-card__value"><%= progress.streak %></strong>
+            <small class="metric-card__meta">days of active learning momentum</small>
+          </div>
+          <span class="metric-card__icon"><i class="fas fa-fire"></i></span>
+        </div>
+      </article>
     </div>
-    <div class="small text-muted mt-2">
-      Attempts: <strong><%= progress.totalAttempts %></strong> - Passed: <strong><%= progress.passedQuizzes %></strong> - Failed: <strong><%= progress.failedQuizzes %></strong>
-    </div>
-  </div>
 
-  <div class="table-card">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-      <h2 class="h5 mb-0">By Category</h2>
-      <a href="/enrollments/browse">Enroll more</a>
-    </div>
-    <div class="table-responsive">
-      <table class="table align-middle">
-        <thead>
-          <tr>
-            <th>Category</th>
-            <th>Completed</th>
-            <th>Average</th>
-          </tr>
-        </thead>
-        <tbody>
-          <% if (!progress.quizzesByCategory || progress.quizzesByCategory.length === 0) { %>
-            <tr><td colspan="3" class="text-center text-muted py-4">No progress yet.</td></tr>
+    <div class="content-grid">
+      <section class="form-panel">
+        <div class="panel-header">
+          <div class="panel-header__copy">
+            <span class="eyebrow">Completion</span>
+            <h2>Overall exam progress</h2>
+            <p>How much of your enrolled work is already complete.</p>
+          </div>
+        </div>
+        <div class="progress" role="progressbar" aria-label="Completion" aria-valuenow="<%= completionRate %>" aria-valuemin="0" aria-valuemax="100">
+          <div class="progress-bar" style="width: <%= completionRate %>%"><%= completionRate %>%</div>
+        </div>
+        <p class="small mt-3">
+          Attempts: <strong><%= progress.totalAttempts %></strong> ·
+          Passed: <strong><%= progress.passedQuizzes %></strong> ·
+          Failed: <strong><%= progress.failedQuizzes %></strong>
+        </p>
+      </section>
+
+      <aside class="support-card">
+        <span class="eyebrow">Next Move</span>
+        <h3>Recommended focus</h3>
+        <p>
+          <% if (completionRate < 50) { %>
+            Your completion rate is still building. Start with one enrolled exam to move the bar quickly.
+          <% } else if (progress.averageScore < 70) { %>
+            Completion is moving well. Revisit lower-scoring categories to lift your average next.
+          <% } else { %>
+            Strong progress overall. Push for consistency and keep the streak active.
           <% } %>
-          <% (progress.quizzesByCategory || []).forEach((item) => { %>
-            <tr>
-              <td><strong><%= item.category %></strong></td>
-              <td><%= item.completed %> / <%= item.total %></td>
-              <td><%= item.averageScore %>%</td>
-            </tr>
-          <% }) %>
-        </tbody>
-      </table>
+        </p>
+      </aside>
     </div>
+
+    <section class="table-card table-shell">
+      <div class="panel-header">
+        <div class="panel-header__copy">
+          <span class="eyebrow">Categories</span>
+          <h2>Progress by category</h2>
+          <p>See where your strongest and weakest topic clusters are forming.</p>
+        </div>
+        <a href="/enrollments/browse" class="btn btn-outline-primary btn-sm">Enroll more</a>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table align-middle">
+          <thead>
+            <tr>
+              <th>Category</th>
+              <th>Completed</th>
+              <th>Average</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (!progress.quizzesByCategory || progress.quizzesByCategory.length === 0) { %>
+              <tr><td colspan="3" class="text-center text-muted py-4">No progress yet.</td></tr>
+            <% } %>
+            <% (progress.quizzesByCategory || []).forEach((item) => { %>
+              <tr>
+                <td><strong><%= item.category %></strong></td>
+                <td><%= item.completed %> / <%= item.total %></td>
+                <td><%= item.averageScore %>%</td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </section>
   </div>
 </section>
 

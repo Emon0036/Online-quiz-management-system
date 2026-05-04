@@ -1,16 +1,81 @@
+(function initThemeToggle() {
+  const STORAGE_KEY = 'quizAppTheme';
+  const DARK_CLASS = 'theme-dark';
+  const themeMeta = document.querySelector('meta[name="theme-color"]');
+
+  function getTheme() {
+    return document.documentElement.classList.contains(DARK_CLASS) ? 'dark' : 'light';
+  }
+
+  function updateThemeButtons(theme) {
+    document.querySelectorAll('[data-theme-toggle]').forEach((button) => {
+      const icon = button.querySelector('[data-theme-icon]');
+      const label = button.querySelector('[data-theme-label]');
+      const isDark = theme === 'dark';
+
+      if (icon) {
+        icon.classList.toggle('fa-moon', !isDark);
+        icon.classList.toggle('fa-sun', isDark);
+      }
+
+      if (label) {
+        label.textContent = isDark ? 'Light mode' : 'Dark mode';
+      }
+
+      button.setAttribute('aria-pressed', isDark ? 'true' : 'false');
+      button.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
+      button.setAttribute('title', isDark ? 'Switch to light mode' : 'Switch to dark mode');
+    });
+  }
+
+  function applyTheme(theme) {
+    const normalizedTheme = theme === 'dark' ? 'dark' : 'light';
+    const isDark = normalizedTheme === 'dark';
+
+    document.documentElement.classList.toggle(DARK_CLASS, isDark);
+    document.documentElement.dataset.theme = normalizedTheme;
+    document.documentElement.style.colorScheme = isDark ? 'dark' : 'light';
+
+    if (themeMeta) {
+      themeMeta.setAttribute('content', isDark ? '#1f2d33' : '#0e4b78');
+    }
+
+    try {
+      window.localStorage.setItem(STORAGE_KEY, normalizedTheme);
+    } catch {}
+
+    updateThemeButtons(normalizedTheme);
+  }
+
+  document.querySelectorAll('[data-theme-toggle]').forEach((button) => {
+    button.addEventListener('click', () => {
+      applyTheme(getTheme() === 'dark' ? 'light' : 'dark');
+    });
+  });
+
+  applyTheme(getTheme());
+})();
+
 (function initTabSession() {
   const STORAGE_KEY = 'quizAppTabId';
+  const WINDOW_NAME_PREFIX = 'quizapp-tab:';
   const url = new URL(window.location.href);
   const urlTab = url.searchParams.get('tab');
-  let tabId = urlTab || window.sessionStorage.getItem(STORAGE_KEY);
+  const storedTab = window.sessionStorage.getItem(STORAGE_KEY);
+  const bodyTab = document.body.dataset.currentTabId || '';
+  const namedTab = window.name.startsWith(WINDOW_NAME_PREFIX)
+    ? window.name.slice(WINDOW_NAME_PREFIX.length)
+    : '';
+  let tabId = namedTab || storedTab || urlTab || bodyTab;
 
   if (!tabId) {
     tabId = `tab-${Math.random().toString(36).slice(2, 10)}-${Date.now()}`;
   }
 
   window.sessionStorage.setItem(STORAGE_KEY, tabId);
+  window.name = `${WINDOW_NAME_PREFIX}${tabId}`;
 
-  if (!urlTab) {
+  if (urlTab !== tabId) {
     url.searchParams.set('tab', tabId);
     window.history.replaceState({}, '', url.toString());
   }
@@ -30,6 +95,16 @@
       const href = link.getAttribute('href');
       if (!isInternalLink(href)) return;
       const linkUrl = new URL(href, window.location.href);
+      if (
+        linkUrl.pathname === '/auth/login' ||
+        linkUrl.pathname === '/auth/register' ||
+        linkUrl.pathname === '/auth/forgot-password' ||
+        linkUrl.pathname.startsWith('/auth/reset-password/')
+      ) {
+        linkUrl.searchParams.delete('tab');
+        link.setAttribute('href', `${linkUrl.pathname}${linkUrl.search}${linkUrl.hash}`);
+        return;
+      }
       if (!linkUrl.searchParams.get('tab')) {
         linkUrl.searchParams.set('tab', tabId);
         link.setAttribute('href', linkUrl.toString());

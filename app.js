@@ -20,7 +20,8 @@ const teacherRoutes = require('./routes/teacherRoutes');
 const studentRoutes = require('./routes/studentRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const { notFound, errorHandler } = require('./middleware/errorMiddleware');
-const { attachTabUser } = require('./middleware/tabSessionMiddleware');
+const { enforceActiveAccount } = require('./middleware/authMiddleware');
+const { attachTabUser, resolveTabUser } = require('./middleware/tabSessionMiddleware');
 
 const app = express();
 const configuredMongoUri =
@@ -108,6 +109,8 @@ function configureApp(mongoUri) {
   app.use(flash());
   app.use(passport.initialize());
   app.use(passport.session());
+  app.use(resolveTabUser);
+  app.use(enforceActiveAccount);
 
   // Make auth state and flash messages available to every EJS view.
   app.use((req, res, next) => {
@@ -116,6 +119,8 @@ function configureApp(mongoUri) {
     res.locals.success = req.flash('success');
     res.locals.error = req.flash('error');
     res.locals.appName = 'QuizMaster';
+    res.locals.pageClass = '';
+    res.locals.hideSiteChrome = false;
     next();
   });
 

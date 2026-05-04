@@ -9,7 +9,7 @@
           <td><%= attempt.score %>/<%= attempt.totalMarks %> (<%= attempt.percentage %>%)</td>
           <td><span class="badge text-bg-<%= attempt.status === 'pending-review' ? 'warning' : attempt.passed ? 'success' : 'danger' %>"><%= attempt.status === 'pending-review' ? 'pending' : attempt.passed ? 'pass' : 'fail' %></span></td>
           <td><%= attempt.submittedAt.toLocaleString() %></td>
-          <td class="text-end"><a class="btn btn-sm btn-outline-primary" href="/student/results/<%= attempt._id %>">Review</a></td>
+          <td class="text-end"><a class="btn btn-sm btn-outline-primary" href="/student/results/<%= attempt._id %>">Open Result</a></td>
         </tr>
       <% }) %>
     </tbody>

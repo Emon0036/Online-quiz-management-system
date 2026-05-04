@@ -18,10 +18,12 @@ async function buildDashboardData() {
     pendingTeachers,
     rejectedTeachers,
     stats: {
-      students: students.length,
-      teachers: teachers.filter((teacher) => teacher.teacherStatus !== 'rejected').length,
+      students: students.filter((student) => student.accountStatus !== 'blocked').length,
+      teachers: teachers.filter((teacher) => teacher.teacherStatus === 'approved' && teacher.accountStatus !== 'blocked').length,
       pendingTeachers: pendingTeachers.length,
       admins: admins.length,
+      blockedUsers: students.filter((student) => student.accountStatus === 'blocked').length
+        + teachers.filter((teacher) => teacher.accountStatus === 'blocked').length,
     },
   };
 }
@@ -48,6 +50,10 @@ async function createAdminAccount({ name, email, password, createdBy }) {
 
   await Admin.create({ user: user._id, createdBy });
   return user;
+}
+
+function ensureManageableUser(user) {
+  return Boolean(user && ['student', 'teacher'].includes(user.role));
 }
 
 exports.showSetup = async (req, res) => {
@@ -159,5 +165,47 @@ exports.grantTeacherByEmail = async (req, res) => {
   await user.save();
 
   req.flash('success', `${user.email} now has approved teacher access.`);
+  return res.redirect('/admin/dashboard');
+};
+
+exports.blockUser = async (req, res) => {
+  const user = await User.findById(req.params.userId);
+  if (!ensureManageableUser(user)) {
+    req.flash('error', 'Only student and teacher accounts can be blocked.');
+    return res.redirect('/admin/dashboard');
+  }
+
+  if (user.accountStatus === 'blocked') {
+    req.flash('error', `${user.name} is already blocked.`);
+    return res.redirect('/admin/dashboard');
+  }
+
+  user.accountStatus = 'blocked';
+  user.blockedBy = req.user._id;
+  user.blockedAt = new Date();
+  await user.save();
+
+  req.flash('success', `${user.name} has been blocked from accessing the platform.`);
+  return res.redirect('/admin/dashboard');
+};
+
+exports.unblockUser = async (req, res) => {
+  const user = await User.findById(req.params.userId);
+  if (!ensureManageableUser(user)) {
+    req.flash('error', 'Only student and teacher accounts can be unblocked.');
+    return res.redirect('/admin/dashboard');
+  }
+
+  if (user.accountStatus !== 'blocked') {
+    req.flash('error', `${user.name} is not blocked.`);
+    return res.redirect('/admin/dashboard');
+  }
+
+  user.accountStatus = 'active';
+  user.blockedBy = undefined;
+  user.blockedAt = undefined;
+  await user.save();
+
+  req.flash('success', `${user.name} can access the platform again.`);
   return res.redirect('/admin/dashboard');
 };

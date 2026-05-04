@@ -1,89 +1,170 @@
 <% layout('layouts/main') %>
-<section class="container py-4">
-<% const examTypeLabels = { quiz: 'Quiz', 'true-false': 'True/False', 'short-answer': 'Short Question', 'coding-test': 'Coding Exam' }; %>
-  <% const examTypeOrder = ['quiz', 'true-false', 'short-answer', 'coding-test']; %>
+<section class="page-shell">
+  <div class="page-container page-stack">
+    <% const examTypeLabels = { quiz: 'Quiz', 'true-false': 'True/False', 'short-answer': 'Short Question', 'coding-test': 'Coding Exam' }; %>
+    <% const examTypeOrder = ['quiz', 'true-false', 'short-answer', 'coding-test']; %>
+    <% const totalCount = Object.values(groupedEnrollments || {}).reduce((sum, list) => sum + (list?.length || 0), 0); %>
+    <% const codingProblemCount = (codingProblems || []).length; %>
 
-  <div class="page-heading">
-    <div><span class="eyebrow">Student</span><h1>My Exams</h1></div>
-    <div class="d-flex gap-2">
-      <a href="/enrollments/browse" class="btn btn-outline-primary">Browse Exams</a>
-      <a href="/enrollments/progress" class="btn btn-primary">Progress</a>
-    </div>
-  </div>
-
-  <div class="d-flex flex-wrap gap-2 mb-3">
-    <a class="btn btn-sm <%= (selectedType || 'all') === 'all' ? 'btn-primary' : 'btn-outline-primary' %>" href="/enrollments/my-quizzes?type=all">All</a>
-    <a class="btn btn-sm <%= selectedType === 'quiz' ? 'btn-primary' : 'btn-outline-primary' %>" href="/enrollments/my-quizzes?type=quiz">Quiz</a>
-    <a class="btn btn-sm <%= selectedType === 'true-false' ? 'btn-primary' : 'btn-outline-primary' %>" href="/enrollments/my-quizzes?type=true-false">True/False</a>
-    <a class="btn btn-sm <%= selectedType === 'short-answer' ? 'btn-primary' : 'btn-outline-primary' %>" href="/enrollments/my-quizzes?type=short-answer">Short Question</a>
-    <a class="btn btn-sm <%= selectedType === 'coding-test' ? 'btn-primary' : 'btn-outline-primary' %>" href="/enrollments/my-quizzes?type=coding-test">Coding Exam</a>
-  </div>
-
-  <% const totalCount = Object.values(groupedEnrollments || {}).reduce((sum, list) => sum + (list?.length || 0), 0); %>
-  <% if (!totalCount) { %>
-    <div class="empty-state">You have not enrolled in any exams yet. <a href="/enrollments/browse">Browse exams</a>.</div>
-  <% } %>
-
-  <% examTypeOrder.forEach((typeKey) => { %>
-    <% const enrollments = (groupedEnrollments && groupedEnrollments[typeKey]) ? groupedEnrollments[typeKey] : []; %>
-    <% if (enrollments.length === 0) return; %>
-
-    <div class="table-card mb-4">
-      <div class="d-flex justify-content-between align-items-center mb-2">
-        <h2 class="h5 mb-0"><%= examTypeLabels[typeKey] %> <span class="text-muted">(<%= enrollments.length %>)</span></h2>
+    <div class="page-heading">
+      <div>
+        <span class="eyebrow">Student</span>
+        <h1>My Exams</h1>
+        <p>Return to your enrolled assessments, check best scores, and keep coding practice within reach.</p>
       </div>
-      <div class="table-responsive">
-        <table class="table align-middle">
-          <thead>
-            <tr>
-              <th>Exam</th>
-              <th>Category</th>
-              <th>Status</th>
-              <th>Best %</th>
-              <th class="text-end">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            <% enrollments.forEach((enrollment) => { %>
+      <div class="toolbar">
+        <a href="/enrollments/browse" class="btn btn-outline-primary">Browse Exams</a>
+        <a href="/enrollments/progress" class="btn btn-primary">Progress</a>
+      </div>
+    </div>
+
+    <div class="chip-group">
+      <a class="filter-chip <%= (selectedType || 'all') === 'all' ? 'is-active' : '' %>" href="/enrollments/my-quizzes?type=all">All</a>
+      <a class="filter-chip <%= selectedType === 'quiz' ? 'is-active' : '' %>" href="/enrollments/my-quizzes?type=quiz">Quiz</a>
+      <a class="filter-chip <%= selectedType === 'true-false' ? 'is-active' : '' %>" href="/enrollments/my-quizzes?type=true-false">True/False</a>
+      <a class="filter-chip <%= selectedType === 'short-answer' ? 'is-active' : '' %>" href="/enrollments/my-quizzes?type=short-answer">Short Question</a>
+      <a class="filter-chip <%= selectedType === 'coding-test' ? 'is-active' : '' %>" href="/enrollments/my-quizzes?type=coding-test">Coding Exam</a>
+    </div>
+
+    <% if (!totalCount && !codingProblemCount) { %>
+      <div class="empty-state">
+        <h3>You have not enrolled anywhere yet</h3>
+        <p>Browse the published exam catalog to build your personal workspace.</p>
+        <a href="/enrollments/browse" class="btn btn-primary mt-3">Browse exams</a>
+      </div>
+    <% } %>
+
+    <% examTypeOrder.forEach((typeKey) => { %>
+      <% const enrollments = (groupedEnrollments && groupedEnrollments[typeKey]) ? groupedEnrollments[typeKey] : []; %>
+      <% if (enrollments.length === 0) return; %>
+
+      <section class="table-card table-shell">
+        <div class="panel-header">
+          <div class="panel-header__copy">
+            <span class="eyebrow"><%= examTypeLabels[typeKey] %></span>
+            <h2><%= examTypeLabels[typeKey] %> Workspace</h2>
+            <p><%= enrollments.length %> enrolled exam<%= enrollments.length === 1 ? '' : 's' %> in this track.</p>
+          </div>
+          <span class="status-pill approved"><%= enrollments.length %> enrolled</span>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table align-middle">
+            <thead>
               <tr>
-                <td>
-                  <strong><%= enrollment.quiz.title %></strong>
-                  <div class="small text-muted"><%= enrollment.quiz.duration %> min - <%= enrollment.quiz.totalMarks %> marks - Pass <%= enrollment.quiz.passingMarks %>%</div>
-                </td>
-                <td><%= enrollment.quiz.category %></td>
-                <td>
-                  <% if (enrollment.status === 'completed') { %>
-                    <span class="badge text-bg-success">Completed</span>
-                  <% } else if (enrollment.status === 'pending-review') { %>
-                    <span class="badge text-bg-warning">Pending Review</span>
-                  <% } else { %>
-                    <span class="badge text-bg-primary">Enrolled</span>
-                  <% } %>
-                </td>
-                <td>
-                  <% if (enrollment.status === 'completed') { %>
-                    <%= enrollment.bestScore %>%
-                  <% } else if (enrollment.status === 'pending-review') { %>
-                    <span class="text-muted">Pending</span>
-                  <% } else { %>
-                    <span class="text-muted">-</span>
-                  <% } %>
-                </td>
-                <td class="text-end">
-                  <div class="d-flex justify-content-end gap-2">
-                    <a class="btn btn-sm btn-primary" href="/student/quizzes/<%= enrollment.quiz._id %>/take">
-                      <%= enrollment.attempts ? 'Attempt Again' : 'Attempt' %>
-                    </a>
-                    <% if (enrollment.bestAttemptId) { %>
-                      <a class="btn btn-sm btn-outline-secondary" href="/student/results/<%= enrollment.bestAttemptId._id || enrollment.bestAttemptId %>">View Result</a>
-                    <% } %>
-                  </div>
-                </td>
+                <th>Exam</th>
+                <th>Category</th>
+                <th>Status</th>
+                <th>Best %</th>
+                <th class="text-end">Action</th>
               </tr>
-            <% }) %>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  <% }) %>
+            </thead>
+            <tbody>
+              <% enrollments.forEach((enrollment) => { %>
+                <tr>
+                  <td>
+                    <strong><%= enrollment.quiz.title %></strong>
+                    <div class="small text-muted">
+                      <%= enrollment.quiz.duration %> min · <%= enrollment.quiz.totalMarks %> marks · Pass <%= enrollment.quiz.passingMarks %>%
+                    </div>
+                  </td>
+                  <td><%= enrollment.quiz.category %></td>
+                  <td>
+                    <% if (enrollment.status === 'completed') { %>
+                      <span class="badge text-bg-success">Completed</span>
+                    <% } else if (enrollment.status === 'pending-review') { %>
+                      <span class="badge text-bg-warning">Pending Review</span>
+                    <% } else { %>
+                      <span class="badge text-bg-primary">Enrolled</span>
+                    <% } %>
+                  </td>
+                  <td>
+                    <% if (enrollment.status === 'completed') { %>
+                      <%= enrollment.bestScore %>%
+                    <% } else if (enrollment.status === 'pending-review') { %>
+                      <span class="text-muted">Pending</span>
+                    <% } else { %>
+                      <span class="text-muted">-</span>
+                    <% } %>
+                  </td>
+                  <td class="text-end">
+                    <div class="action-stack">
+                      <a class="btn btn-sm btn-primary" href="/student/quizzes/<%= enrollment.quiz._id %>/take">
+                        <%= enrollment.attempts ? 'Attempt Again' : 'Attempt' %>
+                      </a>
+                      <% if (enrollment.bestAttemptId) { %>
+                        <a class="btn btn-sm btn-outline-secondary" href="/student/results/<%= enrollment.bestAttemptId._id || enrollment.bestAttemptId %>">View Result</a>
+                      <% } %>
+                    </div>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    <% }) %>
+
+    <% if ((selectedType === 'all' || selectedType === 'coding-test') && codingProblemCount) { %>
+      <section class="table-card table-shell">
+        <div class="panel-header">
+          <div class="panel-header__copy">
+            <span class="eyebrow">Coding Practice</span>
+            <h2>Hands-on coding problems</h2>
+            <p>Standalone challenges you can solve outside the exam flow.</p>
+          </div>
+          <a href="/problems" class="btn btn-outline-primary btn-sm">Open challenge library</a>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table align-middle">
+            <thead>
+              <tr>
+                <th>Problem</th>
+                <th>Difficulty</th>
+                <th>Latest Submission</th>
+                <th>Status</th>
+                <th class="text-end">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% codingProblems.forEach((item) => { %>
+                <tr>
+                  <td>
+                    <strong><%= item.problem.title %></strong>
+                    <div class="small text-muted">Practice challenge</div>
+                  </td>
+                  <td><%= item.problem.difficulty || 'Unspecified' %></td>
+                  <td>
+                    <% if (item.latestSubmission) { %>
+                      <%= new Date(item.latestSubmission.submittedAt).toLocaleDateString() %>
+                    <% } else { %>
+                      <span class="text-muted">Not attempted</span>
+                    <% } %>
+                  </td>
+                  <td>
+                    <% if (!item.latestSubmission) { %>
+                      <span class="badge text-bg-primary">Ready</span>
+                    <% } else if (item.latestSubmission.status === 'reviewed') { %>
+                      <span class="badge text-bg-success">Reviewed</span>
+                    <% } else { %>
+                      <span class="badge text-bg-warning">Pending Review</span>
+                    <% } %>
+                  </td>
+                  <td class="text-end">
+                    <div class="action-stack">
+                      <a class="btn btn-sm btn-primary" href="/problems/<%= item.problem._id %>">Solve</a>
+                      <% if (item.latestSubmission) { %>
+                        <a class="btn btn-sm btn-outline-secondary" href="/submissions/<%= item.latestSubmission._id %>/view">Latest Submission</a>
+                      <% } %>
+                    </div>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    <% } %>
+  </div>
 </section>
