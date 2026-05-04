@@ -1,6 +1,12 @@
 const Submission = require("../models/Submission");
 const Problem = require("../models/Problem");
 
+function canReviewProblem(req, problem) {
+  if (!problem) return false;
+  if (req.user?.role === 'admin') return true;
+  return String(problem.createdBy || '') === String(req.user?._id);
+}
+
 /**
  * Submit code for manual teacher review
  * @param {object} req - Express request object
@@ -99,6 +105,10 @@ exports.getProblemSubmissions = async (req, res) => {
       req.flash('error', 'Problem not found');
       return res.redirect('/problems');
     }
+    if (!canReviewProblem(req, problem)) {
+      req.flash('error', 'You can only review submissions for problems you created.');
+      return res.redirect('/problems/manage');
+    }
 
     const submissions = await Submission.find({ problem: problemId })
       .populate('student', 'name email')
@@ -131,6 +141,10 @@ exports.viewSubmission = async (req, res) => {
       req.flash('error', 'Submission not found');
       return res.redirect('/problems');
     }
+    if (!canReviewProblem(req, submission.problem)) {
+      req.flash('error', 'You can only review submissions for problems you created.');
+      return res.redirect('/problems/manage');
+    }
 
     res.render('teacher/review-submission', {
       title: 'Review Code Submission',
@@ -151,10 +165,14 @@ exports.updateSubmission = async (req, res) => {
     const { marksAwarded, teacherComment, correctedCode } = req.body;
     const submissionId = req.params.submissionId;
 
-    const submission = await Submission.findById(submissionId);
+    const submission = await Submission.findById(submissionId).populate('problem');
     if (!submission) {
       req.flash('error', 'Submission not found');
       return res.redirect('/problems');
+    }
+    if (!canReviewProblem(req, submission.problem)) {
+      req.flash('error', 'You can only review submissions for problems you created.');
+      return res.redirect('/problems/manage');
     }
 
     // Update submission with teacher review
@@ -168,7 +186,7 @@ exports.updateSubmission = async (req, res) => {
     await submission.save();
 
     req.flash('success', 'Submission reviewed and marks assigned');
-    res.redirect(`/problems/${submission.problem}`);
+    res.redirect(`/problems/${submission.problem._id || submission.problem}`);
   } catch (error) {
     console.error('Error updating submission:', error.message);
     req.flash('error', 'Failed to update submission');

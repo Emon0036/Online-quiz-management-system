@@ -3,8 +3,8 @@
   <div class="page-heading mb-4">
     <div><span class="eyebrow">Coding Challenge</span><h1><%= problem.title %></h1></div>
     <div class="d-flex gap-2">
-      <a href="/problems" class="btn btn-outline-secondary">← Back to Problems</a>
-      <% if (currentUser && currentUser.role === 'teacher') { %>
+      <a href="/problems" class="btn btn-outline-secondary">Back to Problems</a>
+      <% if (currentUser && (currentUser.role === 'teacher' || currentUser.role === 'admin')) { %>
         <a href="/submissions/problem/<%= problem._id %>" class="btn btn-outline-info">
           <i class="fa-solid fa-comments me-2"></i>View Submissions
         </a>
@@ -61,7 +61,7 @@
 
     <!-- Code Editor Panel (Right Side) -->
     <div class="col-lg-7">
-      <% if (currentUser && currentUser.role !== 'teacher') { %>
+      <% if (currentUser && currentUser.role === 'student') { %>
         <form onsubmit="submitCode(event, '<%= problem._id %>')">
           <!-- Language Selection -->
           <div class="form-panel mb-3">
@@ -94,7 +94,7 @@
 
         <!-- Previous Submissions (if any) -->
         <div id="submissionsContainer"></div>
-      <% } else if (currentUser && currentUser.role === 'teacher') { %>
+      <% } else if (currentUser && (currentUser.role === 'teacher' || currentUser.role === 'admin')) { %>
         <div class="alert alert-info">
           <i class="fa-solid fa-info-circle me-2"></i>
           <strong>Teacher View</strong> - Use the "View Submissions" button above to review student submissions for this problem.
@@ -109,7 +109,7 @@
   </div>
 </section>
 
-<% if (currentUser && currentUser.role !== 'teacher') { %>
+<% if (currentUser && currentUser.role === 'student') { %>
   <script>
     async function submitCode(event, problemId) {
       event.preventDefault();

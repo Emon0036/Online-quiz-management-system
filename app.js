@@ -1,6 +1,7 @@
 require('dotenv').config();
 
 const path = require('path');
+const dns = require('dns');
 const express = require('express');
 const mongoose = require('mongoose');
 const session = require('express-session');
@@ -19,70 +20,141 @@ const teacherRoutes = require('./routes/teacherRoutes');
 const studentRoutes = require('./routes/studentRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const { notFound, errorHandler } = require('./middleware/errorMiddleware');
+const { attachTabUser } = require('./middleware/tabSessionMiddleware');
 
 const app = express();
-const mongoUri = process.env.MONGODB_URI;
+const configuredMongoUri =
+  process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/quiz-management-system';
+let memoryMongoServer = null;
 
-// Connect MongoDB once during startup so every route can share the same pool.
-mongoose
-  .connect(mongoUri, { serverSelectionTimeoutMS: 5000 })
-  .then(() => console.log('MongoDB connected'))
-  .catch((error) => {
-    console.error('MongoDB connection failed:', error.message);
-    process.exit(1);
+if (process.env.DNS_SERVERS) {
+  dns.setServers(
+    process.env.DNS_SERVERS.split(',')
+      .map((server) => server.trim())
+      .filter(Boolean)
+  );
+}
+
+function validateRuntimeConfig() {
+  if (process.env.NODE_ENV !== 'production') return;
+
+  if (!process.env.MONGODB_URI) {
+    throw new Error('MONGODB_URI is required in production.');
+  }
+  if (!process.env.SESSION_SECRET || process.env.SESSION_SECRET.includes('change') || process.env.SESSION_SECRET.includes('replace')) {
+    throw new Error('Set a strong SESSION_SECRET before running in production.');
+  }
+}
+
+async function connectMongo() {
+  try {
+    await mongoose.connect(configuredMongoUri, { serverSelectionTimeoutMS: 5000 });
+    console.log('MongoDB connected');
+    return configuredMongoUri;
+  } catch (error) {
+    const canUseDevFallback =
+      process.env.NODE_ENV !== 'production' &&
+      /^mongodb:\/\/(127\.0\.0\.1|localhost)(:\d+)?\//.test(configuredMongoUri);
+
+    if (!canUseDevFallback) {
+      throw error;
+    }
+
+    console.warn(
+      `Local MongoDB unavailable (${error.message}). Starting in-memory MongoDB for development.`
+    );
+
+    const { MongoMemoryServer } = require('mongodb-memory-server');
+    memoryMongoServer = await MongoMemoryServer.create({
+      instance: { dbName: 'quiz-management-system' },
+    });
+
+    const memoryUri = memoryMongoServer.getUri();
+    await mongoose.connect(memoryUri, { serverSelectionTimeoutMS: 5000 });
+    console.log('MongoDB connected (in-memory development server)');
+    return memoryUri;
+  }
+}
+
+function configureApp(mongoUri) {
+  require('./config/passport')(passport);
+
+  app.engine('ejs', engine);
+  app.set('view engine', 'ejs');
+  app.set('views', path.join(__dirname, 'views'));
+
+  app.use(express.urlencoded({ extended: true }));
+  app.use(express.json());
+  app.use(methodOverride('_method'));
+  app.use(express.static(path.join(__dirname, 'public')));
+
+  // Sessions are stored in MongoDB so logins survive server restarts.
+  app.use(
+    session({
+      secret: process.env.SESSION_SECRET || 'replace-this-secret',
+      resave: false,
+      saveUninitialized: false,
+      store: MongoStore.create({ mongoUrl: mongoUri }),
+      cookie: {
+        httpOnly: true,
+        maxAge: 1000 * 60 * 60 * 24 * 7,
+        sameSite: 'lax',
+        secure: process.env.NODE_ENV === 'production',
+      },
+    })
+  );
+
+  app.use(attachTabUser);
+  app.use(flash());
+  app.use(passport.initialize());
+  app.use(passport.session());
+
+  // Make auth state and flash messages available to every EJS view.
+  app.use((req, res, next) => {
+    res.locals.currentUser = req.user || null;
+    res.locals.currentTabId = req.currentTabId || null;
+    res.locals.success = req.flash('success');
+    res.locals.error = req.flash('error');
+    res.locals.appName = 'QuizMaster';
+    next();
   });
 
-require('./config/passport')(passport);
+  app.use('/', publicRoutes);
+  app.use('/auth', authRoutes);
+  app.use('/admin', adminRoutes);
+  app.use('/teacher', teacherRoutes);
+  app.use('/student', studentRoutes);
+  app.use('/enrollments', enrollmentRoutes);
+  app.use('/problems', problemRoutes);
+  app.use('/submissions', submissionRoutes);
 
-app.engine('ejs', engine);
-app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'));
+  app.use(notFound);
+  app.use(errorHandler);
+}
 
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
-app.use(methodOverride('_method'));
-app.use(express.static(path.join(__dirname, 'public')));
+async function start() {
+  validateRuntimeConfig();
+  const mongoUri = await connectMongo();
+  configureApp(mongoUri);
 
-// Sessions are stored in MongoDB so logins survive server restarts.
-app.use(
-  session({
-    secret: process.env.SESSION_SECRET || 'replace-this-secret',
-    resave: false,
-    saveUninitialized: false,
-    store: MongoStore.create({ mongoUrl: mongoUri }),
-    cookie: {
-      httpOnly: true,
-      maxAge: 1000 * 60 * 60 * 24 * 7,
-      sameSite: 'lax',
-      secure: process.env.NODE_ENV === 'production',
-    },
-  })
-);
+  const port = process.env.PORT || 3000;
+  const server = app.listen(port, () => console.log(`Server running on http://localhost:${port}`));
 
-app.use(flash());
-app.use(passport.initialize());
-app.use(passport.session());
+  const shutdown = async () => {
+    server.close(async () => {
+      await mongoose.connection.close(false);
+      if (memoryMongoServer) {
+        await memoryMongoServer.stop();
+      }
+      process.exit(0);
+    });
+  };
 
-// Make auth state and flash messages available to every EJS view.
-app.use((req, res, next) => {
-  res.locals.currentUser = req.user || null;
-  res.locals.success = req.flash('success');
-  res.locals.error = req.flash('error');
-  res.locals.appName = 'QuizMaster';
-  next();
+  process.on('SIGINT', shutdown);
+  process.on('SIGTERM', shutdown);
+}
+
+start().catch((error) => {
+  console.error('Server startup failed:', error.message);
+  process.exit(1);
 });
-
-app.use('/', publicRoutes);
-app.use('/auth', authRoutes);
-app.use('/admin', adminRoutes);
-app.use('/teacher', teacherRoutes);
-app.use('/student', studentRoutes);
-app.use('/enrollments', enrollmentRoutes);
-app.use("/problems", problemRoutes);
-app.use("/submissions", submissionRoutes);
-
-app.use(notFound);
-app.use(errorHandler);
-
-const port = process.env.PORT || 3000;
-app.listen(port, () => console.log(`Server running on http://localhost:${port}`));

@@ -10,6 +10,9 @@
       <p class="text-muted mb-4">Your teacher registration has been sent to the admin. Once approved, your teacher dashboard and quiz tools will open automatically after login.</p>
     <% } %>
     <form action="/auth/logout" method="POST">
+      <% if (currentTabId) { %>
+        <input type="hidden" name="tab" value="<%= currentTabId %>">
+      <% } %>
       <button class="btn btn-outline-primary" type="submit">Logout</button>
     </form>
   </div>

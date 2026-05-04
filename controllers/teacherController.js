@@ -6,15 +6,123 @@ const Leaderboard = require('../models/Leaderboard');
 const Enrollment = require('../models/Enrollment');
 const { finalizeQuizAttempt } = require('../utils/quizProgress');
 
+const EXAM_TYPES = ['quiz', 'true-false', 'short-answer', 'coding-test'];
+const DIFFICULTY_LEVELS = ['Easy', 'Medium', 'Hard'];
+const QUESTION_TYPES_BY_EXAM = {
+  quiz: ['multiple-choice', 'true-false', 'short-answer'],
+  'true-false': ['true-false'],
+  'short-answer': ['short-answer'],
+  'coding-test': ['coding'],
+};
+const CODING_LANGUAGES = ['javascript', 'python', 'java', 'cpp', 'csharp'];
+
 async function getTeacherQuiz(quizId, teacherId) {
   return Quiz.findOne({ _id: quizId, createdBy: teacherId }).populate('questions');
 }
 
-function normalizeQuestionBody(body) {
-  const options = Array.isArray(body.options) ? body.options.filter(Boolean) : [];
-  if (body.type === 'true-false') return ['True', 'False'];
-  if (body.type === 'multiple-choice') return options;
-  return [];
+function cleanText(value) {
+  return String(value || '').trim();
+}
+
+function buildQuizPayload(body) {
+  const duration = Number(body.duration);
+  const passingMarks = Number(body.passingMarks);
+  const payload = {
+    examType: EXAM_TYPES.includes(body.examType) ? body.examType : 'quiz',
+    title: cleanText(body.title),
+    description: cleanText(body.description),
+    category: cleanText(body.category) || 'General Knowledge',
+    difficulty: DIFFICULTY_LEVELS.includes(body.difficulty) ? body.difficulty : 'Medium',
+    duration,
+    passingMarks,
+  };
+
+  const errors = [];
+  if (!payload.title) errors.push('Quiz title is required.');
+  if (!Number.isFinite(duration) || duration < 1) errors.push('Duration must be at least 1 minute.');
+  if (!Number.isFinite(passingMarks) || passingMarks < 0 || passingMarks > 100) {
+    errors.push('Passing percentage must be between 0 and 100.');
+  }
+
+  return { payload, errors };
+}
+
+function allowedQuestionTypesForQuiz(quiz) {
+  return QUESTION_TYPES_BY_EXAM[quiz.examType || 'quiz'] || QUESTION_TYPES_BY_EXAM.quiz;
+}
+
+function normalizeOptionList(options) {
+  const values = Array.isArray(options) ? options : [options];
+  return values.map(cleanText).filter(Boolean);
+}
+
+function normalizeTrueFalseAnswer(answer) {
+  const value = cleanText(answer).toLowerCase();
+  if (value === 'true') return 'True';
+  if (value === 'false') return 'False';
+  return '';
+}
+
+function parseCodingTestCases(body) {
+  const inputs = Array.isArray(body.testCaseInputs) ? body.testCaseInputs : [body.testCaseInputs || ''];
+  const outputs = Array.isArray(body.testCaseOutputs) ? body.testCaseOutputs : [body.testCaseOutputs || ''];
+
+  return inputs
+    .map((input, index) => ({
+      input: cleanText(input),
+      expectedOutput: cleanText(outputs[index]),
+    }))
+    .filter((testCase) => testCase.input || testCase.expectedOutput);
+}
+
+function buildQuestionPayload(quiz, body) {
+  const type = cleanText(body.type);
+  const allowedTypes = allowedQuestionTypesForQuiz(quiz);
+  const marks = Number(body.marks || 1);
+  const payload = {
+    quiz: quiz._id,
+    questionText: cleanText(body.questionText),
+    type,
+    explanation: cleanText(body.explanation),
+    marks,
+  };
+  const errors = [];
+
+  if (!payload.questionText) errors.push('Question text is required.');
+  if (!allowedTypes.includes(type)) {
+    errors.push('That question type is not allowed for this exam type.');
+  }
+  if (!Number.isFinite(marks) || marks < 1) errors.push('Question marks must be at least 1.');
+
+  if (type === 'multiple-choice') {
+    const options = normalizeOptionList(body.options);
+    const correctAnswer = cleanText(body.correctAnswer);
+    if (options.length < 2) errors.push('Multiple choice questions need at least two options.');
+    if (!correctAnswer) errors.push('Choose or enter the correct option.');
+    if (correctAnswer && options.length && !options.some((option) => option.toLowerCase() === correctAnswer.toLowerCase())) {
+      errors.push('Correct answer must match one of the options.');
+    }
+    payload.options = options;
+    payload.correctAnswer = correctAnswer;
+  } else if (type === 'true-false') {
+    const correctAnswer = normalizeTrueFalseAnswer(body.correctAnswer);
+    if (!correctAnswer) errors.push('True/False questions require True or False as the correct answer.');
+    payload.options = ['True', 'False'];
+    payload.correctAnswer = correctAnswer;
+  } else if (type === 'short-answer') {
+    payload.options = [];
+    payload.correctAnswer = cleanText(body.correctAnswer);
+  } else if (type === 'coding') {
+    const testCases = parseCodingTestCases(body);
+    const incompleteTestCase = testCases.some((testCase) => !testCase.expectedOutput);
+    if (!testCases.length) errors.push('Add at least one test case for coding questions.');
+    if (incompleteTestCase) errors.push('Every coding test case needs an expected output.');
+    payload.language = cleanText(body.language);
+    payload.codeTemplate = cleanText(body.codeTemplate);
+    payload.testCases = testCases;
+  }
+
+  return { payload, errors };
 }
 
 function calculateGrade(percentage) {
@@ -95,10 +203,16 @@ exports.listQuizzes = async (req, res) => {
 exports.showCreateQuiz = (req, res) => res.render('teacher/quiz-form', { title: 'Create Quiz', quiz: {}, questions: [], action: '/teacher/quizzes' });
 
 exports.createQuiz = async (req, res) => {
-  const quiz = await Quiz.create({ ...req.body, createdBy: req.user._id, status: 'draft' });
+  const { payload, errors } = buildQuizPayload(req.body);
+  if (errors.length) {
+    req.flash('error', errors[0]);
+    return res.redirect('/teacher/quizzes/new');
+  }
+
+  const quiz = await Quiz.create({ ...payload, createdBy: req.user._id, status: 'draft' });
   await Leaderboard.create({ quiz: quiz._id, entries: [] });
   req.flash('success', 'Quiz created. Add questions next.');
-  res.redirect(`/teacher/quizzes/${quiz._id}/edit`);
+  return res.redirect(`/teacher/quizzes/${quiz._id}/edit`);
 };
 
 exports.showEditQuiz = async (req, res) => {
@@ -111,11 +225,27 @@ exports.showEditQuiz = async (req, res) => {
 };
 
 exports.updateQuiz = async (req, res) => {
-  const quiz = await Quiz.findOneAndUpdate({ _id: req.params.quizId, createdBy: req.user._id }, req.body, { new: true, runValidators: true });
+  const { payload, errors } = buildQuizPayload(req.body);
+  if (errors.length) {
+    req.flash('error', errors[0]);
+    return res.redirect(`/teacher/quizzes/${req.params.quizId}/edit`);
+  }
+
+  const quiz = await getTeacherQuiz(req.params.quizId, req.user._id);
   if (!quiz) {
     req.flash('error', 'Quiz not found.');
     return res.redirect('/teacher/quizzes');
   }
+
+  const allowedTypes = QUESTION_TYPES_BY_EXAM[payload.examType] || QUESTION_TYPES_BY_EXAM.quiz;
+  const hasInvalidExistingQuestion = quiz.questions.some((question) => !allowedTypes.includes(question.type));
+  if (hasInvalidExistingQuestion) {
+    req.flash('error', 'Remove incompatible questions before changing this exam type.');
+    return res.redirect(`/teacher/quizzes/${quiz._id}/edit`);
+  }
+
+  Object.assign(quiz, payload);
+  await quiz.save();
   req.flash('success', 'Quiz details updated.');
   return res.redirect(`/teacher/quizzes/${quiz._id}/edit`);
 };
@@ -147,6 +277,11 @@ exports.togglePublish = async (req, res) => {
     req.flash('error', 'Add at least one question before publishing.');
     return res.redirect('/teacher/quizzes');
   }
+  const allowedTypes = allowedQuestionTypesForQuiz(quiz);
+  if (quiz.status === 'draft' && quiz.questions.some((question) => !allowedTypes.includes(question.type))) {
+    req.flash('error', 'This quiz has questions that do not match its exam type.');
+    return res.redirect(`/teacher/quizzes/${quiz._id}/edit`);
+  }
   quiz.status = quiz.status === 'published' ? 'draft' : 'published';
   await quiz.save();
   req.flash('success', `Quiz ${quiz.status === 'published' ? 'published' : 'unpublished'}.`);
@@ -161,42 +296,10 @@ exports.addQuestion = async (req, res) => {
     return res.redirect('/teacher/quizzes');
   }
 
-  const questionData = {
-    quiz: quiz._id,
-    questionText: req.body.questionText,
-    type: req.body.type,
-    explanation: req.body.explanation || '',
-    marks: Number(req.body.marks || 1),
-  };
-
-  // Handle different question types
-  if (req.body.type === 'coding') {
-    // For coding questions, parse test cases
-    questionData.language = req.body.language || 'javascript';
-    questionData.codeTemplate = req.body.codeTemplate || '';
-    
-    // Parse test cases - they come as arrays from the form
-    const testCasesInputs = Array.isArray(req.body.testCaseInputs) ? req.body.testCaseInputs : [req.body.testCaseInputs || ''];
-    const testCasesOutputs = Array.isArray(req.body.testCaseOutputs) ? req.body.testCaseOutputs : [req.body.testCaseOutputs || ''];
-    
-    questionData.testCases = [];
-    for (let i = 0; i < testCasesInputs.length; i++) {
-      if (testCasesInputs[i] && testCasesInputs[i].trim()) {
-        questionData.testCases.push({
-          input: String(testCasesInputs[i]).trim(),
-          expectedOutput: String(testCasesOutputs[i] || '').trim(),
-        });
-      }
-    }
-    
-    if (questionData.testCases.length === 0) {
-      req.flash('error', 'Add at least one test case for coding questions.');
-      return res.redirect(`/teacher/quizzes/${quiz._id}/edit`);
-    }
-  } else {
-    // For non-coding questions
-    questionData.options = normalizeQuestionBody(req.body);
-    questionData.correctAnswer = req.body.correctAnswer;
+  const { payload: questionData, errors } = buildQuestionPayload(quiz, req.body);
+  if (errors.length) {
+    req.flash('error', errors[0]);
+    return res.redirect(`/teacher/quizzes/${quiz._id}/edit`);
   }
 
   // Create a new question with all details
@@ -221,6 +324,19 @@ exports.deleteQuestion = async (req, res) => {
   await recalculateQuizMarks(quiz._id);
   req.flash('success', 'Question removed.');
   return res.redirect(`/teacher/quizzes/${quiz._id}/edit`);
+};
+
+exports.reviews = async (req, res) => {
+  const quizzes = await Quiz.find({ createdBy: req.user._id }).select('_id');
+  const quizIds = quizzes.map((quiz) => quiz._id);
+  const attempts = quizIds.length
+    ? await Attempt.find({ quiz: { $in: quizIds }, status: 'pending-review' })
+        .populate('quiz', 'title category')
+        .populate('student', 'name email')
+        .sort('-submittedAt')
+    : [];
+
+  res.render('teacher/reviews', { title: 'Pending Reviews', attempts });
 };
 
 exports.attempts = async (req, res) => {
@@ -251,11 +367,13 @@ exports.updateReview = async (req, res) => {
 
   attempt.answers.forEach((answer, index) => {
     if (answer.needsManualReview) {
-      const marks = Number(req.body.marks?.[index] || 0);
+      const submittedMarks = Number(req.body.marks?.[index] || 0);
+      const marks = Number.isFinite(submittedMarks) ? submittedMarks : 0;
       answer.marksObtained = Math.max(0, Math.min(marks, answer.question.marks));
       answer.isCorrect = answer.marksObtained === answer.question.marks;
       answer.needsManualReview = false;
     }
+    answer.reviewComment = String(req.body.comments?.[index] || '').trim();
   });
 
   attempt.score = attempt.answers.reduce((sum, answer) => sum + answer.marksObtained, 0);

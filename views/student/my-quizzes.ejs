@@ -48,7 +48,7 @@
               <tr>
                 <td>
                   <strong><%= enrollment.quiz.title %></strong>
-                  <div class="small text-muted"><%= enrollment.quiz.duration %> min · <%= enrollment.quiz.totalMarks %> marks · Pass <%= enrollment.quiz.passingMarks %>%</div>
+                  <div class="small text-muted"><%= enrollment.quiz.duration %> min - <%= enrollment.quiz.totalMarks %> marks - Pass <%= enrollment.quiz.passingMarks %>%</div>
                 </td>
                 <td><%= enrollment.quiz.category %></td>
                 <td>
@@ -66,17 +66,18 @@
                   <% } else if (enrollment.status === 'pending-review') { %>
                     <span class="text-muted">Pending</span>
                   <% } else { %>
-                    <span class="text-muted">—</span>
+                    <span class="text-muted">-</span>
                   <% } %>
                 </td>
                 <td class="text-end">
-                  <% if (enrollment.status === 'enrolled') { %>
-                    <a class="btn btn-sm btn-primary" href="/student/quizzes/<%= enrollment.quiz._id %>/take">Attempt</a>
-                  <% } else if (enrollment.bestAttemptId) { %>
-                    <a class="btn btn-sm btn-outline-secondary" href="/student/results/<%= enrollment.bestAttemptId._id || enrollment.bestAttemptId %>">View Result</a>
-                  <% } else { %>
-                    <span class="text-muted small">No attempt yet</span>
-                  <% } %>
+                  <div class="d-flex justify-content-end gap-2">
+                    <a class="btn btn-sm btn-primary" href="/student/quizzes/<%= enrollment.quiz._id %>/take">
+                      <%= enrollment.attempts ? 'Attempt Again' : 'Attempt' %>
+                    </a>
+                    <% if (enrollment.bestAttemptId) { %>
+                      <a class="btn btn-sm btn-outline-secondary" href="/student/results/<%= enrollment.bestAttemptId._id || enrollment.bestAttemptId %>">View Result</a>
+                    <% } %>
+                  </div>
                 </td>
               </tr>
             <% }) %>

@@ -54,11 +54,11 @@ exports.browseQuizzes = async (req, res) => {
 exports.enrollQuiz = async (req, res) => {
   try {
     const { quizId } = req.params;
-    const quiz = await Quiz.findById(quizId);
+    const quiz = await Quiz.findOne({ _id: quizId, status: 'published' });
 
     if (!quiz) {
-      req.flash('error', 'Quiz not found');
-      return res.redirect('/student/quizzes');
+      req.flash('error', 'This exam is not available for enrollment.');
+      return res.redirect('/enrollments/browse');
     }
 
     // Check if already enrolled

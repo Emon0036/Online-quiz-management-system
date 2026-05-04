@@ -1,6 +1,6 @@
 <% layout('layouts/main') %>
 <section class="container py-4">
-  <% const examTypeLabels = { quiz: 'Quiz', 'true-false': 'True/False', 'short-answer': 'Short Question' }; %>
+  <% const examTypeLabels = { quiz: 'Quiz', 'true-false': 'True/False', 'short-answer': 'Short Question', 'coding-test': 'Coding Exam' }; %>
   <div class="page-heading">
     <div><span class="eyebrow">Student</span><h1>Browse Exams</h1></div>
     <a href="/enrollments/my-quizzes" class="btn btn-primary">My Exams</a>
@@ -11,6 +11,7 @@
       <option value="quiz" <%= (selectedType || query.type) === 'quiz' ? 'selected' : '' %>>Quiz (MCQ / Mixed)</option>
       <option value="true-false" <%= (selectedType || query.type) === 'true-false' ? 'selected' : '' %>>True / False</option>
       <option value="short-answer" <%= (selectedType || query.type) === 'short-answer' ? 'selected' : '' %>>Short Question</option>
+      <option value="coding-test" <%= (selectedType || query.type) === 'coding-test' ? 'selected' : '' %>>Coding Exam</option>
     </select>
     <select class="form-select" name="category">
       <option value="all" <%= (selectedCategory || query.category || 'all') === 'all' ? 'selected' : '' %>>All categories</option>

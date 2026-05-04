@@ -6,24 +6,55 @@
   </div>
   <div class="row g-4">
     <div class="col-lg-5">
-      <form class="form-panel" action="<%= action %>" method="POST">
-        <h2 class="h5">Quiz Details</h2>
-        <input class="form-control" name="title" placeholder="Quiz title" value="<%= quiz.title || '' %>" required>
-        <textarea class="form-control" name="description" rows="4" placeholder="Description"><%= quiz.description || '' %></textarea>
-        <input class="form-control" name="category" placeholder="Category" value="<%= quiz.category || 'General Knowledge' %>" required>
-<select class="form-select" name="examType">
-          <option value="quiz" <%= (quiz.examType || 'quiz') === 'quiz' ? 'selected' : '' %>>Quiz (Mixed / MCQ)</option>
-          <option value="true-false" <%= quiz.examType === 'true-false' ? 'selected' : '' %>>True / False</option>
-          <option value="short-answer" <%= quiz.examType === 'short-answer' ? 'selected' : '' %>>Short Question</option>
-          <option value="coding-test" <%= quiz.examType === 'coding-test' ? 'selected' : '' %>>Coding Exam</option>
-        </select>
-        <select class="form-select" name="difficulty">
-          <% ['Easy','Medium','Hard'].forEach((level) => { %><option value="<%= level %>" <%= quiz.difficulty === level ? 'selected' : '' %>><%= level %></option><% }) %>
-        </select>
-        <div class="row g-2">
-          <div class="col"><input class="form-control" type="number" name="duration" min="1" placeholder="Duration minutes" value="<%= quiz.duration || '' %>" required></div>
-          <div class="col"><input class="form-control" type="number" name="passingMarks" min="0" max="100" placeholder="Passing %" value="<%= quiz.passingMarks || '' %>" required></div>
+      <form class="form-panel quiz-details-form" action="<%= action %>" method="POST">
+        <h2 class="h5 mb-4">Quiz Details</h2>
+
+        <div class="row g-3">
+          <div class="col-md-7">
+            <label class="form-label" for="examType">Exam type</label>
+            <select id="examType" class="form-select" name="examType">
+              <option value="quiz" <%= (quiz.examType || 'quiz') === 'quiz' ? 'selected' : '' %>>Quiz (Mixed / MCQ)</option>
+              <option value="true-false" <%= quiz.examType === 'true-false' ? 'selected' : '' %>>True / False</option>
+              <option value="short-answer" <%= quiz.examType === 'short-answer' ? 'selected' : '' %>>Short Question</option>
+              <option value="coding-test" <%= quiz.examType === 'coding-test' ? 'selected' : '' %>>Coding Exam</option>
+            </select>
+          </div>
+
+          <div class="col-md-5">
+            <label class="form-label" for="difficulty">Difficulty</label>
+            <select id="difficulty" class="form-select" name="difficulty">
+              <% ['Easy','Medium','Hard'].forEach((level) => { %><option value="<%= level %>" <%= quiz.difficulty === level ? 'selected' : '' %>><%= level %></option><% }) %>
+            </select>
+          </div>
         </div>
+
+        <div class="form-field">
+          <label class="form-label" for="quizTitle">Quiz title</label>
+          <input id="quizTitle" class="form-control" name="title" placeholder="Quiz title" value="<%= quiz.title || '' %>" required>
+        </div>
+
+        <div class="form-field">
+          <label class="form-label" for="quizDescription">Description</label>
+          <textarea id="quizDescription" class="form-control" name="description" rows="4" placeholder="Description"><%= quiz.description || '' %></textarea>
+        </div>
+
+        <div class="form-field">
+          <label class="form-label" for="quizCategory">Category</label>
+          <input id="quizCategory" class="form-control" name="category" placeholder="Category" value="<%= quiz.category || 'General Knowledge' %>" required>
+        </div>
+
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label" for="duration">Duration minutes</label>
+            <input id="duration" class="form-control" type="number" name="duration" min="1" placeholder="Duration minutes" value="<%= quiz.duration || '' %>" required>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label" for="passingMarks">Passing %</label>
+            <input id="passingMarks" class="form-control" type="number" name="passingMarks" min="0" max="100" placeholder="Passing %" value="<%= quiz.passingMarks || '' %>" required>
+          </div>
+        </div>
+
         <button class="btn btn-primary" type="submit">Save Quiz</button>
       </form>
     </div>
@@ -31,19 +62,21 @@
       <% if (quiz._id) { %>
         <div class="form-panel mb-4">
           <h2 class="h5">Add Question</h2>
-          <p class="text-muted small mb-3">1) Write your question. 2) Add options if needed. 3) Select the correct answer. The form auto-adjusts to your selected type.</p>
+          <p class="text-muted small mb-3">Write the question, add the required answer fields, then assign marks. The form adjusts to this exam type.</p>
           <% const lockedType = ['true-false', 'short-answer', 'coding-test'].includes(quiz.examType) ? quiz.examType : null; %>
           <form action="/teacher/quizzes/<%= quiz._id %>/questions" method="POST" class="vstack gap-3 modern-question-form">
+            <label class="form-label fw-semibold mb-1" for="questionTitle">Question Title</label>
+            <input class="form-control" name="questionTitle" id="questionTitle" type="text" placeholder="Enter a short title for this question" required>
+
             <label class="form-label fw-semibold mb-1">Question to create</label>
             <textarea class="form-control" name="questionText" rows="3" placeholder="Enter the question statement" required></textarea>
             
-            <!-- Question Type Selection -->
+            <label class="form-label fw-semibold mb-1" for="questionType">Question type</label>
             <select class="form-select question-type" name="type" id="questionType" required>
               <% if (!lockedType) { %>
                 <option value="multiple-choice">Multiple Choice</option>
                 <option value="true-false">True/False</option>
                 <option value="short-answer">Short Answer</option>
-                <option value="coding">Coding</option>
               <% } else if (lockedType === 'true-false') { %>
                 <option value="true-false">True/False</option>
               <% } else if (lockedType === 'short-answer') { %>
@@ -53,8 +86,6 @@
               <% } %>
             </select>
             
-            <label class="form-label fw-semibold mb-1">Question type</label>
-            <!-- Multiple Choice Options (shown only for multiple-choice questions) -->
             <div class="options-box" id="optionsBox">
               <label class="form-label fw-semibold mb-1">Options</label>
               <input class="form-control mb-2" name="options[]" placeholder="Option 1">
@@ -63,20 +94,22 @@
               <input class="form-control mb-2" name="options[]" placeholder="Option 4">
             </div>
             
-            <!-- Correct Answer Input -->
-            <label class="form-label fw-semibold mb-1">Correct option / answer</label>
+            <label class="form-label fw-semibold mb-1" for="correctAnswerField">Correct option / expected answer</label>
             <input class="form-control" id="correctAnswerField" name="correctAnswer" placeholder="Enter exact correct answer" required>
+            <select class="form-select d-none" id="trueFalseAnswerField" name="correctAnswer" disabled>
+              <option value="True">True</option>
+              <option value="False">False</option>
+            </select>
+            <div class="form-text" id="correctAnswerHelp">For multiple choice, this must match one option exactly.</div>
             
-            <!-- Coding Question Fields -->
-            <div id="codingFields" style="display: none;">
+            <div id="codingFields" class="d-none">
+              <div class="mb-3">
+                <h3 class="h6 fw-semibold mb-1">Coding Question Details</h3>
+                <p class="text-muted small mb-0">Provide the language, code template, and test cases for student submissions.</p>
+              </div>
+
               <label class="form-label">Programming Language</label>
-              <select class="form-select" name="language" id="language">
-                <option value="javascript">JavaScript</option>
-                <option value="python">Python</option>
-                <option value="java">Java</option>
-                <option value="cpp">C++</option>
-                <option value="csharp">C#</option>
-              </select>
+              <input class="form-control" type="text" name="language" id="language" placeholder="Any programming language, e.g. JavaScript, Python, C++, Java" required>
               
               <label class="form-label mt-3">Code Template (Optional)</label>
               <textarea class="form-control" name="codeTemplate" id="codeTemplate" rows="4" placeholder="// Starter code template for students"></textarea>
@@ -88,7 +121,7 @@
                   <textarea class="form-control" name="testCaseOutputs[]" rows="2" placeholder="Expected Output 1"></textarea>
                 </div>
               </div>
-              <button type="button" class="btn btn-sm btn-outline-secondary" onclick="addTestCase()">+ Add Test Case</button>
+              <button type="button" class="btn btn-sm btn-outline-secondary" id="addQuizTestCase">+ Add Test Case</button>
             </div>
             
             <!-- Explanation Field: Will be displayed to students after quiz submission -->
@@ -99,58 +132,6 @@
             
             <!-- Submit button to add question -->
             <button class="btn btn-outline-primary mt-3" type="submit">Add Question</button>
-            
-            <script>
-              const questionTypeField = document.getElementById('questionType');
-              const optionsBox = document.getElementById('optionsBox');
-              const correctAnswerField = document.getElementById('correctAnswerField');
-              const codingFields = document.getElementById('codingFields');
-              const optionInputs = document.querySelectorAll('#optionsBox input');
-
-              function applyQuestionMode() {
-                const type = questionTypeField.value;
-                const isCoding = type === 'coding';
-                const isShortAnswer = type === 'short-answer';
-                const isTrueFalse = type === 'true-false';
-
-                codingFields.style.display = isCoding ? 'block' : 'none';
-                optionsBox.style.display = (!isCoding && !isShortAnswer) ? 'block' : 'none';
-                correctAnswerField.style.display = isCoding ? 'none' : 'block';
-                correctAnswerField.required = !isCoding;
-
-                if (isTrueFalse) {
-                  optionInputs[0].value = 'True';
-                  optionInputs[1].value = 'False';
-                  optionInputs[2].value = '';
-                  optionInputs[3].value = '';
-                }
-
-                optionInputs.forEach((el, index) => {
-                  if (isCoding || isShortAnswer) {
-                    el.required = false;
-                  } else if (isTrueFalse) {
-                    el.required = index < 2;
-                  } else {
-                    el.required = true;
-                  }
-                });
-              }
-
-              questionTypeField.addEventListener('change', applyQuestionMode);
-              applyQuestionMode();
-              
-              function addTestCase() {
-                const container = document.getElementById('testCasesContainer');
-                const testCaseCount = container.children.length;
-                const html = `
-                  <div class="test-case mb-3">
-                    <input class="form-control mb-2" name="testCaseInputs[]" placeholder="Test Input ${testCaseCount + 1}">
-                    <textarea class="form-control" name="testCaseOutputs[]" rows="2" placeholder="Expected Output ${testCaseCount + 1}"></textarea>
-                  </div>
-                `;
-                container.insertAdjacentHTML('beforeend', html);
-              }
-            </script>
           </form>
         </div>
         <div class="table-card">
@@ -164,7 +145,7 @@
                   <span class="badge bg-secondary me-2"><%= question.type %></span>
                   <%= question.marks %> marks
                   <% if (question.type === 'coding') { %>
-                    | <%= question.language || 'javascript' %> | <%= question.testCases ? question.testCases.length : 0 %> test cases
+                    | <%= question.language || 'Coding' %> | <%= question.testCases ? question.testCases.length : 0 %> test cases
                   <% } else if (question.type !== 'short-answer') { %>
                     | Answer: <%= question.correctAnswer || 'N/A' %>
                   <% } %>

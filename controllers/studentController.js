@@ -8,12 +8,13 @@ const Progress = require('../models/Progress');
 const { finalizeQuizAttempt } = require('../utils/quizProgress');
 
 exports.dashboard = async (req, res) => {
-  const [recentAttempts, availableQuizCount, completedCount, enrollments, progress] = await Promise.all([
+  const [recentAttempts, availableQuizCount, completedCount, enrollments, progress, pendingReviewCount] = await Promise.all([
     Attempt.find({ student: req.user._id }).populate('quiz', 'title category examType').sort('-submittedAt').limit(5),
     Quiz.countDocuments({ status: 'published' }),
     Attempt.countDocuments({ student: req.user._id }),
     Enrollment.find({ student: req.user._id }).populate('quiz', 'examType').select('status quiz'),
     Progress.findOne({ student: req.user._id }).select('totalPoints averageScore streak'),
+    Attempt.countDocuments({ student: req.user._id, status: 'pending-review' }),
   ]);
 
   const examTypeCounts = { quiz: 0, 'true-false': 0, 'short-answer': 0, 'coding-test': 0 };
@@ -25,7 +26,7 @@ exports.dashboard = async (req, res) => {
   res.render('student/dashboard', {
     title: 'Student Dashboard',
     recentAttempts,
-    stats: { availableQuizCount, completedCount, enrolledCount: enrollments.length },
+    stats: { availableQuizCount, completedCount, enrolledCount: enrollments.length, pendingReviewCount },
     examTypeCounts,
     progress: progress || { totalPoints: 0, averageScore: 0, streak: 0 },
   });
@@ -40,11 +41,6 @@ exports.takeQuiz = async (req, res) => {
   if (!enrollment) {
     req.flash('error', 'You must enroll first before attempting this exam.');
     return res.redirect('/enrollments/browse');
-  }
-  if (enrollment.status !== 'enrolled') {
-    if (enrollment.bestAttemptId) return res.redirect(`/student/results/${enrollment.bestAttemptId._id}`);
-    req.flash('error', 'This exam is no longer available to attempt.');
-    return res.redirect('/student/dashboard');
   }
 
   const quiz = await Quiz.findOne({ _id: req.params.quizId, status: 'published' }).populate('questions');
@@ -61,11 +57,6 @@ exports.submitQuiz = async (req, res) => {
   if (!enrollment) {
     req.flash('error', 'You must enroll first before submitting this exam.');
     return res.redirect('/enrollments/browse');
-  }
-  if (enrollment.status !== 'enrolled') {
-    req.flash('error', 'This exam has already been submitted.');
-    if (enrollment.bestAttemptId) return res.redirect(`/student/results/${enrollment.bestAttemptId}`);
-    return res.redirect('/student/dashboard');
   }
 
   const quiz = await Quiz.findOne({ _id: req.params.quizId, status: 'published' }).populate('questions');
@@ -154,9 +145,11 @@ exports.submitQuiz = async (req, res) => {
   }
 
   enrollment.attempts += 1;
-  enrollment.bestAttemptId = attempt._id;
+  if (!enrollment.bestAttemptId || percentage > enrollment.bestScore) {
+    enrollment.bestAttemptId = attempt._id;
+    enrollment.bestScore = percentage;
+  }
   enrollment.status = hasManualReview ? 'pending-review' : 'completed';
-  if (!hasManualReview) enrollment.bestScore = percentage;
   await enrollment.save();
 
   if (!hasManualReview) {
@@ -199,6 +192,20 @@ exports.result = async (req, res) => {
 exports.history = async (req, res) => {
   const attempts = await Attempt.find({ student: req.user._id }).populate('quiz', 'title category passingMarks').sort('-submittedAt');
   res.render('student/history', { title: 'Score History', attempts });
+};
+
+exports.reviews = async (req, res) => {
+  const reviewAttempts = await Attempt.find({
+    student: req.user._id,
+    status: { $in: ['pending-review', 'reviewed'] },
+  })
+    .populate('quiz', 'title category duration totalMarks passingMarks')
+    .sort('-submittedAt');
+
+  res.render('student/reviews', {
+    title: 'Review Center',
+    reviewAttempts,
+  });
 };
 
 exports.leaderboard = async (req, res) => {

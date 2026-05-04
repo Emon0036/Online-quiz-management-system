@@ -3,15 +3,40 @@
   <div class="page-heading"><div><span class="eyebrow">Manual Review</span><h1><%= attempt.student.name %> - <%= attempt.quiz.title %></h1></div></div>
   <form action="/teacher/attempts/<%= attempt._id %>/review?_method=PATCH" method="POST" class="form-panel">
     <% attempt.answers.forEach((answer, index) => { %>
-      <div class="review-item">
-        <strong><%= index + 1 %>. <%= answer.question.questionText %></strong>
-        <p class="mb-1 text-muted">Student answer: <%= answer.answer || 'Not answered' %></p>
-        <% if (answer.needsManualReview) { %>
-          <label class="form-label">Marks out of <%= answer.question.marks %></label>
-          <input class="form-control" type="number" min="0" max="<%= answer.question.marks %>" name="marks[<%= index %>]" value="<%= answer.marksObtained %>">
+      <div class="review-item bg-white rounded-3 p-4 mb-4 shadow-sm">
+        <div class="d-flex justify-content-between align-items-start mb-3">
+          <div>
+            <h2 class="h5 mb-1"><%= index + 1 %>. <%= answer.question.questionText %></h2>
+            <p class="text-muted mb-0">Marks: <strong><%= answer.question.marks %></strong></p>
+          </div>
+          <% if (!answer.needsManualReview) { %>
+            <span class="badge <%= answer.isCorrect ? 'text-bg-success' : 'text-bg-danger' %>"><%= answer.marksObtained %>/<%= answer.question.marks %></span>
+          <% } %>
+        </div>
+
+        <% if (answer.question.type === 'coding') { %>
+          <div class="mb-3">
+            <p class="text-muted mb-2"><strong>Student code:</strong></p>
+            <pre class="code-block"><code><%= answer.answer || '(No code submitted)' %></code></pre>
+          </div>
         <% } else { %>
-          <span class="badge <%= answer.isCorrect ? 'text-bg-success' : 'text-bg-danger' %>"><%= answer.marksObtained %>/<%= answer.question.marks %></span>
+          <div class="mb-3">
+            <p class="text-muted mb-2"><strong>Student answer:</strong></p>
+            <div class="p-3 bg-gray-50 rounded"><%= answer.answer || '(Not answered)' %></div>
+          </div>
         <% } %>
+
+        <% if (answer.needsManualReview) { %>
+          <div class="mb-3">
+            <label class="form-label">Assign marks</label>
+            <input class="form-control" type="number" min="0" max="<%= answer.question.marks %>" name="marks[<%= index %>]" value="<%= answer.marksObtained %>">
+          </div>
+        <% } %>
+
+        <div class="mb-3">
+          <label class="form-label">Review notes</label>
+          <textarea class="form-control" name="comments[<%= index %>]" rows="3" placeholder="Optional reviewer feedback"><%= answer.reviewComment || '' %></textarea>
+        </div>
       </div>
     <% }) %>
     <button class="btn btn-primary">Save Review</button>

@@ -20,7 +20,7 @@
         <i class="fas fa-home"></i>
         <span>Dashboard</span>
       </a>
-      <a href="/student/quizzes" class="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
+      <a href="/enrollments/my-quizzes" class="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
         <i class="fas fa-book"></i>
         <span>My Quizzes</span>
       </a>
@@ -28,11 +28,15 @@
         <i class="fas fa-history"></i>
         <span>Attempt History</span>
       </a>
-      <a href="/student/leaderboard" class="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
+      <a href="/student/reviews" class="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
+        <i class="fas fa-comments"></i>
+        <span>Review Center</span>
+      </a>
+      <a href="/enrollments/leaderboard" class="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
         <i class="fas fa-trophy"></i>
         <span>Leaderboard</span>
       </a>
-      <a href="/student/progress" class="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
+      <a href="/enrollments/progress" class="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
         <i class="fas fa-chart-line"></i>
         <span>Progress</span>
       </a>
@@ -48,7 +52,7 @@
     <!-- Header -->
     <div class="mb-8">
       <h1 class="text-3xl font-bold text-gray-900 mb-2">
-        Welcome back, <%= currentUser.name %>! 👋
+        Welcome back, <%= currentUser.name %>!
       </h1>
       <p class="text-gray-600">Ready to continue your learning journey?</p>
     </div>
@@ -75,6 +79,18 @@
           </div>
           <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
             <i class="fas fa-plus text-green-600"></i>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium text-gray-600">Review Submissions</p>
+            <p class="text-2xl font-bold text-gray-900"><%= stats.pendingReviewCount %></p>
+          </div>
+          <div class="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center">
+            <i class="fas fa-clock text-amber-600"></i>
           </div>
         </div>
       </div>
@@ -145,15 +161,15 @@
         </div>
       </a>
 
-      <a href="/problems" class="card group hover:scale-105 transition-transform duration-200">
+      <a href="/enrollments/my-quizzes?type=coding-test" class="card group hover:scale-105 transition-transform duration-200">
         <div class="flex items-center justify-between mb-4">
           <span class="px-3 py-1 bg-purple-100 text-purple-800 text-xs font-medium rounded-full">Coding</span>
-          <span class="text-2xl font-bold text-purple-600">∞</span>
+          <span class="text-2xl font-bold text-purple-600"><%= examTypeCounts['coding-test'] %></span>
         </div>
-        <h3 class="text-lg font-semibold text-gray-900 mb-2">Coding Challenges</h3>
-        <p class="text-gray-600 text-sm">Practice programming skills</p>
+        <h3 class="text-lg font-semibold text-gray-900 mb-2">Coding Exams</h3>
+        <p class="text-gray-600 text-sm">Teacher-created coding assessments</p>
         <div class="mt-4 flex items-center text-purple-600 group-hover:text-purple-700">
-          <span class="text-sm font-medium">Start Coding</span>
+          <span class="text-sm font-medium">View Exams</span>
           <i class="fas fa-arrow-right ml-2"></i>
         </div>
       </a>
@@ -182,7 +198,7 @@
                 </div>
               </div>
               <div class="text-right">
-                <div class="text-lg font-semibold text-gray-900"><%= attempt.score %>%</div>
+                <div class="text-lg font-semibold text-gray-900"><%= attempt.percentage %>%</div>
                 <div class="text-sm text-gray-500">Score</div>
               </div>
             </div>
@@ -193,7 +209,7 @@
           <i class="fas fa-inbox text-4xl text-gray-300 mb-4"></i>
           <h3 class="text-lg font-medium text-gray-900 mb-2">No recent attempts</h3>
           <p class="text-gray-500">Start taking quizzes to see your activity here.</p>
-          <a href="/student/quizzes" class="btn-primary mt-4 inline-block">
+          <a href="/enrollments/browse" class="btn-primary mt-4 inline-block">
             Browse Quizzes
           </a>
         </div>

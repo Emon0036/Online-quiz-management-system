@@ -40,22 +40,23 @@
               </div>
             <% } %>
             
-            <label class="form-label">Language: <strong><%= question.language || 'JavaScript' %></strong></label>
+            <label class="form-label">Language: <strong><%= question.language || 'Coding' %></strong></label>
             <textarea 
               class="form-control code-editor" 
               name="code[<%= question._id %>]" 
-              data-language="<%= question.language || 'javascript' %>"
+              data-language="<%= question.language || '' %>"
               rows="10" 
-              placeholder="Write your code here..."><%= question.codeTemplate || '' %></textarea>
+              placeholder="Write your code here..."
+              required><%= question.codeTemplate || '' %></textarea>
           </div>
         <% } else if (question.type === 'short-answer') { %>
           <!-- Short Answer Question Section -->
-          <textarea class="form-control" name="answers[<%= question._id %>]" rows="3" placeholder="Write your answer"></textarea>
+          <textarea class="form-control" name="answers[<%= question._id %>]" rows="3" placeholder="Write your answer" required></textarea>
         <% } else { %>
           <!-- Multiple Choice / True-False Question Section -->
           <% question.options.forEach((option) => { %>
             <label class="answer-option">
-              <input type="radio" name="answers[<%= question._id %>]" value="<%= option %>">
+              <input type="radio" name="answers[<%= question._id %>]" value="<%= option %>" required>
               <span><%= option %></span>
             </label>
           <% }) %>

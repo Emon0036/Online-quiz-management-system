@@ -5,7 +5,7 @@
       <span class="eyebrow">Code Review</span>
       <h1><%= submission.problem.title %></h1>
     </div>
-    <a href="/submissions/problem/<%= submission.problem._id %>" class="btn btn-outline-secondary">← Back to Submissions</a>
+    <a href="/submissions/problem/<%= submission.problem._id %>" class="btn btn-outline-secondary">Back to Submissions</a>
   </div>
 
   <div class="row g-3">
@@ -60,7 +60,7 @@
           <p class="mb-2"><strong>Status:</strong> 
             <% if (submission.status === 'reviewed') { %>
               <span class="badge text-bg-success">Already Reviewed</span>
-              <small class="text-muted d-block mt-2">Reviewed by: <%= submission.reviewedBy.name %></small>
+              <small class="text-muted d-block mt-2">Reviewed by: <%= submission.reviewedBy?.name || 'Staff' %></small>
               <small class="text-muted d-block">Date: <%= new Date(submission.reviewedAt).toLocaleString() %></small>
             <% } else { %>
               <span class="badge text-bg-warning">Pending Review</span>

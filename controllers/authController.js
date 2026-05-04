@@ -3,6 +3,7 @@ const passport = require('passport');
 const validator = require('validator');
 const User = require('../models/User');
 const { dashboardPathFor } = require('../middleware/authMiddleware');
+const { saveTabUser, removeTabUser } = require('../middleware/tabSessionMiddleware');
 
 exports.showRegister = (req, res) => res.render('auth/register', { title: 'Register' });
 exports.showLogin = (req, res) => res.render('auth/login', { title: 'Login' });
@@ -51,27 +52,58 @@ exports.register = async (req, res) => {
   return res.redirect('/auth/login');
 };
 
-exports.login = [
-  passport.authenticate('local', {
-    failureRedirect: '/auth/login',
-    failureFlash: true,
-  }),
-  (req, res) => {
-    req.flash('success', `Welcome back, ${req.user.name}.`);
-    res.redirect(dashboardPathFor(req.user));
-  },
-];
+exports.login = async (req, res, next) => {
+  const tabId = req.body.tab || crypto.randomBytes(8).toString('hex');
+
+  passport.authenticate('local', (error, user, info) => {
+    if (error) return next(error);
+    if (!user) {
+      req.flash('error', info?.message || 'Invalid email or password.');
+      return res.redirect(`/auth/login?tab=${encodeURIComponent(tabId)}`);
+    }
+
+    req.login(user, (loginError) => {
+      if (loginError) return next(loginError);
+      saveTabUser(req, user.id, tabId);
+      req.flash('success', `Welcome back, ${req.user.name}.`);
+      return res.redirect(`${dashboardPathFor(req.user)}?tab=${encodeURIComponent(tabId)}`);
+    });
+  })(req, res, next);
+};
 
 exports.logout = (req, res, next) => {
-  req.logout((error) => {
-    if (error) return next(error);
-    req.flash('success', 'You have been logged out.');
-    return res.redirect('/');
-  });
+  const tabId = req.body.tab || req.query.tab || req.currentTabId;
+  const removedUserId = removeTabUser(req, tabId);
+
+  const remainingTabIds = req.session?.tabUsers ? Object.keys(req.session.tabUsers) : [];
+  if (!remainingTabIds.length) {
+    return req.logout((error) => {
+      if (error) return next(error);
+      req.flash('success', 'You have been logged out.');
+      return res.redirect('/');
+    });
+  }
+
+  if (req.session && req.session.passport && !req.session.passport.user && remainingTabIds.length) {
+    req.session.passport.user = req.session.tabUsers[remainingTabIds[0]];
+  }
+
+  req.flash('success', 'You have been logged out.');
+  return res.redirect(`/auth/login${tabId ? `?tab=${encodeURIComponent(tabId)}` : ''}`);
 };
 
 exports.startGoogle = (req, res, next) => {
-  passport.authenticate('google', { scope: ['profile', 'email'] })(req, res, next);
+  if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
+    req.flash('error', 'Google login is not configured yet.');
+    return res.redirect('/auth/login');
+  }
+
+  const authOptions = {
+    scope: ['profile', 'email'],
+    state: req.query.tab ? String(req.query.tab) : undefined,
+  };
+
+  passport.authenticate('google', authOptions)(req, res, next);
 };
 
 exports.googleCallback = [
@@ -80,8 +112,10 @@ exports.googleCallback = [
     failureFlash: true,
   }),
   (req, res) => {
+    const tabId = req.query.state || req.currentTabId || crypto.randomBytes(8).toString('hex');
+    saveTabUser(req, req.user.id, tabId);
     req.flash('success', `Welcome, ${req.user.name}.`);
-    res.redirect(dashboardPathFor(req.user));
+    res.redirect(`${dashboardPathFor(req.user)}?tab=${encodeURIComponent(tabId)}`);
   },
 ];
 
@@ -97,8 +131,12 @@ exports.forgotPassword = async (req, res) => {
 
   // In production, send this URL by email. During development it is shown for easy testing.
   const resetUrl = `${req.protocol}://${req.get('host')}/auth/reset-password/${token}`;
-  console.log(`Password reset URL: ${resetUrl}`);
-  req.flash('success', `Reset link created: ${resetUrl}`);
+  if (process.env.NODE_ENV === 'production') {
+    req.flash('success', 'If that email exists, a reset link has been created.');
+  } else {
+    console.log(`Password reset URL: ${resetUrl}`);
+    req.flash('success', `Reset link created: ${resetUrl}`);
+  }
   return res.redirect('/auth/login');
 };
 

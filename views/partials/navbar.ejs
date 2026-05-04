@@ -43,12 +43,15 @@
                     <% } %>
                   <% } else { %>
                     <a class="block px-4 py-3 rounded-2xl hover:bg-gray-50" href="/student/dashboard"><i class="fas fa-gauge mr-3"></i>Student Dashboard</a>
-                    <a class="block px-4 py-3 rounded-2xl hover:bg-gray-50" href="/student/quizzes"><i class="fas fa-book mr-3"></i>My Quizzes</a>
+                    <a class="block px-4 py-3 rounded-2xl hover:bg-gray-50" href="/enrollments/my-quizzes"><i class="fas fa-book mr-3"></i>My Quizzes</a>
                     <a class="block px-4 py-3 rounded-2xl hover:bg-gray-50" href="/student/history"><i class="fas fa-history mr-3"></i>History</a>
                   <% } %>
                 </div>
                 <div class="px-5 py-4">
                   <form action="/auth/logout" method="POST">
+                    <% if (currentTabId) { %>
+                      <input type="hidden" name="tab" value="<%= currentTabId %>">
+                    <% } %>
                     <button type="submit" class="w-full rounded-2xl bg-red-600 px-4 py-3 text-white hover:bg-red-700 transition">Logout</button>
                   </form>
                 </div>

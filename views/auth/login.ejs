@@ -91,6 +91,9 @@
       <% } %>
 
       <form action="/auth/login" method="POST" class="space-y-6" x-data="{ showPassword: false }">
+        <% if (currentTabId) { %>
+          <input type="hidden" name="tab" value="<%= currentTabId %>">
+        <% } %>
         <div>
           <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
             Email address

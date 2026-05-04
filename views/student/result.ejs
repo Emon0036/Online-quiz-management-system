@@ -17,53 +17,48 @@
     <h2 class="mb-3">Answer Review</h2>
     
     <% attempt.answers.forEach((answer, index) => { %>
-      <div class="review-item mb-4 p-3 border rounded">
-        <!-- Question Number and Text -->
-        <div class="mb-2">
-          <strong class="d-block mb-2">
-            <span class="badge bg-primary me-2"><%= index + 1 %></span>
-            <%= answer.question.questionText %>
-          </strong>
+      <div class="review-item mb-4 p-4 rounded-3 shadow-sm">
+        <div class="d-flex align-items-start justify-content-between mb-3 gap-3">
+          <div>
+            <h3 class="h6 mb-1"><span class="badge bg-primary me-2"><%= index + 1 %></span><%= answer.question.questionText %></h3>
+            <p class="text-muted mb-0">Max marks: <strong><%= answer.question.marks %></strong></p>
+          </div>
+          <div class="text-end">
+            <span class="badge <%= answer.needsManualReview ? 'text-bg-warning' : answer.isCorrect ? 'text-bg-success' : 'text-bg-danger' %>">
+              <%= answer.needsManualReview ? 'Pending Review' : `${answer.marksObtained}/${answer.question.marks} marks` %>
+            </span>
+          </div>
         </div>
 
-        <!-- Display Student's Answer -->
         <% if (answer.question.type === 'coding') { %>
-          <!-- Coding Question Response -->
           <div class="mb-3">
-            <p class="mb-1 text-muted"><strong>Your Code:</strong></p>
-            <pre class="bg-light p-3 rounded" style="border-left: 4px solid #007bff; overflow-x: auto;"><code><%= answer.answer || '(No code submitted)' %></code></pre>
+            <p class="mb-1 text-muted"><strong>Your code:</strong></p>
+            <pre class="code-block bg-slate-950 text-slate-100 p-4 rounded-lg overflow-x-auto"><code><%= answer.answer || '(No code submitted)' %></code></pre>
           </div>
         <% } else { %>
-          <!-- Text/Multiple Choice Response -->
           <div class="mb-3">
-            <p class="mb-1 text-muted">
-              <strong>Your Answer:</strong>
-              <span class="<%= answer.isCorrect ? 'text-success' : answer.needsManualReview ? 'text-warning' : 'text-danger' %>">
-                <%= answer.answer || '(Not answered)' %>
-              </span>
-            </p>
+            <p class="mb-1 text-muted"><strong>Your answer:</strong></p>
+            <div class="p-3 bg-gray-50 rounded"><span class="fw-semibold <%= answer.isCorrect ? 'text-success' : answer.needsManualReview ? 'text-warning' : 'text-danger' %>"><%= answer.answer || '(Not answered)' %></span></div>
           </div>
         <% } %>
 
-        <!-- Status Badge: Shows if answer is correct, pending review, or wrong -->
-        <div class="mb-3">
-          <span class="badge <%= answer.needsManualReview ? 'text-bg-warning' : answer.isCorrect ? 'text-bg-success' : 'text-bg-danger' %>">
-            <%= answer.needsManualReview ? 'Waiting for teacher review' : `${answer.marksObtained}/${answer.question.marks} marks` %>
-          </span>
-        </div>
-
-        <!-- Show Correct Answer (only if not pending manual review and not coding) -->
         <% if (!answer.needsManualReview && !answer.isCorrect && answer.question.type !== 'coding') { %>
-          <div class="alert alert-info mb-2">
-            <strong>Correct Answer:</strong> <%= answer.question.correctAnswer %>
+          <div class="alert alert-info mb-3">
+            <strong>Correct answer:</strong> <%= answer.question.correctAnswer %>
           </div>
         <% } %>
 
-        <!-- Display Explanation (if available) -->
         <% if (answer.question.explanation && answer.question.explanation.trim()) { %>
-          <div class="alert alert-light border border-secondary mb-0">
+          <div class="alert alert-light border border-secondary mb-3">
             <strong>Explanation:</strong>
             <p class="mb-0 mt-2"><%= answer.question.explanation %></p>
+          </div>
+        <% } %>
+
+        <% if (answer.reviewComment && answer.reviewComment.trim()) { %>
+          <div class="alert alert-secondary mb-0">
+            <strong>Teacher feedback:</strong>
+            <p class="mb-0 mt-2"><%= answer.reviewComment %></p>
           </div>
         <% } %>
       </div>

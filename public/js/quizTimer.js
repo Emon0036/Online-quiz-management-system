@@ -25,8 +25,12 @@ if (timer && quizForm && timerText) {
     if (autoSubmitted) autoSubmitted.value = '1';
     if (autoSubmitReason) autoSubmitReason.value = String(reason || 'focus_lost');
 
-    if (typeof quizForm.requestSubmit === 'function') quizForm.requestSubmit();
-    else quizForm.submit();
+    clearInterval(interval);
+    clearInterval(focusCheckInterval);
+
+    // Use native submit for automatic submission so required validation does not block it.
+    quizForm.noValidate = true;
+    quizForm.submit();
   }
 
   // Timer countdown
@@ -39,10 +43,17 @@ if (timer && quizForm && timerText) {
 
     if (remaining <= 60) timer.classList.add('timer-danger');
     if (remaining <= 0) {
-      clearInterval(interval);
       submitNow('time_up');
     }
   }, 1000);
+
+  // Continuous focus monitor for tabs, notifications, and app switches
+  const focusCheckInterval = setInterval(() => {
+    if (alreadySubmitted) return;
+    if (!document.hasFocus() || document.visibilityState !== 'visible') {
+      submitNow('focus_lost');
+    }
+  }, 500);
 
   quizForm.addEventListener('submit', () => {
     alreadySubmitted = true;
@@ -65,15 +76,10 @@ if (timer && quizForm && timerText) {
     }
   });
 
-  // Notification API - detect when notification arrives (browser permission required)
-  if ('Notification' in window && Notification.permission === 'granted') {
-    // This will detect if a notification is displayed while quiz is active
-    document.addEventListener('notificationclick', () => {
-      if (!alreadySubmitted && focusLost) {
-        submitNow('notification_received');
-      }
-    });
-  }
+  // Fallback for modern browsers when page is hidden or closed
+  window.addEventListener('pagehide', () => {
+    if (!alreadySubmitted) submitNow('page_hide');
+  });
 
   // Prevent right-click and developer tools opening
   document.addEventListener('keydown', (e) => {

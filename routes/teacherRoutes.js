@@ -10,6 +10,7 @@ router.get('/dashboard', asyncHandler(teacherController.dashboard));
 router.get('/quizzes', asyncHandler(teacherController.listQuizzes));
 router.get('/quizzes/new', teacherController.showCreateQuiz);
 router.post('/quizzes', asyncHandler(teacherController.createQuiz));
+router.get('/reviews', asyncHandler(teacherController.reviews));
 router.get('/quizzes/:quizId/edit', asyncHandler(teacherController.showEditQuiz));
 router.put('/quizzes/:quizId', asyncHandler(teacherController.updateQuiz));
 router.delete('/quizzes/:quizId', asyncHandler(teacherController.deleteQuiz));

@@ -12,7 +12,7 @@ const questionSchema = new mongoose.Schema(
     marks: { type: Number, required: true, min: 1, default: 1 },
     // Coding test specific fields
     codeTemplate: { type: String, trim: true, default: '' }, // Starter code template
-    language: { type: String, enum: ['javascript', 'python', 'java', 'cpp', 'csharp'], default: 'javascript' }, // Programming language
+    language: { type: String, trim: true, default: '' }, // Programming language
     testCases: [{ // Test cases for coding problems
       input: { type: String, trim: true },
       expectedOutput: { type: String, trim: true },
