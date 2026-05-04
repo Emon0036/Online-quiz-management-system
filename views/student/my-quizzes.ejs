@@ -2,15 +2,19 @@
 <section class="page-shell">
   <div class="page-container page-stack">
     <% const examTypeLabels = { quiz: 'Quiz', 'true-false': 'True/False', 'short-answer': 'Short Question', 'coding-test': 'Coding Exam' }; %>
-    <% const examTypeOrder = ['quiz', 'true-false', 'short-answer', 'coding-test']; %>
-    <% const totalCount = Object.values(groupedEnrollments || {}).reduce((sum, list) => sum + (list?.length || 0), 0); %>
+    <% const categorySections = categoryGroups || []; %>
+    <% const currentType = selectedType || 'all'; %>
+    <% const currentCategory = selectedCategory || 'all'; %>
+    <% const totalCount = categorySections.reduce((sum, group) => sum + (group.enrollments?.length || 0), 0); %>
     <% const codingProblemCount = (codingProblems || []).length; %>
+    <% const buildTypeLink = (typeValue) => `/enrollments/my-quizzes?type=${encodeURIComponent(typeValue)}&category=${encodeURIComponent(currentCategory)}`; %>
+    <% const buildCategoryLink = (categoryValue) => `/enrollments/my-quizzes?type=${encodeURIComponent(currentType)}&category=${encodeURIComponent(categoryValue)}`; %>
 
     <div class="page-heading">
       <div>
         <span class="eyebrow">Student</span>
         <h1>My Exams</h1>
-        <p>Return to your enrolled assessments, check best scores, and keep coding practice within reach.</p>
+        <p>Your enrolled exams are grouped by category so each subject stays easier to scan before you start an attempt.</p>
       </div>
       <div class="toolbar">
         <a href="/enrollments/browse" class="btn btn-outline-primary">Browse Exams</a>
@@ -19,12 +23,21 @@
     </div>
 
     <div class="chip-group">
-      <a class="filter-chip <%= (selectedType || 'all') === 'all' ? 'is-active' : '' %>" href="/enrollments/my-quizzes?type=all">All</a>
-      <a class="filter-chip <%= selectedType === 'quiz' ? 'is-active' : '' %>" href="/enrollments/my-quizzes?type=quiz">Quiz</a>
-      <a class="filter-chip <%= selectedType === 'true-false' ? 'is-active' : '' %>" href="/enrollments/my-quizzes?type=true-false">True/False</a>
-      <a class="filter-chip <%= selectedType === 'short-answer' ? 'is-active' : '' %>" href="/enrollments/my-quizzes?type=short-answer">Short Question</a>
-      <a class="filter-chip <%= selectedType === 'coding-test' ? 'is-active' : '' %>" href="/enrollments/my-quizzes?type=coding-test">Coding Exam</a>
+      <a class="filter-chip <%= (selectedType || 'all') === 'all' ? 'is-active' : '' %>" href="<%= buildTypeLink('all') %>">All</a>
+      <a class="filter-chip <%= selectedType === 'quiz' ? 'is-active' : '' %>" href="<%= buildTypeLink('quiz') %>">Quiz</a>
+      <a class="filter-chip <%= selectedType === 'true-false' ? 'is-active' : '' %>" href="<%= buildTypeLink('true-false') %>">True/False</a>
+      <a class="filter-chip <%= selectedType === 'short-answer' ? 'is-active' : '' %>" href="<%= buildTypeLink('short-answer') %>">Short Question</a>
+      <a class="filter-chip <%= selectedType === 'coding-test' ? 'is-active' : '' %>" href="<%= buildTypeLink('coding-test') %>">Coding Exam</a>
     </div>
+
+    <% if ((enrollmentCategories || []).length > 0) { %>
+      <div class="chip-group">
+        <a class="filter-chip <%= (selectedCategory || 'all') === 'all' ? 'is-active' : '' %>" href="<%= buildCategoryLink('all') %>">All categories</a>
+        <% enrollmentCategories.forEach((category) => { %>
+          <a class="filter-chip <%= selectedCategory === category ? 'is-active' : '' %>" href="<%= buildCategoryLink(category) %>"><%= category %></a>
+        <% }) %>
+      </div>
+    <% } %>
 
     <% if (!totalCount && !codingProblemCount) { %>
       <div class="empty-state">
@@ -34,18 +47,15 @@
       </div>
     <% } %>
 
-    <% examTypeOrder.forEach((typeKey) => { %>
-      <% const enrollments = (groupedEnrollments && groupedEnrollments[typeKey]) ? groupedEnrollments[typeKey] : []; %>
-      <% if (enrollments.length === 0) return; %>
-
+    <% categorySections.forEach((group) => { %>
       <section class="table-card table-shell">
         <div class="panel-header">
           <div class="panel-header__copy">
-            <span class="eyebrow"><%= examTypeLabels[typeKey] %></span>
-            <h2><%= examTypeLabels[typeKey] %> Workspace</h2>
-            <p><%= enrollments.length %> enrolled exam<%= enrollments.length === 1 ? '' : 's' %> in this track.</p>
+            <span class="eyebrow">Category</span>
+            <h2><%= group.category %></h2>
+            <p><%= group.enrollments.length %> enrolled exam<%= group.enrollments.length === 1 ? '' : 's' %> in this subject.</p>
           </div>
-          <span class="status-pill approved"><%= enrollments.length %> enrolled</span>
+          <span class="status-pill approved"><%= group.enrollments.length %> enrolled</span>
         </div>
 
         <div class="table-responsive">
@@ -53,22 +63,22 @@
             <thead>
               <tr>
                 <th>Exam</th>
-                <th>Category</th>
+                <th>Type</th>
                 <th>Status</th>
                 <th>Best %</th>
                 <th class="text-end">Action</th>
               </tr>
             </thead>
             <tbody>
-              <% enrollments.forEach((enrollment) => { %>
+              <% group.enrollments.forEach((enrollment) => { %>
                 <tr>
                   <td>
                     <strong><%= enrollment.quiz.title %></strong>
                     <div class="small text-muted">
-                      <%= enrollment.quiz.duration %> min · <%= enrollment.quiz.totalMarks %> marks · Pass <%= enrollment.quiz.passingMarks %>%
+                      <%= enrollment.quiz.duration %> min · <%= enrollment.quiz.totalMarks %> marks · Pass <%= enrollment.quiz.passingMarks %>% · <%= enrollment.quiz.createdBy?.name || 'Teacher' %>
                     </div>
                   </td>
-                  <td><%= enrollment.quiz.category %></td>
+                  <td><span class="badge text-bg-secondary"><%= examTypeLabels[enrollment.quiz.examType || 'quiz'] %></span></td>
                   <td>
                     <% if (enrollment.status === 'completed') { %>
                       <span class="badge text-bg-success">Completed</span>
@@ -105,7 +115,7 @@
       </section>
     <% }) %>
 
-    <% if ((selectedType === 'all' || selectedType === 'coding-test') && codingProblemCount) { %>
+    <% if ((selectedType === 'all' || selectedType === 'coding-test') && (selectedCategory || 'all') === 'all' && codingProblemCount) { %>
       <section class="table-card table-shell">
         <div class="panel-header">
           <div class="panel-header__copy">

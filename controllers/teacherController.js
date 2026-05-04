@@ -397,7 +397,11 @@ exports.updateReview = async (req, res) => {
     { upsert: true, runValidators: true }
   );
 
-  const leaderboard = await Leaderboard.findOneAndUpdate({ quiz: attempt.quiz._id }, { $setOnInsert: { quiz: attempt.quiz._id } }, { upsert: true, new: true });
+  const leaderboard = await Leaderboard.findOneAndUpdate(
+    { quiz: attempt.quiz._id },
+    { $setOnInsert: { quiz: attempt.quiz._id } },
+    { upsert: true, returnDocument: 'after' }
+  );
   await leaderboard.recordAttempt(attempt.student, attempt.score, attempt.percentage);
   await finalizeQuizAttempt(attempt._id);
 

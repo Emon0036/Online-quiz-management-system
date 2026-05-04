@@ -156,7 +156,7 @@ exports.updateProblem = async (req, res) => {
         const problem = await Problem.findOneAndUpdate(
             ownershipFilter(req, req.params.id),
             { title, description, inputFormat, outputFormat, sampleInput, sampleOutput, difficulty, testCases },
-            { new: true, runValidators: true }
+            { returnDocument: 'after', runValidators: true }
         );
 
         if (!problem) {

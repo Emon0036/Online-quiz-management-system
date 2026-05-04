@@ -6,38 +6,114 @@ const Attempt = require('../models/Attempt');
 const Problem = require('../models/Problem');
 const Submission = require('../models/Submission');
 
+function normalizeCategory(category) {
+  const value = String(category || '').trim();
+  return value || 'General';
+}
+
+function sortByCategoryName(left, right) {
+  return left.localeCompare(right, undefined, { sensitivity: 'base' });
+}
+
+function sortByDisplayName(left, right) {
+  return left.localeCompare(right, undefined, { sensitivity: 'base' });
+}
+
+function buildCategoryGroups(items, getCategory) {
+  const grouped = new Map();
+
+  items.forEach((item) => {
+    const category = normalizeCategory(getCategory(item));
+    if (!grouped.has(category)) grouped.set(category, []);
+    grouped.get(category).push(item);
+  });
+
+  return Array.from(grouped.entries())
+    .sort(([left], [right]) => sortByCategoryName(left, right))
+    .map(([category, groupedItems]) => ({ category, items: groupedItems }));
+}
+
 /**
  * Get available quizzes by category for student enrollment
  */
 exports.browseQuizzes = async (req, res) => {
   try {
-    const { category, difficulty, type } = req.query;
+    const selectedCategory = String(req.query.category || 'all');
+    const selectedDifficulty = String(req.query.difficulty || '');
+    const selectedType = String(req.query.type || 'all');
+    const selectedTeacherId = String(req.query.teacher || 'all');
     
     const filter = { status: 'published' };
-    if (category && category !== 'all') {
-      filter.category = category;
+    if (selectedCategory !== 'all') {
+      filter.category = selectedCategory;
     }
-    if (difficulty) filter.difficulty = difficulty;
-    if (type && type !== 'all') filter.examType = type;
+    if (selectedDifficulty) filter.difficulty = selectedDifficulty;
+    if (selectedType !== 'all') filter.examType = selectedType;
+    if (selectedTeacherId !== 'all') filter.createdBy = selectedTeacherId;
 
-    const quizzes = await Quiz.find(filter)
-      .populate('createdBy', 'name')
-      .sort('-createdAt');
+    const teacherAwareCategoryFilter = { status: 'published' };
+    if (selectedTeacherId !== 'all') teacherAwareCategoryFilter.createdBy = selectedTeacherId;
+    if (selectedDifficulty) teacherAwareCategoryFilter.difficulty = selectedDifficulty;
+    if (selectedType !== 'all') teacherAwareCategoryFilter.examType = selectedType;
 
-    // Get student's enrollments
-    const enrollments = await Enrollment.find({ student: req.user._id });
-    const enrolledQuizIds = enrollments.map(e => e.quiz.toString());
+    const teacherSourceFilter = { status: 'published' };
+    if (selectedCategory !== 'all') teacherSourceFilter.category = selectedCategory;
+    if (selectedDifficulty) teacherSourceFilter.difficulty = selectedDifficulty;
+    if (selectedType !== 'all') teacherSourceFilter.examType = selectedType;
 
-    // Get categories
-    const categories = await Quiz.distinct('category', { status: 'published' });
+    const [quizzes, enrollments, rawCategories, teacherSourceQuizzes] = await Promise.all([
+      Quiz.find(filter)
+        .populate('createdBy', 'name')
+        .sort('-createdAt'),
+      Enrollment.find({ student: req.user._id }),
+      Quiz.distinct('category', teacherAwareCategoryFilter),
+      Quiz.find(teacherSourceFilter)
+        .select('createdBy')
+        .populate('createdBy', 'name role accountStatus'),
+    ]);
+
+    const groupedQuizzes = buildCategoryGroups(
+      [...quizzes].sort((left, right) => left.title.localeCompare(right.title, undefined, { sensitivity: 'base' })),
+      (quiz) => quiz.category
+    ).map((group) => ({ category: group.category, quizzes: group.items }));
+
+    const enrolledQuizIds = enrollments.map((enrollment) => enrollment.quiz.toString());
+
+    const categories = rawCategories
+      .map((category) => normalizeCategory(category))
+      .sort(sortByCategoryName);
+
+    const teacherMap = new Map();
+    teacherSourceQuizzes.forEach((quiz) => {
+      const teacher = quiz.createdBy;
+      if (!teacher || !teacher._id) return;
+      if (teacher.role && teacher.role !== 'teacher') return;
+      if (teacher.accountStatus === 'blocked') return;
+      const id = String(teacher._id);
+      if (!teacherMap.has(id)) {
+        teacherMap.set(id, {
+          id,
+          name: String(teacher.name || 'Teacher').trim() || 'Teacher',
+        });
+      }
+    });
+
+    const teacherOptions = Array.from(teacherMap.values())
+      .sort((left, right) => sortByDisplayName(left.name, right.name));
+
+    const selectedTeacher = teacherOptions.find((teacher) => teacher.id === selectedTeacherId) || null;
 
     res.render('student/quizzes', {
       title: 'Browse Exams',
       quizzes,
+      groupedQuizzes,
       categories,
-      selectedCategory: category || 'all',
-      selectedDifficulty: difficulty || '',
-      selectedType: type || 'all',
+      teacherOptions,
+      selectedCategory,
+      selectedDifficulty,
+      selectedType,
+      selectedTeacherId,
+      selectedTeacherName: selectedTeacher ? selectedTeacher.name : '',
       enrolledQuizIds,
       query: req.query,
     });
@@ -82,7 +158,7 @@ exports.enrollQuiz = async (req, res) => {
     const progress = await Progress.findOneAndUpdate(
       { student: req.user._id },
       { $setOnInsert: { student: req.user._id } },
-      { upsert: true, new: true }
+      { upsert: true, returnDocument: 'after' }
     );
     progress.totalQuizzes += 1;
     progress.inProgressQuizzes += 1;
@@ -117,10 +193,10 @@ exports.enrollQuiz = async (req, res) => {
 exports.getEnrolledQuizzes = async (req, res) => {
   try {
     const selectedType = String(req.query.type || 'all');
-    const includeCoding = selectedType === 'all' || selectedType === 'coding-test';
-    const includeQuizzes = selectedType !== 'coding-test';
-
-    const grouped = { quiz: [], 'true-false': [], 'short-answer': [], 'coding-test': [] };
+    const selectedCategory = String(req.query.category || 'all');
+    const showCodingPractice = selectedCategory === 'all' && (selectedType === 'all' || selectedType === 'coding-test');
+    const includeCoding = showCodingPractice;
+    const includeQuizzes = true;
 
     let codingProblems = [];
 
@@ -144,12 +220,30 @@ exports.getEnrolledQuizzes = async (req, res) => {
         : Promise.resolve([]),
     ]);
 
+    const enrolledCategories = new Set();
+    const filteredEnrollments = [];
+
     enrollments.forEach((enrollment) => {
       if (!enrollment.quiz) return;
       const examType = enrollment.quiz.examType || 'quiz';
+      const category = normalizeCategory(enrollment.quiz.category);
+      enrolledCategories.add(category);
+
       if (selectedType !== 'all' && examType !== selectedType) return;
-      if (grouped[examType]) grouped[examType].push(enrollment);
+      if (selectedCategory !== 'all' && category !== selectedCategory) return;
+      filteredEnrollments.push(enrollment);
     });
+
+    filteredEnrollments.sort((left, right) => {
+      const leftCategory = normalizeCategory(left.quiz?.category);
+      const rightCategory = normalizeCategory(right.quiz?.category);
+      const categoryOrder = sortByCategoryName(leftCategory, rightCategory);
+      if (categoryOrder !== 0) return categoryOrder;
+      return left.quiz.title.localeCompare(right.quiz.title, undefined, { sensitivity: 'base' });
+    });
+
+    const categoryGroups = buildCategoryGroups(filteredEnrollments, (enrollment) => enrollment.quiz?.category)
+      .map((group) => ({ category: group.category, enrollments: group.items }));
 
     if (includeCoding) {
       const latestSubmissionByProblemId = new Map();
@@ -168,8 +262,10 @@ exports.getEnrolledQuizzes = async (req, res) => {
 
     res.render('student/my-quizzes', {
       title: 'My Exams',
-      groupedEnrollments: grouped,
+      categoryGroups,
       selectedType,
+      selectedCategory,
+      enrollmentCategories: Array.from(enrolledCategories).sort(sortByCategoryName),
       codingProblems,
     });
   } catch (error) {

@@ -1,4 +1,7 @@
 {
+  "engines":{
+        "node": "22.20.0"
+  },
   "name": "online-quiz-management-system",
   "version": "1.0.0",
   "description": "Complete Online Quiz Management System with Teacher and Student features",

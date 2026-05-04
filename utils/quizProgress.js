@@ -46,7 +46,7 @@ async function finalizeQuizAttempt(attemptId) {
   const progress = await Progress.findOneAndUpdate(
     { student: attempt.student },
     { $setOnInsert: { student: attempt.student } },
-    { upsert: true, new: true }
+    { upsert: true, returnDocument: 'after' }
   );
   progress.quizzesByCategory = progress.quizzesByCategory || [];
 
@@ -87,7 +87,7 @@ async function finalizeQuizAttempt(attemptId) {
   const leaderboard = await GlobalLeaderboard.findOneAndUpdate(
     { student: attempt.student },
     { $setOnInsert: { student: attempt.student } },
-    { upsert: true, new: true }
+    { upsert: true, returnDocument: 'after' }
   );
 
   const previousCompleted = leaderboard.quizzesCompleted || 0;

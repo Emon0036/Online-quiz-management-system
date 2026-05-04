@@ -140,7 +140,11 @@ exports.submitQuiz = async (req, res) => {
 
   // Update leaderboard if all answers are auto-graded
   if (!hasManualReview) {
-    const leaderboard = await Leaderboard.findOneAndUpdate({ quiz: quiz._id }, { $setOnInsert: { quiz: quiz._id } }, { upsert: true, new: true });
+    const leaderboard = await Leaderboard.findOneAndUpdate(
+      { quiz: quiz._id },
+      { $setOnInsert: { quiz: quiz._id } },
+      { upsert: true, returnDocument: 'after' }
+    );
     await leaderboard.recordAttempt(req.user._id, score, percentage);
   }
 
