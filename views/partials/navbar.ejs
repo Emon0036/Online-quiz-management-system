@@ -1,70 +1,78 @@
-<nav class="navbar navbar-expand-lg navbar-dark bg-brand sticky-top">
-  <div class="container">
-    <a class="navbar-brand fw-bold" href="/"><i class="fa-solid fa-circle-question me-2"></i><%= appName %></a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="mainNavbar">
-      <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
-        <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
-        <li class="nav-item"><a class="nav-link" href="/about">About</a></li>
-        <li class="nav-item"><a class="nav-link" href="/problems">Coding Challenges</a></li>
+<nav x-data="{ mobileOpen: false }" class="bg-gradient-to-r from-brand-600 to-brand-800 shadow-xl sticky top-0 z-50">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between h-16">
+      <a class="flex items-center gap-3 text-white font-bold text-xl" href="/">
+        <div class="w-10 h-10 bg-white/15 rounded-2xl flex items-center justify-center">
+          <i class="fas fa-circle-question text-accent-300"></i>
+        </div>
+        <span><%= appName %></span>
+      </a>
+
+      <div class="hidden md:flex items-center gap-10">
+        <a class="nav-link" href="/">Home</a>
+        <a class="nav-link" href="/about">About</a>
+        <a class="nav-link" href="/problems">Coding Challenges</a>
+      </div>
+
+      <div class="hidden md:flex items-center gap-3">
         <% if (!currentUser) { %>
-          <li class="nav-item"><a class="nav-link" href="/auth/login">Login</a></li>
-          <li class="nav-item"><a class="btn btn-light btn-sm" href="/auth/register">Register</a></li>
-        <% } else if (currentUser.role === 'admin') { %>
-          <li class="nav-item dropdown">
-            <button class="btn user-profile-btn dropdown-toggle" type="button" data-bs-toggle="dropdown">
-              <div class="user-avatar"><%= currentUser.name.charAt(0).toUpperCase() %></div>
-              <span><%= currentUser.name %></span>
-            </button>
-            <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="/admin/dashboard"><i class="fa-solid fa-gauge me-2"></i>Dashboard</a></li>
-              <li><a class="dropdown-item" href="/problems/manage"><i class="fa-solid fa-code me-2"></i>Manage Problems</a></li>
-              <li><hr class="dropdown-divider"></li>
-              <li><form action="/auth/logout" method="POST"><button class="dropdown-item" type="submit"><i class="fa-solid fa-sign-out me-2"></i>Logout</button></form></li>
-            </ul>
-          </li>
-        <% } else if (currentUser.role === 'teacher') { %>
-          <% if (currentUser.teacherStatus === 'pending' || currentUser.teacherStatus === 'rejected') { %>
-            <li class="nav-item"><a class="nav-link" href="/auth/teacher-pending">Teacher Access</a></li>
-          <% } else { %>
-          <li class="nav-item dropdown">
-            <button class="btn user-profile-btn dropdown-toggle" type="button" data-bs-toggle="dropdown">
-              <div class="user-avatar"><%= currentUser.name.charAt(0).toUpperCase() %></div>
-              <span><%= currentUser.name %></span>
-            </button>
-            <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="/teacher/dashboard"><i class="fa-solid fa-gauge me-2"></i>Dashboard</a></li>
-              <li><a class="dropdown-item" href="/teacher/quizzes"><i class="fa-solid fa-book me-2"></i>My Quizzes</a></li>
-              <li><a class="dropdown-item" href="/problems/manage"><i class="fa-solid fa-code me-2"></i>Problems</a></li>
-              <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item" href="/teacher/quizzes/new"><i class="fa-solid fa-plus me-2"></i>Create Quiz</a></li>
-              <li><a class="dropdown-item" href="/problems/create/new"><i class="fa-solid fa-code me-2"></i>Create Problem</a></li>
-              <li><hr class="dropdown-divider"></li>
-              <li><form action="/auth/logout" method="POST"><button class="dropdown-item" type="submit"><i class="fa-solid fa-sign-out me-2"></i>Logout</button></form></li>
-            </ul>
-          </li>
-          <% } %>
+          <a class="text-white hover:text-accent-300 transition" href="/auth/login">Login</a>
+          <a class="btn-primary" href="/auth/register">Register</a>
         <% } else { %>
-          <li class="nav-item dropdown">
-            <button class="btn user-profile-btn dropdown-toggle" type="button" data-bs-toggle="dropdown">
-              <div class="user-avatar"><%= currentUser.name.charAt(0).toUpperCase() %></div>
-              <span><%= currentUser.name %></span>
+          <div x-data="{ open: false }" class="relative">
+            <button @click="open = !open" class="flex items-center gap-3 rounded-full bg-white/10 px-4 py-2 text-white transition hover:bg-white/20">
+              <div class="flex h-10 w-10 items-center justify-center rounded-full bg-white/20 font-semibold">
+                <%= currentUser.name.charAt(0).toUpperCase() %>
+              </div>
+              <span class="hidden sm:inline"><%= currentUser.name %></span>
+              <i class="fas fa-chevron-down text-sm"></i>
             </button>
-            <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="/student/dashboard"><i class="fa-solid fa-gauge me-2"></i>Dashboard</a></li>
-              <li><a class="dropdown-item" href="/enrollments/my-quizzes"><i class="fa-solid fa-book me-2"></i>My Exams</a></li>
-              <li><a class="dropdown-item" href="/enrollments/browse"><i class="fa-solid fa-magnifying-glass me-2"></i>Browse</a></li>
-              <li><a class="dropdown-item" href="/enrollments/progress"><i class="fa-solid fa-chart-line me-2"></i>Progress</a></li>
-              <li><a class="dropdown-item" href="/enrollments/leaderboard"><i class="fa-solid fa-trophy me-2"></i>Leaderboard</a></li>
-              <li><a class="dropdown-item" href="/student/history"><i class="fa-solid fa-history me-2"></i>History</a></li>
-              <li><hr class="dropdown-divider"></li>
-              <li><form action="/auth/logout" method="POST"><button class="dropdown-item" type="submit"><i class="fa-solid fa-sign-out me-2"></i>Logout</button></form></li>
-            </ul>
-          </li>
+            <div x-show="open" @click.away="open = false" x-transition class="absolute right-0 mt-3 w-64 overflow-hidden rounded-3xl bg-white text-gray-800 shadow-2xl ring-1 ring-black ring-opacity-5">
+              <div class="divide-y divide-gray-100">
+                <div class="px-5 py-3">
+                  <% if (currentUser.role === 'admin') { %>
+                    <a class="block px-4 py-3 rounded-2xl hover:bg-gray-50" href="/admin/dashboard"><i class="fas fa-gauge mr-3"></i>Admin Dashboard</a>
+                    <a class="block px-4 py-3 rounded-2xl hover:bg-gray-50" href="/problems/manage"><i class="fas fa-code mr-3"></i>Manage Problems</a>
+                  <% } else if (currentUser.role === 'teacher') { %>
+                    <% if (currentUser.teacherStatus === 'pending' || currentUser.teacherStatus === 'rejected') { %>
+                      <a class="block px-4 py-3 rounded-2xl hover:bg-gray-50" href="/auth/teacher-pending"><i class="fas fa-user-clock mr-3"></i>Teacher Access</a>
+                    <% } else { %>
+                      <a class="block px-4 py-3 rounded-2xl hover:bg-gray-50" href="/teacher/dashboard"><i class="fas fa-gauge mr-3"></i>Teacher Dashboard</a>
+                      <a class="block px-4 py-3 rounded-2xl hover:bg-gray-50" href="/teacher/quizzes"><i class="fas fa-book mr-3"></i>My Quizzes</a>
+                      <a class="block px-4 py-3 rounded-2xl hover:bg-gray-50" href="/teacher/quizzes/new"><i class="fas fa-plus mr-3"></i>Create Quiz</a>
+                    <% } %>
+                  <% } else { %>
+                    <a class="block px-4 py-3 rounded-2xl hover:bg-gray-50" href="/student/dashboard"><i class="fas fa-gauge mr-3"></i>Student Dashboard</a>
+                    <a class="block px-4 py-3 rounded-2xl hover:bg-gray-50" href="/student/quizzes"><i class="fas fa-book mr-3"></i>My Quizzes</a>
+                    <a class="block px-4 py-3 rounded-2xl hover:bg-gray-50" href="/student/history"><i class="fas fa-history mr-3"></i>History</a>
+                  <% } %>
+                </div>
+                <div class="px-5 py-4">
+                  <form action="/auth/logout" method="POST">
+                    <button type="submit" class="w-full rounded-2xl bg-red-600 px-4 py-3 text-white hover:bg-red-700 transition">Logout</button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
         <% } %>
-      </ul>
+      </div>
+
+      <button @click="mobileOpen = !mobileOpen" class="md:hidden p-2 text-white">
+        <i class="fas fa-bars"></i>
+      </button>
+    </div>
+
+    <div x-show="mobileOpen" x-transition class="md:hidden pb-4">
+      <div class="space-y-2 pt-4">
+        <a class="block px-4 py-3 rounded-2xl text-white hover:bg-white/10" href="/">Home</a>
+        <a class="block px-4 py-3 rounded-2xl text-white hover:bg-white/10" href="/about">About</a>
+        <a class="block px-4 py-3 rounded-2xl text-white hover:bg-white/10" href="/problems">Coding Challenges</a>
+        <% if (!currentUser) { %>
+          <a class="block px-4 py-3 rounded-2xl text-white hover:bg-white/10" href="/auth/login">Login</a>
+          <a class="block px-4 py-3 rounded-2xl bg-white text-brand-700 font-semibold" href="/auth/register">Register</a>
+        <% } %>
+      </div>
     </div>
   </div>
 </nav>

@@ -1,60 +1,464 @@
 <% layout('layouts/main') %>
 
-<section class="hero-band">
-  <div class="container py-5">
-    <div class="row align-items-center g-5">
-      <div class="col-lg-7">
-        <span class="eyebrow">Online Quiz Management System</span>
-        <h1 class="display-4 fw-bold mt-3">Create, deliver, and review quizzes from one clean dashboard.</h1>
-        <p class="lead text-muted mt-3">Teachers can build quizzes with multiple question types. Students can take timed quizzes, see results, review attempts, and track rank.</p>
-        <div class="d-flex flex-wrap gap-2 mt-4">
-          <a class="btn btn-primary btn-lg" href="/auth/register">Get Started</a>
-          <a class="btn btn-outline-primary btn-lg" href="/student/quizzes">Browse Quizzes</a>
+<!-- Hero Section -->
+<section class="hero-gradient relative overflow-hidden">
+  <div class="absolute inset-0 bg-gradient-to-br from-brand-600/10 via-transparent to-accent-600/10"></div>
+  <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-32">
+    <div class="grid lg:grid-cols-2 gap-12 items-center">
+      <div class="animate-fade-in">
+        <div class="inline-flex items-center px-4 py-2 rounded-full bg-brand-100 text-brand-800 text-sm font-medium mb-6">
+          <i class="fas fa-star text-yellow-500 mr-2"></i>
+          Trusted by 10,000+ students and teachers
+        </div>
+        <h1 class="text-4xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+          Transform Learning with
+          <span class="text-gradient">Smart Quizzes</span>
+        </h1>
+        <p class="text-xl text-gray-600 mb-8 leading-relaxed">
+          Create, deliver, and analyze quizzes with advanced analytics. Empower teachers to build engaging assessments and help students track their progress with real-time insights.
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4">
+          <a href="/auth/register" class="btn-primary text-center px-8 py-4 text-lg">
+            <i class="fas fa-rocket mr-2"></i>
+            Get Started Free
+          </a>
+          <a href="/student/quizzes" class="btn-secondary text-center px-8 py-4 text-lg">
+            <i class="fas fa-play mr-2"></i>
+            Browse Quizzes
+          </a>
+        </div>
+        <div class="flex items-center gap-8 mt-8 text-sm text-gray-500">
+          <div class="flex items-center gap-2">
+            <i class="fas fa-check text-green-500"></i>
+            <span>No credit card required</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <i class="fas fa-check text-green-500"></i>
+            <span>Free forever plan</span>
+          </div>
         </div>
       </div>
-      <div class="col-lg-5">
-        <div class="hero-panel">
-          <div class="d-flex justify-content-between align-items-center mb-3">
-            <strong>Live Quiz</strong><span class="badge text-bg-success">Published</span>
+
+      <div class="relative animate-slide-up">
+        <div class="glass-card p-8">
+          <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center gap-3">
+              <div class="w-12 h-12 bg-brand-100 rounded-lg flex items-center justify-center">
+                <i class="fas fa-brain text-brand-600 text-xl"></i>
+              </div>
+              <div>
+                <h3 class="font-semibold text-gray-900">Advanced Quiz</h3>
+                <p class="text-sm text-gray-500">Mathematics • 45 mins</p>
+              </div>
+            </div>
+            <span class="px-3 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">Published</span>
           </div>
-          <div class="progress mb-3" style="height: 10px;"><div class="progress-bar" style="width: 72%;"></div></div>
-          <div class="d-grid gap-3">
-            <div class="mini-row"><i class="fa-solid fa-clock"></i><span>Timed attempts</span></div>
-            <div class="mini-row"><i class="fa-solid fa-chart-simple"></i><span>Instant analytics</span></div>
-            <div class="mini-row"><i class="fa-solid fa-trophy"></i><span>Leaderboards</span></div>
+
+          <div class="space-y-4 mb-6">
+            <div class="flex items-center justify-between">
+              <span class="text-sm text-gray-600">Progress</span>
+              <span class="text-sm font-medium text-gray-900">72%</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2">
+              <div class="bg-brand-600 h-2 rounded-full" style="width: 72%"></div>
+            </div>
           </div>
+
+          <div class="grid grid-cols-3 gap-4 text-center">
+            <div class="p-3 bg-gray-50 rounded-lg">
+              <i class="fas fa-clock text-accent-600 mb-1"></i>
+              <p class="text-xs text-gray-600">Timed</p>
+            </div>
+            <div class="p-3 bg-gray-50 rounded-lg">
+              <i class="fas fa-chart-line text-brand-600 mb-1"></i>
+              <p class="text-xs text-gray-600">Analytics</p>
+            </div>
+            <div class="p-3 bg-gray-50 rounded-lg">
+              <i class="fas fa-trophy text-yellow-600 mb-1"></i>
+              <p class="text-xs text-gray-600">Leaderboard</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Floating elements -->
+        <div class="absolute -top-4 -right-4 w-20 h-20 bg-accent-100 rounded-full flex items-center justify-center animate-bounce-subtle">
+          <i class="fas fa-graduation-cap text-accent-600 text-2xl"></i>
+        </div>
+        <div class="absolute -bottom-4 -left-4 w-16 h-16 bg-brand-100 rounded-full flex items-center justify-center animate-bounce-subtle" style="animation-delay: 1s">
+          <i class="fas fa-star text-brand-600 text-xl"></i>
         </div>
       </div>
     </div>
   </div>
 </section>
 
-<section class="container py-5">
-  <div class="row g-4">
-    <div class="col-md-4"><div class="feature-card"><i class="fa-solid fa-pen-to-square"></i><h3>Teacher Tools</h3><p>Create, edit, publish, review, and analyze quizzes.</p></div></div>
-    <div class="col-md-4"><div class="feature-card"><i class="fa-solid fa-user-graduate"></i><h3>Student Flow</h3><p>Browse quizzes, take timed attempts, and view history.</p></div></div>
-    <div class="col-md-4"><div class="feature-card"><i class="fa-solid fa-shield-halved"></i><h3>Secure Access</h3><p>Passport sessions, local auth, Google OAuth, and role checks.</p></div></div>
+<!-- Features Section -->
+<section class="py-24 bg-white">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center mb-16">
+      <h2 class="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
+        Everything you need for modern assessment
+      </h2>
+      <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+        Powerful features designed to make quiz creation and management effortless for educators and engaging for students.
+      </p>
+    </div>
+
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div class="card group hover:scale-105 transition-transform duration-200">
+        <div class="w-12 h-12 bg-brand-100 rounded-lg flex items-center justify-center mb-4 group-hover:bg-brand-200 transition-colors">
+          <i class="fas fa-pen-to-square text-brand-600 text-xl"></i>
+        </div>
+        <h3 class="text-xl font-semibold text-gray-900 mb-2">Teacher Tools</h3>
+        <p class="text-gray-600">Create, edit, publish, review, and analyze quizzes with comprehensive analytics and student insights.</p>
+      </div>
+
+      <div class="card group hover:scale-105 transition-transform duration-200">
+        <div class="w-12 h-12 bg-accent-100 rounded-lg flex items-center justify-center mb-4 group-hover:bg-accent-200 transition-colors">
+          <i class="fas fa-user-graduate text-accent-600 text-xl"></i>
+        </div>
+        <h3 class="text-xl font-semibold text-gray-900 mb-2">Student Experience</h3>
+        <p class="text-gray-600">Browse quizzes, take timed attempts, view detailed results, and track progress with leaderboards.</p>
+      </div>
+
+      <div class="card group hover:scale-105 transition-transform duration-200">
+        <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4 group-hover:bg-green-200 transition-colors">
+          <i class="fas fa-shield-halved text-green-600 text-xl"></i>
+        </div>
+        <h3 class="text-xl font-semibold text-gray-900 mb-2">Secure & Reliable</h3>
+        <p class="text-gray-600">Enterprise-grade security with Passport authentication, role-based access, and Google OAuth integration.</p>
+      </div>
+
+      <div class="card group hover:scale-105 transition-transform duration-200">
+        <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4 group-hover:bg-purple-200 transition-colors">
+          <i class="fas fa-chart-bar text-purple-600 text-xl"></i>
+        </div>
+        <h3 class="text-xl font-semibold text-gray-900 mb-2">Advanced Analytics</h3>
+        <p class="text-gray-600">Detailed performance metrics, progress tracking, and comprehensive reporting for data-driven decisions.</p>
+      </div>
+
+      <div class="card group hover:scale-105 transition-transform duration-200">
+        <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mb-4 group-hover:bg-orange-200 transition-colors">
+          <i class="fas fa-mobile-alt text-orange-600 text-xl"></i>
+        </div>
+        <h3 class="text-xl font-semibold text-gray-900 mb-2">Mobile First</h3>
+        <p class="text-gray-600">Fully responsive design that works perfectly on all devices - desktop, tablet, and mobile.</p>
+      </div>
+    </div>
   </div>
 </section>
 
-<section class="container pb-5">
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <h2 class="h4 mb-0">Recently Published</h2>
-    <a href="/student/quizzes" class="btn btn-sm btn-outline-primary">View all</a>
+<!-- How It Works Section -->
+<section class="py-24 bg-gray-50">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center mb-16">
+      <h2 class="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
+        How it works
+      </h2>
+      <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+        Get started in minutes with our simple 3-step process
+      </p>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-8">
+      <div class="text-center">
+        <div class="w-16 h-16 bg-brand-600 rounded-full flex items-center justify-center mx-auto mb-6 text-white text-2xl font-bold">
+          1
+        </div>
+        <h3 class="text-xl font-semibold text-gray-900 mb-4">Create Account</h3>
+        <p class="text-gray-600">Sign up as a teacher or student. Teachers need approval to access creation tools.</p>
+      </div>
+
+      <div class="text-center">
+        <div class="w-16 h-16 bg-brand-600 rounded-full flex items-center justify-center mx-auto mb-6 text-white text-2xl font-bold">
+          2
+        </div>
+        <h3 class="text-xl font-semibold text-gray-900 mb-4">Create or Take Quiz</h3>
+        <p class="text-gray-600">Teachers build quizzes with various question types. Students browse and attempt available quizzes.</p>
+      </div>
+
+      <div class="text-center">
+        <div class="w-16 h-16 bg-brand-600 rounded-full flex items-center justify-center mx-auto mb-6 text-white text-2xl font-bold">
+          3
+        </div>
+        <h3 class="text-xl font-semibold text-gray-900 mb-4">Analyze Results</h3>
+        <p class="text-gray-600">View detailed analytics, track progress, and improve learning outcomes with comprehensive insights.</p>
+      </div>
+    </div>
   </div>
-  <div class="row g-3">
-    <% if (featuredQuizzes.length === 0) { %>
-      <div class="col-12"><div class="empty-state">No published quizzes yet.</div></div>
-    <% } %>
-    <% featuredQuizzes.forEach((quiz) => { %>
-      <div class="col-md-6 col-lg-4">
-        <div class="quiz-card h-100">
-          <span class="badge text-bg-light"><%= quiz.category %></span>
-          <h3 class="h5 mt-3"><%= quiz.title %></h3>
-          <p class="text-muted"><%= quiz.description || 'A focused quiz for practice and assessment.' %></p>
-          <div class="small text-muted"><i class="fa-regular fa-clock me-1"></i><%= quiz.duration %> min</div>
+</section>
+
+<!-- Role Showcase Section -->
+<section class="py-24 bg-white">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center mb-16">
+      <h2 class="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
+        Built for every role
+      </h2>
+      <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+        Tailored experiences for students, teachers, and administrators
+      </p>
+    </div>
+
+    <div class="grid lg:grid-cols-3 gap-8">
+      <!-- Student Card -->
+      <div class="card text-center group hover:scale-105 transition-transform duration-200">
+        <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-blue-200 transition-colors">
+          <i class="fas fa-user-graduate text-blue-600 text-3xl"></i>
+        </div>
+        <h3 class="text-2xl font-semibold text-gray-900 mb-4">Students</h3>
+        <ul class="text-left space-y-3 mb-6">
+          <li class="flex items-center gap-3">
+            <i class="fas fa-check text-green-500"></i>
+            <span>Take timed quizzes</span>
+          </li>
+          <li class="flex items-center gap-3">
+            <i class="fas fa-check text-green-500"></i>
+            <span>View detailed results</span>
+          </li>
+          <li class="flex items-center gap-3">
+            <i class="fas fa-check text-green-500"></i>
+            <span>Track progress & rankings</span>
+          </li>
+        </ul>
+        <a href="/auth/register?role=student" class="btn-primary w-full">
+          Join as Student
+        </a>
+      </div>
+
+      <!-- Teacher Card -->
+      <div class="card text-center group hover:scale-105 transition-transform duration-200 border-2 border-brand-200">
+        <div class="w-20 h-20 bg-brand-100 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-brand-200 transition-colors">
+          <i class="fas fa-chalkboard-teacher text-brand-600 text-3xl"></i>
+        </div>
+        <h3 class="text-2xl font-semibold text-gray-900 mb-4">Teachers</h3>
+        <ul class="text-left space-y-3 mb-6">
+          <li class="flex items-center gap-3">
+            <i class="fas fa-check text-green-500"></i>
+            <span>Create & manage quizzes</span>
+          </li>
+          <li class="flex items-center gap-3">
+            <i class="fas fa-check text-green-500"></i>
+            <span>Advanced analytics</span>
+          </li>
+          <li class="flex items-center gap-3">
+            <i class="fas fa-check text-green-500"></i>
+            <span>Student performance insights</span>
+          </li>
+          <li class="flex items-center gap-3">
+            <i class="fas fa-check text-green-500"></i>
+            <span>Coding problem management</span>
+          </li>
+        </ul>
+        <a href="/auth/register?role=teacher" class="bg-brand-600 hover:bg-brand-700 text-white font-medium px-6 py-3 rounded-lg w-full inline-block transition-colors">
+          Join as Teacher
+        </a>
+      </div>
+
+      <!-- Admin Card -->
+      <div class="card text-center group hover:scale-105 transition-transform duration-200">
+        <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-gray-200 transition-colors">
+          <i class="fas fa-cog text-gray-600 text-3xl"></i>
+        </div>
+        <h3 class="text-2xl font-semibold text-gray-900 mb-4">Administrators</h3>
+        <ul class="text-left space-y-3 mb-6">
+          <li class="flex items-center gap-3">
+            <i class="fas fa-check text-green-500"></i>
+            <span>User management</span>
+          </li>
+          <li class="flex items-center gap-3">
+            <i class="fas fa-check text-green-500"></i>
+            <span>Teacher approvals</span>
+          </li>
+          <li class="flex items-center gap-3">
+            <i class="fas fa-check text-green-500"></i>
+            <span>System analytics</span>
+          </li>
+          <li class="flex items-center gap-3">
+            <i class="fas fa-check text-green-500"></i>
+            <span>Content moderation</span>
+          </li>
+        </ul>
+        <span class="bg-gray-100 text-gray-600 font-medium px-6 py-3 rounded-lg w-full inline-block">
+          Admin Access Only
+        </span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Stats Section -->
+<section class="py-24 bg-gradient-to-r from-brand-600 to-brand-800 text-white">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="grid md:grid-cols-4 gap-8 text-center">
+      <div>
+        <div class="text-4xl font-bold mb-2">10K+</div>
+        <div class="text-brand-100">Active Students</div>
+      </div>
+      <div>
+        <div class="text-4xl font-bold mb-2">500+</div>
+        <div class="text-brand-100">Expert Teachers</div>
+      </div>
+      <div>
+        <div class="text-4xl font-bold mb-2">25K+</div>
+        <div class="text-brand-100">Quizzes Created</div>
+      </div>
+      <div>
+        <div class="text-4xl font-bold mb-2">95%</div>
+        <div class="text-brand-100">Success Rate</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Testimonials Section -->
+<section class="py-24 bg-gray-50">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center mb-16">
+      <h2 class="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
+        Loved by educators worldwide
+      </h2>
+      <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+        See what teachers and students say about our platform
+      </p>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-8">
+      <div class="card">
+        <div class="flex items-center mb-4">
+          <div class="w-12 h-12 bg-brand-100 rounded-full flex items-center justify-center mr-4">
+            <span class="font-semibold text-brand-600">SM</span>
+          </div>
+          <div>
+            <div class="font-semibold text-gray-900">Sarah Mitchell</div>
+            <div class="text-sm text-gray-500">Math Teacher</div>
+          </div>
+        </div>
+        <p class="text-gray-600 italic">"This platform has revolutionized how I assess my students. The analytics are incredible and save me hours of grading time."</p>
+        <div class="flex text-yellow-400 mt-4">
+          <i class="fas fa-star"></i>
+          <i class="fas fa-star"></i>
+          <i class="fas fa-star"></i>
+          <i class="fas fa-star"></i>
+          <i class="fas fa-star"></i>
         </div>
       </div>
-    <% }) %>
+
+      <div class="card">
+        <div class="flex items-center mb-4">
+          <div class="w-12 h-12 bg-accent-100 rounded-full flex items-center justify-center mr-4">
+            <span class="font-semibold text-accent-600">JD</span>
+          </div>
+          <div>
+            <div class="font-semibold text-gray-900">James Davis</div>
+            <div class="text-sm text-gray-500">Biology Teacher</div>
+          </div>
+        </div>
+        <p class="text-gray-600 italic">"The platform has made assessment so much easier. My students love the interactive format and I can see their progress clearly."</p>
+        <div class="flex text-yellow-400 mt-4">
+          <i class="fas fa-star"></i>
+          <i class="fas fa-star"></i>
+          <i class="fas fa-star"></i>
+          <i class="fas fa-star"></i>
+          <i class="fas fa-star"></i>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="flex items-center mb-4">
+          <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mr-4">
+            <span class="font-semibold text-green-600">LR</span>
+          </div>
+          <div>
+            <div class="font-semibold text-gray-900">Lisa Rodriguez</div>
+            <div class="text-sm text-gray-500">School Administrator</div>
+          </div>
+        </div>
+        <p class="text-gray-600 italic">"The admin dashboard gives us complete visibility into student performance across all subjects. Game-changing for our school."</p>
+        <div class="flex text-yellow-400 mt-4">
+          <i class="fas fa-star"></i>
+          <i class="fas fa-star"></i>
+          <i class="fas fa-star"></i>
+          <i class="fas fa-star"></i>
+          <i class="fas fa-star"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ Section -->
+<section class="py-24 bg-white">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center mb-16">
+      <h2 class="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
+        Frequently asked questions
+      </h2>
+      <p class="text-xl text-gray-600">
+        Everything you need to know about our platform
+      </p>
+    </div>
+
+    <div class="space-y-6">
+      <div class="card">
+        <details class="group">
+          <summary class="flex justify-between items-center cursor-pointer font-semibold text-lg">
+            <span>How do I get started as a teacher?</span>
+            <i class="fas fa-chevron-down group-open:rotate-180 transition-transform"></i>
+          </summary>
+          <p class="mt-4 text-gray-600">Sign up for a teacher account and wait for admin approval. Once approved, you can create quizzes, manage students, and access advanced analytics.</p>
+        </details>
+      </div>
+
+      <div class="card">
+        <details class="group">
+          <summary class="flex justify-between items-center cursor-pointer font-semibold text-lg">
+            <span>Are there any fees for using the platform?</span>
+            <i class="fas fa-chevron-down group-open:rotate-180 transition-transform"></i>
+          </summary>
+          <p class="mt-4 text-gray-600">We offer a free forever plan with all essential features. Premium plans are available for larger institutions with advanced analytics and priority support.</p>
+        </details>
+      </div>
+
+      <div class="card">
+        <details class="group">
+          <summary class="flex justify-between items-center cursor-pointer font-semibold text-lg">
+            <span>What types of questions can I create?</span>
+            <i class="fas fa-chevron-down group-open:rotate-180 transition-transform"></i>
+          </summary>
+          <p class="mt-4 text-gray-600">Support for multiple choice, true/false, short answer, and more. You can mix different question types within a single quiz.</p>
+        </details>
+      </div>
+
+      <div class="card">
+        <details class="group">
+          <summary class="flex justify-between items-center cursor-pointer font-semibold text-lg">
+            <span>Is the platform mobile-friendly?</span>
+            <i class="fas fa-chevron-down group-open:rotate-180 transition-transform"></i>
+          </summary>
+          <p class="mt-4 text-gray-600">Yes! Our platform is fully responsive and works perfectly on desktop, tablet, and mobile devices. Students can take quizzes anywhere.</p>
+        </details>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-24 bg-gradient-to-r from-brand-600 to-accent-600 text-white">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+    <h2 class="text-3xl lg:text-4xl font-bold mb-6">
+      Ready to transform your assessment process?
+    </h2>
+    <p class="text-xl mb-8 text-brand-100">
+      Join thousands of educators and students already using our platform
+    </p>
+    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+      <a href="/auth/register" class="btn-primary bg-white text-brand-600 hover:bg-gray-50 px-8 py-4 text-lg">
+        Get Started Today
+      </a>
+      <a href="/about" class="btn-secondary border-white text-white hover:bg-white hover:text-brand-600 px-8 py-4 text-lg">
+        Learn More
+      </a>
+    </div>
   </div>
 </section>

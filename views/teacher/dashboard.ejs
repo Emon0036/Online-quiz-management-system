@@ -1,30 +1,211 @@
 <% layout('layouts/main') %>
-<section class="dashboard-hero">
-  <div class="container">
-    <div class="hero-content">
-      <div class="greeting-section">
-        <div class="greeting-icon">
-          <i class="fa-solid fa-chalkboard-teacher"></i>
+
+<div class="flex min-h-screen bg-gray-50">
+  <!-- Sidebar -->
+  <div class="w-64 bg-white shadow-lg">
+    <div class="p-6 border-b border-gray-200">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 bg-accent-100 rounded-full flex items-center justify-center">
+          <i class="fas fa-chalkboard-teacher text-accent-600"></i>
         </div>
-        <div class="greeting-text">
-          <h1>Welcome back, <%= currentUser.name %>!</h1>
-          <p>Create and manage quizzes, review submissions, and track student progress</p>
+        <div>
+          <h3 class="font-semibold text-gray-900"><%= currentUser.name %></h3>
+          <p class="text-sm text-gray-500">Teacher Dashboard</p>
         </div>
       </div>
     </div>
-  </div>
-</section>
 
-<section class="container py-4">
-  <div class="row g-3 mb-4">
-    <div class="col-md"><div class="stat-tile"><span>Total Quizzes</span><strong><%= stats.totalQuizzes %></strong></div></div>
-    <div class="col-md"><div class="stat-tile"><span>Published</span><strong><%= stats.publishedQuizzes %></strong></div></div>
-    <div class="col-md"><div class="stat-tile"><span>Drafts</span><strong><%= stats.draftQuizzes %></strong></div></div>
-    <div class="col-md"><div class="stat-tile"><span>Attempts</span><strong><%= stats.totalAttempts %></strong></div></div>
-    <div class="col-md"><div class="stat-tile"><span>Manual Review</span><strong><%= stats.pendingReviews %></strong></div></div>
+    <nav class="p-4 space-y-2">
+      <a href="/teacher/dashboard" class="flex items-center space-x-3 px-4 py-3 text-accent-600 bg-accent-50 rounded-lg font-medium">
+        <i class="fas fa-home"></i>
+        <span>Dashboard</span>
+      </a>
+      <a href="/teacher/quizzes" class="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
+        <i class="fas fa-book"></i>
+        <span>My Quizzes</span>
+      </a>
+      <a href="/teacher/quizzes/new" class="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
+        <i class="fas fa-plus"></i>
+        <span>Create Quiz</span>
+      </a>
+      <a href="/teacher/analytics" class="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
+        <i class="fas fa-chart-bar"></i>
+        <span>Analytics</span>
+      </a>
+      <a href="/teacher/submissions" class="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
+        <i class="fas fa-file-alt"></i>
+        <span>Submissions</span>
+      </a>
+      <a href="/problems/manage" class="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
+        <i class="fas fa-code"></i>
+        <span>Problems</span>
+      </a>
+    </nav>
   </div>
-  <div class="table-card">
-    <div class="d-flex justify-content-between align-items-center mb-3"><h2 class="h5 mb-0">Recent Quizzes</h2><a href="/teacher/quizzes">Manage all</a></div>
-    <%- include('quiz-table', { quizzes }) %>
+
+  <!-- Main Content -->
+  <div class="flex-1 p-8">
+    <!-- Header -->
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 mb-2">
+        Welcome back, <%= currentUser.name %>! 👋
+      </h1>
+      <p class="text-gray-600">Manage your quizzes and track student performance</p>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <a href="/teacher/quizzes/new" class="card group hover:scale-105 transition-transform duration-200 text-center">
+        <div class="w-16 h-16 bg-brand-100 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-brand-200 transition-colors">
+          <i class="fas fa-plus text-brand-600 text-2xl"></i>
+        </div>
+        <h3 class="text-lg font-semibold text-gray-900 mb-2">Create New Quiz</h3>
+        <p class="text-gray-600 text-sm">Build engaging assessments for your students</p>
+      </a>
+
+      <a href="/teacher/quizzes" class="card group hover:scale-105 transition-transform duration-200 text-center">
+        <div class="w-16 h-16 bg-accent-100 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-accent-200 transition-colors">
+          <i class="fas fa-book text-accent-600 text-2xl"></i>
+        </div>
+        <h3 class="text-lg font-semibold text-gray-900 mb-2">Manage Quizzes</h3>
+        <p class="text-gray-600 text-sm">Edit, publish, and organize your quizzes</p>
+      </a>
+
+      <a href="/teacher/analytics" class="card group hover:scale-105 transition-transform duration-200 text-center">
+        <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-green-200 transition-colors">
+          <i class="fas fa-chart-line text-green-600 text-2xl"></i>
+        </div>
+        <h3 class="text-lg font-semibold text-gray-900 mb-2">View Analytics</h3>
+        <p class="text-gray-600 text-sm">Analyze student performance and insights</p>
+      </a>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+      <div class="card">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium text-gray-600">Total Quizzes</p>
+            <p class="text-2xl font-bold text-gray-900"><%= stats.totalQuizzes %></p>
+          </div>
+          <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+            <i class="fas fa-book text-blue-600"></i>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium text-gray-600">Published</p>
+            <p class="text-2xl font-bold text-gray-900"><%= stats.publishedQuizzes %></p>
+          </div>
+          <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+            <i class="fas fa-check text-green-600"></i>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium text-gray-600">Drafts</p>
+            <p class="text-2xl font-bold text-gray-900"><%= stats.draftQuizzes %></p>
+          </div>
+          <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+            <i class="fas fa-edit text-yellow-600"></i>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium text-gray-600">Total Attempts</p>
+            <p class="text-2xl font-bold text-gray-900"><%= stats.totalAttempts %></p>
+          </div>
+          <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+            <i class="fas fa-users text-purple-600"></i>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium text-gray-600">Pending Reviews</p>
+            <p class="text-2xl font-bold text-gray-900"><%= stats.pendingReviews %></p>
+          </div>
+          <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+            <i class="fas fa-clock text-orange-600"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Quizzes -->
+    <div class="card">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-xl font-semibold text-gray-900">Recent Quizzes</h2>
+        <a href="/teacher/quizzes" class="text-accent-600 hover:text-accent-700 text-sm font-medium">
+          View all
+        </a>
+      </div>
+
+      <% if (quizzes && quizzes.length > 0) { %>
+        <div class="space-y-4">
+          <% quizzes.slice(0, 5).forEach(quiz => { %>
+            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+              <div class="flex items-center space-x-4">
+                <div class="w-10 h-10 bg-accent-100 rounded-lg flex items-center justify-center">
+                  <i class="fas fa-file-alt text-accent-600"></i>
+                </div>
+                <div>
+                  <h4 class="font-medium text-gray-900"><%= quiz.title %></h4>
+                  <p class="text-sm text-gray-500">
+                    <%= quiz.questions ? quiz.questions.length : 0 %> questions •
+                    <%= new Date(quiz.createdAt).toLocaleDateString() %>
+                  </p>
+                </div>
+              </div>
+              <div class="flex items-center space-x-3">
+                <span class="px-3 py-1 rounded-full text-xs font-medium
+                  <%= quiz.published ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800' %>">
+                  <%= quiz.published ? 'Published' : 'Draft' %>
+                </span>
+                <a href="/teacher/quizzes/<%= quiz._id %>/edit" class="text-gray-400 hover:text-gray-600">
+                  <i class="fas fa-edit"></i>
+                </a>
+              </div>
+            </div>
+          <% }) %>
+        </div>
+      <% } else { %>
+        <div class="text-center py-8">
+          <i class="fas fa-book-open text-4xl text-gray-300 mb-4"></i>
+          <h3 class="text-lg font-medium text-gray-900 mb-2">No quizzes yet</h3>
+          <p class="text-gray-500">Create your first quiz to get started.</p>
+          <a href="/teacher/quizzes/new" class="btn-primary mt-4 inline-block">
+            Create Quiz
+          </a>
+        </div>
+      <% } %>
+    </div>
+
+    <!-- Pending Reviews Alert -->
+    <% if (stats.pendingReviews > 0) { %>
+      <div class="mt-6 bg-orange-50 border border-orange-200 rounded-lg p-4">
+        <div class="flex items-center">
+          <i class="fas fa-exclamation-triangle text-orange-500 mr-3"></i>
+          <div>
+            <h4 class="text-sm font-medium text-orange-800">Pending Reviews</h4>
+            <p class="text-sm text-orange-700">
+              You have <%= stats.pendingReviews %> submission<%= stats.pendingReviews > 1 ? 's' : '' %> waiting for review.
+              <a href="/teacher/submissions" class="font-medium underline">Review now</a>
+            </p>
+          </div>
+        </div>
+      </div>
+    <% } %>
   </div>
-</section>
+</div>

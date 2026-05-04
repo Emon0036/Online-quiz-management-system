@@ -1,17 +1,195 @@
 <% layout('layouts/main') %>
-<section class="auth-wrap">
-  <div class="auth-card">
-    <h1>Welcome back</h1>
-    <p class="text-muted">Log in to continue to your dashboard.</p>
-    <form action="/auth/login" method="POST" class="vstack gap-3">
-      <input class="form-control" type="email" name="email" placeholder="Email address" required>
-      <input class="form-control" type="password" name="password" placeholder="Password" required>
-      <button class="btn btn-primary w-100" type="submit">Login</button>
-    </form>
-    <a class="btn btn-outline-danger w-100 mt-3" href="/auth/google"><i class="fa-brands fa-google me-2"></i>Continue with Google</a>
-    <div class="d-flex justify-content-between small mt-3">
-      <a href="/auth/register">Create account</a>
-      <a href="/auth/forgot-password">Forgot password?</a>
+
+<div class="min-h-screen flex">
+  <!-- Left side - Branding -->
+  <div class="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-brand-600 via-brand-700 to-brand-800 p-12 flex-col justify-between text-white relative overflow-hidden">
+    <div class="absolute inset-0 bg-black/10"></div>
+    <div class="relative z-10">
+      <div class="flex items-center space-x-3 mb-8">
+        <div class="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
+          <i class="fas fa-circle-question text-2xl text-accent-400"></i>
+        </div>
+        <span class="text-2xl font-bold"><%= appName %></span>
+      </div>
+
+      <div class="mb-8">
+        <h1 class="text-4xl font-bold mb-4">Welcome back!</h1>
+        <p class="text-xl text-brand-100 leading-relaxed">
+          Continue your learning journey with personalized quizzes and track your progress.
+        </p>
+      </div>
+
+      <div class="space-y-6">
+        <div class="flex items-center space-x-4">
+          <div class="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
+            <i class="fas fa-brain text-accent-400"></i>
+          </div>
+          <div>
+            <h3 class="font-semibold">Smart Assessment</h3>
+            <p class="text-brand-200 text-sm">AI-powered quiz recommendations</p>
+          </div>
+        </div>
+
+        <div class="flex items-center space-x-4">
+          <div class="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
+            <i class="fas fa-chart-line text-accent-400"></i>
+          </div>
+          <div>
+            <h3 class="font-semibold">Progress Tracking</h3>
+            <p class="text-brand-200 text-sm">Detailed analytics and insights</p>
+          </div>
+        </div>
+
+        <div class="flex items-center space-x-4">
+          <div class="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
+            <i class="fas fa-trophy text-accent-400"></i>
+          </div>
+          <div>
+            <h3 class="font-semibold">Leaderboards</h3>
+            <p class="text-brand-200 text-sm">Compete with peers globally</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="relative z-10">
+      <blockquote class="text-lg italic mb-4">
+        "This platform has transformed how we assess and teach. The insights are incredible."
+      </blockquote>
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+          <span class="font-semibold text-sm">SM</span>
+        </div>
+        <div>
+          <div class="font-semibold">Sarah Mitchell</div>
+          <div class="text-brand-200 text-sm">Math Teacher</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Background decoration -->
+    <div class="absolute top-20 right-20 w-64 h-64 bg-accent-500/20 rounded-full blur-3xl"></div>
+    <div class="absolute bottom-20 left-20 w-48 h-48 bg-brand-400/20 rounded-full blur-3xl"></div>
+  </div>
+
+  <!-- Right side - Login Form -->
+  <div class="w-full lg:w-1/2 flex items-center justify-center p-8 bg-gray-50">
+    <div class="w-full max-w-md space-y-8">
+      <div class="text-center">
+        <h2 class="text-3xl font-bold text-gray-900 mb-2">Sign in to your account</h2>
+        <p class="text-gray-600">Enter your credentials to access your dashboard</p>
+      </div>
+
+      <!-- Flash Messages -->
+      <% if (typeof messages !== 'undefined' && messages.error) { %>
+        <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg animate-slide-up">
+          <div class="flex items-center">
+            <i class="fas fa-exclamation-triangle mr-2"></i>
+            <%= messages.error %>
+          </div>
+        </div>
+      <% } %>
+
+      <form action="/auth/login" method="POST" class="space-y-6" x-data="{ showPassword: false }">
+        <div>
+          <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
+            Email address
+          </label>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            required
+            class="form-input"
+            placeholder="Enter your email"
+            value="<%= typeof email !== 'undefined' ? email : '' %>"
+          >
+        </div>
+
+        <div>
+          <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
+            Password
+          </label>
+          <div class="relative">
+            <input
+              id="password"
+              name="password"
+              :type="showPassword ? 'text' : 'password'"
+              required
+              class="form-input pr-12"
+              placeholder="Enter your password"
+            >
+            <button
+              type="button"
+              @click="showPassword = !showPassword"
+              class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            >
+              <i :class="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between">
+          <div class="flex items-center">
+            <input
+              id="remember"
+              name="remember"
+              type="checkbox"
+              class="h-4 w-4 text-brand-600 focus:ring-brand-500 border-gray-300 rounded"
+            >
+            <label for="remember" class="ml-2 block text-sm text-gray-700">
+              Remember me
+            </label>
+          </div>
+
+          <a href="/auth/forgot-password" class="text-sm text-brand-600 hover:text-brand-500 font-medium">
+            Forgot password?
+          </a>
+        </div>
+
+        <button type="submit" class="btn-primary w-full py-3 text-lg font-medium">
+          <i class="fas fa-sign-in mr-2"></i>
+          Sign In
+        </button>
+      </form>
+
+      <div class="relative">
+        <div class="absolute inset-0 flex items-center">
+          <div class="w-full border-t border-gray-300"></div>
+        </div>
+        <div class="relative flex justify-center text-sm">
+          <span class="px-2 bg-gray-50 text-gray-500">Or continue with</span>
+        </div>
+      </div>
+
+      <a
+        href="/auth/google"
+        class="w-full flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg shadow-sm bg-white text-gray-700 hover:bg-gray-50 transition-colors"
+      >
+        <i class="fab fa-google text-red-500 mr-3"></i>
+        Continue with Google
+      </a>
+
+      <div class="text-center">
+        <p class="text-gray-600">
+          Don't have an account?
+          <a href="/auth/register" class="text-brand-600 hover:text-brand-500 font-medium">
+            Sign up for free
+          </a>
+        </p>
+      </div>
+
+      <!-- Demo credentials for development -->
+      <% if (process.env.NODE_ENV === 'development') { %>
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <h4 class="text-sm font-medium text-blue-800 mb-2">Demo Credentials</h4>
+          <div class="text-xs text-blue-700 space-y-1">
+            <div><strong>Admin:</strong> admin@example.com / admin123</div>
+            <div><strong>Teacher:</strong> teacher@example.com / teacher123</div>
+            <div><strong>Student:</strong> student@example.com / student123</div>
+          </div>
+        </div>
+      <% } %>
     </div>
   </div>
-</section>
+</div>

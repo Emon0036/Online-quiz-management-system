@@ -1,72 +1,203 @@
 <% layout('layouts/main') %>
-<section class="dashboard-hero">
-  <div class="container">
-    <div class="hero-content">
-      <div class="greeting-section">
-        <div class="greeting-icon">
-          <i class="fa-solid fa-graduation-cap"></i>
+
+<div class="flex min-h-screen bg-gray-50">
+  <!-- Sidebar -->
+  <div class="w-64 bg-white shadow-lg">
+    <div class="p-6 border-b border-gray-200">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 bg-brand-100 rounded-full flex items-center justify-center">
+          <i class="fas fa-user-graduate text-brand-600"></i>
         </div>
-        <div class="greeting-text">
-          <h1>Welcome back, <%= currentUser.name %>!</h1>
-          <p>Take exams, track your progress, and compete on the leaderboards</p>
+        <div>
+          <h3 class="font-semibold text-gray-900"><%= currentUser.name %></h3>
+          <p class="text-sm text-gray-500">Student Dashboard</p>
         </div>
       </div>
     </div>
-  </div>
-</section>
 
-<section class="container py-4">
-  <div class="row g-3 mb-4">
-    <div class="col-md-3"><div class="stat-tile"><span>Enrolled Exams</span><strong><%= stats.enrolledCount %></strong></div></div>
-    <div class="col-md-3"><div class="stat-tile"><span>Available Exams</span><strong><%= stats.availableQuizCount %></strong></div></div>
-    <div class="col-md-3"><div class="stat-tile"><span>Total Points</span><strong><%= progress.totalPoints %></strong></div></div>
-    <div class="col-md-3"><div class="stat-tile"><span>Avg Score</span><strong><%= progress.averageScore %>%</strong></div></div>
+    <nav class="p-4 space-y-2">
+      <a href="/student/dashboard" class="flex items-center space-x-3 px-4 py-3 text-brand-600 bg-brand-50 rounded-lg font-medium">
+        <i class="fas fa-home"></i>
+        <span>Dashboard</span>
+      </a>
+      <a href="/student/quizzes" class="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
+        <i class="fas fa-book"></i>
+        <span>My Quizzes</span>
+      </a>
+      <a href="/student/history" class="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
+        <i class="fas fa-history"></i>
+        <span>Attempt History</span>
+      </a>
+      <a href="/student/leaderboard" class="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
+        <i class="fas fa-trophy"></i>
+        <span>Leaderboard</span>
+      </a>
+      <a href="/student/progress" class="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
+        <i class="fas fa-chart-line"></i>
+        <span>Progress</span>
+      </a>
+      <a href="/problems" class="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
+        <i class="fas fa-code"></i>
+        <span>Coding Challenges</span>
+      </a>
+    </nav>
   </div>
 
-  <div class="row g-3 mb-4">
-    <div class="col-md-6 col-lg-3">
-      <a class="quiz-card h-100 d-block text-decoration-none" href="/enrollments/my-quizzes?type=quiz">
-        <div class="d-flex justify-content-between align-items-center">
-          <span class="badge text-bg-secondary">Category</span>
-          <span class="badge text-bg-primary"><%= examTypeCounts.quiz %></span>
+  <!-- Main Content -->
+  <div class="flex-1 p-8">
+    <!-- Header -->
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 mb-2">
+        Welcome back, <%= currentUser.name %>! 👋
+      </h1>
+      <p class="text-gray-600">Ready to continue your learning journey?</p>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div class="card">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium text-gray-600">Enrolled Quizzes</p>
+            <p class="text-2xl font-bold text-gray-900"><%= stats.enrolledCount %></p>
+          </div>
+          <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+            <i class="fas fa-book text-blue-600"></i>
+          </div>
         </div>
-        <h2 class="h5 mt-3 mb-1">Quiz</h2>
-        <p class="text-muted mb-0">MCQ & mixed exams</p>
+      </div>
+
+      <div class="card">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium text-gray-600">Available Quizzes</p>
+            <p class="text-2xl font-bold text-gray-900"><%= stats.availableQuizCount %></p>
+          </div>
+          <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+            <i class="fas fa-plus text-green-600"></i>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium text-gray-600">Total Points</p>
+            <p class="text-2xl font-bold text-gray-900"><%= progress.totalPoints %></p>
+          </div>
+          <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+            <i class="fas fa-star text-yellow-600"></i>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium text-gray-600">Average Score</p>
+            <p class="text-2xl font-bold text-gray-900"><%= progress.averageScore %>%</p>
+          </div>
+          <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+            <i class="fas fa-chart-bar text-purple-600"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <a href="/enrollments/my-quizzes?type=quiz" class="card group hover:scale-105 transition-transform duration-200">
+        <div class="flex items-center justify-between mb-4">
+          <span class="px-3 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">Quiz</span>
+          <span class="text-2xl font-bold text-blue-600"><%= examTypeCounts.quiz %></span>
+        </div>
+        <h3 class="text-lg font-semibold text-gray-900 mb-2">Multiple Choice</h3>
+        <p class="text-gray-600 text-sm">MCQ & mixed format quizzes</p>
+        <div class="mt-4 flex items-center text-blue-600 group-hover:text-blue-700">
+          <span class="text-sm font-medium">View Quizzes</span>
+          <i class="fas fa-arrow-right ml-2"></i>
+        </div>
+      </a>
+
+      <a href="/enrollments/my-quizzes?type=true-false" class="card group hover:scale-105 transition-transform duration-200">
+        <div class="flex items-center justify-between mb-4">
+          <span class="px-3 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">True/False</span>
+          <span class="text-2xl font-bold text-green-600"><%= examTypeCounts['true-false'] %></span>
+        </div>
+        <h3 class="text-lg font-semibold text-gray-900 mb-2">True / False</h3>
+        <p class="text-gray-600 text-sm">Quick concept assessments</p>
+        <div class="mt-4 flex items-center text-green-600 group-hover:text-green-700">
+          <span class="text-sm font-medium">View Quizzes</span>
+          <i class="fas fa-arrow-right ml-2"></i>
+        </div>
+      </a>
+
+      <a href="/enrollments/my-quizzes?type=short-answer" class="card group hover:scale-105 transition-transform duration-200">
+        <div class="flex items-center justify-between mb-4">
+          <span class="px-3 py-1 bg-orange-100 text-orange-800 text-xs font-medium rounded-full">Short Answer</span>
+          <span class="text-2xl font-bold text-orange-600"><%= examTypeCounts['short-answer'] %></span>
+        </div>
+        <h3 class="text-lg font-semibold text-gray-900 mb-2">Short Answer</h3>
+        <p class="text-gray-600 text-sm">Teacher-reviewed responses</p>
+        <div class="mt-4 flex items-center text-orange-600 group-hover:text-orange-700">
+          <span class="text-sm font-medium">View Quizzes</span>
+          <i class="fas fa-arrow-right ml-2"></i>
+        </div>
+      </a>
+
+      <a href="/problems" class="card group hover:scale-105 transition-transform duration-200">
+        <div class="flex items-center justify-between mb-4">
+          <span class="px-3 py-1 bg-purple-100 text-purple-800 text-xs font-medium rounded-full">Coding</span>
+          <span class="text-2xl font-bold text-purple-600">∞</span>
+        </div>
+        <h3 class="text-lg font-semibold text-gray-900 mb-2">Coding Challenges</h3>
+        <p class="text-gray-600 text-sm">Practice programming skills</p>
+        <div class="mt-4 flex items-center text-purple-600 group-hover:text-purple-700">
+          <span class="text-sm font-medium">Start Coding</span>
+          <i class="fas fa-arrow-right ml-2"></i>
+        </div>
       </a>
     </div>
-    <div class="col-md-6 col-lg-3">
-      <a class="quiz-card h-100 d-block text-decoration-none" href="/enrollments/my-quizzes?type=true-false">
-        <div class="d-flex justify-content-between align-items-center">
-          <span class="badge text-bg-secondary">Category</span>
-          <span class="badge text-bg-primary"><%= examTypeCounts['true-false'] %></span>
+
+    <!-- Recent Activity -->
+    <div class="card">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-xl font-semibold text-gray-900">Recent Attempts</h2>
+        <a href="/student/history" class="text-brand-600 hover:text-brand-700 text-sm font-medium">
+          View all
+        </a>
+      </div>
+
+      <% if (recentAttempts && recentAttempts.length > 0) { %>
+        <div class="space-y-4">
+          <% recentAttempts.slice(0, 5).forEach(attempt => { %>
+            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+              <div class="flex items-center space-x-4">
+                <div class="w-10 h-10 bg-brand-100 rounded-lg flex items-center justify-center">
+                  <i class="fas fa-file-alt text-brand-600"></i>
+                </div>
+                <div>
+                  <h4 class="font-medium text-gray-900"><%= attempt.quiz.title %></h4>
+                  <p class="text-sm text-gray-500"><%= new Date(attempt.createdAt).toLocaleDateString() %></p>
+                </div>
+              </div>
+              <div class="text-right">
+                <div class="text-lg font-semibold text-gray-900"><%= attempt.score %>%</div>
+                <div class="text-sm text-gray-500">Score</div>
+              </div>
+            </div>
+          <% }) %>
         </div>
-        <h2 class="h5 mt-3 mb-1">True / False</h2>
-        <p class="text-muted mb-0">Quick concept checks</p>
-      </a>
-    </div>
-    <div class="col-md-6 col-lg-3">
-      <a class="quiz-card h-100 d-block text-decoration-none" href="/enrollments/my-quizzes?type=short-answer">
-        <div class="d-flex justify-content-between align-items-center">
-          <span class="badge text-bg-secondary">Category</span>
-          <span class="badge text-bg-primary"><%= examTypeCounts['short-answer'] %></span>
+      <% } else { %>
+        <div class="text-center py-8">
+          <i class="fas fa-inbox text-4xl text-gray-300 mb-4"></i>
+          <h3 class="text-lg font-medium text-gray-900 mb-2">No recent attempts</h3>
+          <p class="text-gray-500">Start taking quizzes to see your activity here.</p>
+          <a href="/student/quizzes" class="btn-primary mt-4 inline-block">
+            Browse Quizzes
+          </a>
         </div>
-        <h2 class="h5 mt-3 mb-1">Short Question</h2>
-        <p class="text-muted mb-0">Teacher-reviewed answers</p>
-      </a>
-    </div>
-    <div class="col-md-6 col-lg-3">
-      <a class="quiz-card h-100 d-block text-decoration-none" href="/problems">
-        <div class="d-flex justify-content-between align-items-center">
-          <span class="badge text-bg-secondary">Category</span>
-          <span class="badge text-bg-primary">Code</span>
-        </div>
-        <h2 class="h5 mt-3 mb-1">Coding Test</h2>
-        <p class="text-muted mb-0">Practice & submissions</p>
-      </a>
+      <% } %>
     </div>
   </div>
-  <div class="table-card">
-    <h2 class="h5 mb-3">Recent Attempts</h2>
-    <%- include('history-table', { attempts: recentAttempts }) %>
-  </div>
-</section>
+</div>

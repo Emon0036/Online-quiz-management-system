@@ -1,16 +1,26 @@
 <% if (users.length === 0) { %>
-  <p class="text-muted mb-0"><%= emptyText %></p>
+  <div class="empty-state text-slate-600"><%= emptyText %></div>
 <% } else { %>
-  <div class="table-responsive">
-    <table class="table align-middle">
-      <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th></tr></thead>
+  <div class="overflow-x-auto">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Role</th>
+          <th>Status</th>
+        </tr>
+      </thead>
       <tbody>
-        <% users.forEach((user) => { %>
+        <% users.forEach((user) => {
+             const statusValue = user.role === 'teacher' ? (user.teacherStatus || 'approved') : 'active';
+             const statusClass = statusValue === 'approved' ? 'approved' : statusValue === 'pending' ? 'pending' : 'rejected';
+        %>
           <tr>
             <td><%= user.name %></td>
             <td><%= user.email %></td>
-            <td><span class="badge text-bg-light"><%= user.role %></span></td>
-            <td><%= user.role === 'teacher' ? (user.teacherStatus || 'approved') : 'active' %></td>
+            <td><span class="status-pill approved"><%= user.role %></span></td>
+            <td><span class="status-pill <%= statusClass %>"><%= statusValue %></span></td>
           </tr>
         <% }) %>
       </tbody>

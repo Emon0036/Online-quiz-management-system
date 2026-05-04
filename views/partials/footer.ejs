@@ -1,5 +1,60 @@
-<footer class="border-top py-4 mt-5">
-  <div class="container d-flex flex-column flex-md-row justify-content-between gap-2 small text-muted">
-    <span>&copy; <%= new Date().getFullYear() %> <%= appName %>. Online quiz management made simple.</span>
+<footer class="bg-white border-t border-gray-200 mt-16">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+      <!-- Brand -->
+      <div class="col-span-1 md:col-span-2">
+        <div class="flex items-center space-x-3 mb-4">
+          <div class="w-10 h-10 bg-brand-100 rounded-lg flex items-center justify-center">
+            <i class="fas fa-circle-question text-brand-600 text-xl"></i>
+          </div>
+          <span class="text-xl font-bold text-gray-900"><%= appName %></span>
+        </div>
+        <p class="text-gray-600 mb-4 max-w-md">
+          Empowering education through innovative quiz management. Create, deliver, and analyze assessments with ease.
+        </p>
+        <div class="flex space-x-4">
+          <a href="#" class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center text-gray-600 hover:bg-brand-100 hover:text-brand-600 transition-colors">
+            <i class="fab fa-twitter"></i>
+          </a>
+          <a href="#" class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center text-gray-600 hover:bg-brand-100 hover:text-brand-600 transition-colors">
+            <i class="fab fa-linkedin"></i>
+          </a>
+          <a href="#" class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center text-gray-600 hover:bg-brand-100 hover:text-brand-600 transition-colors">
+            <i class="fab fa-github"></i>
+          </a>
+        </div>
+      </div>
+
+      <!-- Product -->
+      <div>
+        <h3 class="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4">Product</h3>
+        <ul class="space-y-3">
+          <li><a href="/about" class="text-gray-600 hover:text-brand-600 transition-colors">About</a></li>
+          <li><a href="/features" class="text-gray-600 hover:text-brand-600 transition-colors">Features</a></li>
+          <li><a href="/pricing" class="text-gray-600 hover:text-brand-600 transition-colors">Pricing</a></li>
+          <li><a href="/problems" class="text-gray-600 hover:text-brand-600 transition-colors">Coding Challenges</a></li>
+        </ul>
+      </div>
+
+      <!-- Support -->
+      <div>
+        <h3 class="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4">Support</h3>
+        <ul class="space-y-3">
+          <li><a href="/help" class="text-gray-600 hover:text-brand-600 transition-colors">Help Center</a></li>
+          <li><a href="/contact" class="text-gray-600 hover:text-brand-600 transition-colors">Contact Us</a></li>
+          <li><a href="/privacy" class="text-gray-600 hover:text-brand-600 transition-colors">Privacy Policy</a></li>
+          <li><a href="/terms" class="text-gray-600 hover:text-brand-600 transition-colors">Terms of Service</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="border-t border-gray-200 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
+      <p class="text-gray-600 text-sm">
+        &copy; <%= new Date().getFullYear() %> <%= appName %>. All rights reserved.
+      </p>
+      <p class="text-gray-600 text-sm mt-2 md:mt-0">
+        Made with <i class="fas fa-heart text-red-500 mx-1"></i> for education
+      </p>
+    </div>
   </div>
 </footer>

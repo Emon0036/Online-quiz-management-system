@@ -1,73 +1,110 @@
 <% layout('layouts/main') %>
-<section class="dashboard-hero">
-  <div class="container">
-    <div class="hero-content">
-      <div class="greeting-section">
-        <div class="greeting-icon">
-          <i class="fa-solid fa-crown"></i>
+<section class="hero-panel overflow-hidden">
+  <div class="max-w-7xl mx-auto px-4 py-10 sm:px-6 lg:px-8">
+    <div class="grid gap-6 lg:grid-cols-[1.6fr_1fr] items-center">
+      <div>
+        <p class="eyebrow">Administrator Workspace</p>
+        <h1 class="text-4xl font-semibold tracking-tight text-slate-900 mb-3">Welcome back, <%= currentUser.name %>!</h1>
+        <p class="max-w-2xl text-slate-600 leading-7">Manage permissions, monitor platform health, and approve teacher requests with a secure, centralized admin experience.</p>
+      </div>
+      <div class="grid gap-4 sm:grid-cols-2">
+        <div class="mini-row">
+          <div class="text-slate-500 text-sm">Active Students</div>
+          <div class="text-2xl font-semibold text-slate-900"><%= stats.students %></div>
         </div>
-        <div class="greeting-text">
-          <h1>Welcome back, <%= currentUser.name %>!</h1>
-          <p>Manage your quiz management system with full administrative control</p>
+        <div class="mini-row">
+          <div class="text-slate-500 text-sm">Active Teachers</div>
+          <div class="text-2xl font-semibold text-slate-900"><%= stats.teachers %></div>
+        </div>
+        <div class="mini-row">
+          <div class="text-slate-500 text-sm">Pending Requests</div>
+          <div class="text-2xl font-semibold text-slate-900"><%= stats.pendingTeachers %></div>
+        </div>
+        <div class="mini-row">
+          <div class="text-slate-500 text-sm">Admin Users</div>
+          <div class="text-2xl font-semibold text-slate-900"><%= stats.admins %></div>
         </div>
       </div>
     </div>
   </div>
 </section>
 
-<section class="container py-4">
+<section class="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8 space-y-6">
+  <div class="grid gap-4 lg:grid-cols-2">
+    <div class="form-panel">
+      <div class="mb-5">
+        <p class="eyebrow">Teacher Access</p>
+        <h2 class="text-2xl font-semibold">Grant teacher privileges</h2>
+      </div>
+      <form action="/admin/teachers/grant" method="POST" class="grid gap-4 sm:grid-cols-[1fr_auto] items-end">
+        <label class="block">
+          <span class="text-sm font-medium text-slate-700">Teacher email</span>
+          <input class="input-field mt-2" type="email" name="email" placeholder="user@example.com" required>
+        </label>
+        <button class="btn-primary w-full sm:w-auto" type="submit">Grant access</button>
+      </form>
+    </div>
 
-  <div class="row g-3 mb-4">
-    <div class="col-md"><div class="stat-tile"><span>Students</span><strong><%= stats.students %></strong></div></div>
-    <div class="col-md"><div class="stat-tile"><span>Teachers</span><strong><%= stats.teachers %></strong></div></div>
-    <div class="col-md"><div class="stat-tile"><span>Pending Teachers</span><strong><%= stats.pendingTeachers %></strong></div></div>
-    <div class="col-md"><div class="stat-tile"><span>Admins</span><strong><%= stats.admins %></strong></div></div>
+    <div class="form-panel">
+      <div class="mb-5">
+        <p class="eyebrow">Administrator Setup</p>
+        <h2 class="text-2xl font-semibold">Create a new admin</h2>
+      </div>
+      <form action="/admin/admins" method="POST" class="grid gap-4">
+        <label class="block">
+          <span class="text-sm font-medium text-slate-700">Full name</span>
+          <input class="input-field mt-2" name="name" placeholder="Jane Doe" required>
+        </label>
+        <label class="block">
+          <span class="text-sm font-medium text-slate-700">Email address</span>
+          <input class="input-field mt-2" type="email" name="email" placeholder="admin@example.com" required>
+        </label>
+        <label class="block">
+          <span class="text-sm font-medium text-slate-700">Password</span>
+          <input class="input-field mt-2" type="password" name="password" placeholder="••••••••" minlength="6" required>
+        </label>
+        <button class="btn-secondary w-full" type="submit">Create admin</button>
+      </form>
+    </div>
   </div>
 
-  <div class="row g-4 mb-4">
-    <div class="col-lg-6">
-      <div class="form-panel h-100">
-        <h2 class="h5">Give Teacher Access by Email</h2>
-        <form action="/admin/teachers/grant" method="POST" class="d-flex gap-2">
-          <input class="form-control" type="email" name="email" placeholder="user@example.com" required>
-          <button class="btn btn-primary" type="submit">Grant</button>
-        </form>
+  <div class="table-card">
+    <div class="section-title">
+      <div>
+        <p class="eyebrow">Teacher Requests</p>
+        <h2 class="text-2xl font-semibold">Pending approvals</h2>
       </div>
+      <span class="status-pill pending"><i class="fas fa-clock"></i> <%= pendingTeachers.length %> waiting</span>
     </div>
-    <div class="col-lg-6">
-      <div class="form-panel h-100">
-        <h2 class="h5">Create Admin</h2>
-        <form action="/admin/admins" method="POST" class="row g-2">
-          <div class="col-md-4"><input class="form-control" name="name" placeholder="Name" required></div>
-          <div class="col-md-4"><input class="form-control" type="email" name="email" placeholder="Email" required></div>
-          <div class="col-md-4"><input class="form-control" type="password" name="password" placeholder="Password" minlength="6" required></div>
-          <div class="col-12"><button class="btn btn-outline-primary" type="submit">Create Admin</button></div>
-        </form>
-      </div>
-    </div>
-  </div>
 
-  <div class="table-card mb-4">
-    <h2 class="h5 mb-3">Pending Teacher Requests</h2>
     <% if (pendingTeachers.length === 0) { %>
-      <p class="text-muted mb-0">No teacher requests are waiting.</p>
+      <div class="empty-state text-slate-600">No teacher requests are waiting.</div>
     <% } else { %>
-      <div class="table-responsive">
-        <table class="table align-middle">
-          <thead><tr><th>Name</th><th>Email</th><th>Requested</th><th class="text-end">Action</th></tr></thead>
+      <div class="overflow-x-auto">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Requested</th>
+              <th>Action</th>
+            </tr>
+          </thead>
           <tbody>
             <% pendingTeachers.forEach((teacher) => { %>
               <tr>
                 <td><%= teacher.name %></td>
                 <td><%= teacher.email %></td>
                 <td><%= teacher.createdAt.toLocaleDateString() %></td>
-                <td class="text-end">
-                  <form action="/admin/teachers/<%= teacher._id %>/approve?_method=PATCH" method="POST" class="d-inline">
-                    <button class="btn btn-sm btn-success" type="submit">Approve</button>
-                  </form>
-                  <form action="/admin/teachers/<%= teacher._id %>/reject?_method=PATCH" method="POST" class="d-inline">
-                    <button class="btn btn-sm btn-outline-danger" type="submit">Reject</button>
-                  </form>
+                <td>
+                  <div class="flex flex-wrap gap-2 justify-end">
+                    <form action="/admin/teachers/<%= teacher._id %>/approve?_method=PATCH" method="POST">
+                      <button class="btn-primary" type="submit">Approve</button>
+                    </form>
+                    <form action="/admin/teachers/<%= teacher._id %>/reject?_method=PATCH" method="POST">
+                      <button class="btn-secondary" type="submit">Reject</button>
+                    </form>
+                  </div>
                 </td>
               </tr>
             <% }) %>
@@ -77,18 +114,18 @@
     <% } %>
   </div>
 
-  <div class="row g-4">
-    <div class="col-lg-6">
-      <div class="table-card">
-        <h2 class="h5 mb-3">Students</h2>
-        <%- include('user-table', { users: students, emptyText: 'No students yet.' }) %>
+  <div class="grid gap-4 lg:grid-cols-2">
+    <div class="table-card">
+      <div class="section-title">
+        <h2 class="text-2xl font-semibold">Students</h2>
       </div>
+      <%- include('user-table', { users: students, emptyText: 'No students yet.' }) %>
     </div>
-    <div class="col-lg-6">
-      <div class="table-card">
-        <h2 class="h5 mb-3">Teachers</h2>
-        <%- include('user-table', { users: teachers, emptyText: 'No teachers yet.' }) %>
+    <div class="table-card">
+      <div class="section-title">
+        <h2 class="text-2xl font-semibold">Teachers</h2>
       </div>
+      <%- include('user-table', { users: teachers, emptyText: 'No teachers yet.' }) %>
     </div>
   </div>
 </section>
