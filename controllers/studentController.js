@@ -32,7 +32,9 @@ exports.dashboard = async (req, res) => {
     Quiz.countDocuments({ status: 'published' }),
     Attempt.countDocuments({ student: req.user._id }),
     Enrollment.find({ student: req.user._id }).populate('quiz', 'examType').select('status quiz'),
-    Progress.findOne({ student: req.user._id }).select('totalPoints averageScore streak'),
+    Progress.findOne({ student: req.user._id }).select(
+      'totalPoints averageScore streak totalQuizzes completedQuizzes inProgressQuizzes totalAttempts passedQuizzes failedQuizzes'
+    ),
     Attempt.countDocuments({ student: req.user._id, status: 'pending-review' }),
   ]);
 
@@ -47,7 +49,17 @@ exports.dashboard = async (req, res) => {
     recentAttempts,
     stats: { availableQuizCount, completedCount, enrolledCount: enrollments.length, pendingReviewCount },
     examTypeCounts,
-    progress: progress || { totalPoints: 0, averageScore: 0, streak: 0 },
+    progress: progress || {
+      totalPoints: 0,
+      averageScore: 0,
+      streak: 0,
+      totalQuizzes: 0,
+      completedQuizzes: 0,
+      inProgressQuizzes: 0,
+      totalAttempts: 0,
+      passedQuizzes: 0,
+      failedQuizzes: 0,
+    },
   });
 };
 

@@ -18,8 +18,31 @@
     averageScore: 0,
     totalPoints: 0,
     streak: 0,
+    totalQuizzes: 0,
+    completedQuizzes: 0,
+    inProgressQuizzes: 0,
+    totalAttempts: 0,
+    passedQuizzes: 0,
+    failedQuizzes: 0,
     ...(progress || {})
   };
+  const latestAttempt = recentAttempts && recentAttempts.length ? recentAttempts[0] : null;
+  const latestAttemptScore = latestAttempt ? Number(latestAttempt.score || 0) : 0;
+  const latestAttemptTotal = latestAttempt ? Number(latestAttempt.totalMarks || 0) : 0;
+  const latestAttemptPercent = latestAttempt ? Number(latestAttempt.percentage || 0) : 0;
+  const progressTotalQuizzes = Number(dashboardProgress.totalQuizzes || dashboardStats.enrolledCount || 0);
+  const progressCompletedQuizzes = Number(dashboardProgress.completedQuizzes || 0);
+  const progressInProgressQuizzes = Number(dashboardProgress.inProgressQuizzes || 0);
+  const progressTotalAttempts = Number(dashboardProgress.totalAttempts || 0);
+  const progressPassedQuizzes = Number(dashboardProgress.passedQuizzes || 0);
+  const progressFailedQuizzes = Number(dashboardProgress.failedQuizzes || 0);
+  const progressReviewedOutcomes = progressPassedQuizzes + progressFailedQuizzes;
+  const dashboardCompletionRate = progressTotalQuizzes
+    ? Math.max(0, Math.min(100, Math.round((progressCompletedQuizzes / progressTotalQuizzes) * 100)))
+    : 0;
+  const dashboardPassRate = progressReviewedOutcomes
+    ? Math.max(0, Math.min(100, Math.round((progressPassedQuizzes / progressReviewedOutcomes) * 100)))
+    : 0;
   const studentExamSegments = [
     {
       label: 'Quizzes',
@@ -182,6 +205,116 @@
             <a href="/student/history"><i class="fas fa-clock-rotate-left"></i><span>View attempt history</span></a>
           </div>
         </div>
+      </div>
+    </section>
+
+    <section class="score-explainer">
+      <div class="panel-header">
+        <div class="panel-header__copy">
+          <span class="eyebrow">Score Breakdown</span>
+          <h2>How your marks, points, and progress are calculated</h2>
+          <p>This is the exact flow the system follows after you submit an exam, including what waits for teacher review.</p>
+        </div>
+        <a href="/student/history" class="btn btn-outline-primary btn-sm">Open score history</a>
+      </div>
+
+      <div class="calculation-snapshot">
+        <article>
+          <span>Latest attempt formula</span>
+          <strong>
+            <% if (latestAttempt) { %>
+              <%= latestAttemptScore %>/<%= latestAttemptTotal %> = <%= latestAttemptPercent %>%
+            <% } else { %>
+              No attempt yet
+            <% } %>
+          </strong>
+          <small>Percentage is rounded from marks earned divided by total marks.</small>
+        </article>
+        <article>
+          <span>Finalized attempts</span>
+          <strong><%= progressTotalAttempts %></strong>
+          <small>Used for average score, points, streak, and global leaderboard.</small>
+        </article>
+        <article>
+          <span>Pending review</span>
+          <strong><%= dashboardStats.pendingReviewCount %></strong>
+          <small>Manual answers are not added to progress until a teacher finishes marking.</small>
+        </article>
+        <article>
+          <span>Completion progress</span>
+          <strong><%= dashboardCompletionRate %>%</strong>
+          <small><%= progressCompletedQuizzes %> completed out of <%= progressTotalQuizzes %> enrolled progress records.</small>
+        </article>
+      </div>
+
+      <div class="calculation-flow">
+        <article class="calculation-step">
+          <span class="calculation-step__number">1</span>
+          <div>
+            <h3>Question marks are added first</h3>
+            <p>Multiple-choice and true/false questions are auto-graded. A correct answer gets the full question marks, and an incorrect or blank answer gets 0 for that question.</p>
+          </div>
+        </article>
+        <article class="calculation-step">
+          <span class="calculation-step__number">2</span>
+          <div>
+            <h3>Manual questions wait for the teacher</h3>
+            <p>Short-answer and coding questions start with 0 temporary marks and a pending-review status. Your final score updates only after the teacher enters marks and feedback.</p>
+          </div>
+        </article>
+        <article class="calculation-step">
+          <span class="calculation-step__number">3</span>
+          <div>
+            <h3>Percentage decides pass or fail</h3>
+            <p>The system calculates <strong>percentage = round((marks earned / total marks) x 100)</strong>. You pass when that percentage is equal to or higher than the exam pass mark.</p>
+          </div>
+        </article>
+        <article class="calculation-step">
+          <span class="calculation-step__number">4</span>
+          <div>
+            <h3>Progress updates after final scoring</h3>
+            <p>Auto-graded exams update immediately. Teacher-reviewed exams update later, after review. Then your attempts, average score, total points, completion, streak, and leaderboard numbers are refreshed.</p>
+          </div>
+        </article>
+      </div>
+
+      <div class="formula-grid">
+        <article class="formula-card">
+          <i class="fas fa-percent"></i>
+          <h3>Average score</h3>
+          <p>Your average is a rolling average of finalized percentages: old average plus the new finalized percentage, divided across all finalized attempts.</p>
+          <strong>Current: <%= dashboardProgress.averageScore %>%</strong>
+        </article>
+        <article class="formula-card">
+          <i class="fas fa-star"></i>
+          <h3>Total points</h3>
+          <p>Points use your percentage with a difficulty multiplier: Easy x1, Medium x1.25, Hard x1.5. The result is rounded and added to your total.</p>
+          <strong>Current: <%= dashboardProgress.totalPoints %></strong>
+        </article>
+        <article class="formula-card">
+          <i class="fas fa-fire"></i>
+          <h3>Streak</h3>
+          <p>Your streak increases when you finalize activity on the next day. Same-day activity keeps the streak, and a missed day starts it again from 1.</p>
+          <strong>Current: <%= dashboardProgress.streak %> day<%= Number(dashboardProgress.streak || 0) === 1 ? '' : 's' %></strong>
+        </article>
+        <article class="formula-card">
+          <i class="fas fa-trophy"></i>
+          <h3>Leaderboards</h3>
+          <p>Quiz leaderboards keep your best percentage for that exam. The global leaderboard ranks students by total points first, then average score for ties.</p>
+          <strong>Pass rate: <%= dashboardPassRate %>%</strong>
+        </article>
+        <article class="formula-card">
+          <i class="fas fa-hourglass-half"></i>
+          <h3>In progress</h3>
+          <p>Enrolling adds an exam to your progress list. It remains in progress until a submitted attempt is finalized by auto-grading or teacher review.</p>
+          <strong>Current: <%= progressInProgressQuizzes %></strong>
+        </article>
+        <article class="formula-card">
+          <i class="fas fa-medal"></i>
+          <h3>Grades</h3>
+          <p>Result grades follow the final percentage: A is 90%+, B is 80%+, C is 70%+, D is 60%+, and F is below 60%.</p>
+          <strong>Passed: <%= progressPassedQuizzes %> / Failed: <%= progressFailedQuizzes %></strong>
+        </article>
       </div>
     </section>
 
