@@ -5,6 +5,7 @@ const Result = require('../models/Result');
 const Leaderboard = require('../models/Leaderboard');
 const Enrollment = require('../models/Enrollment');
 const { finalizeQuizAttempt } = require('../utils/quizProgress');
+const { uploadQuizThumbnail, destroyQuizThumbnail } = require('../utils/quizThumbnailService');
 
 const EXAM_TYPES = ['quiz', 'true-false', 'short-answer', 'coding-test'];
 const DIFFICULTY_LEVELS = ['Easy', 'Medium', 'Hard'];
@@ -209,7 +210,17 @@ exports.createQuiz = async (req, res) => {
     return res.redirect('/teacher/quizzes/new');
   }
 
-  const quiz = await Quiz.create({ ...payload, createdBy: req.user._id, status: 'draft' });
+  let thumbnailPayload = {};
+  if (req.file) {
+    try {
+      thumbnailPayload = await uploadQuizThumbnail(req.file, 'new');
+    } catch (error) {
+      req.flash('error', error.message || 'Thumbnail upload failed.');
+      return res.redirect('/teacher/quizzes/new');
+    }
+  }
+
+  const quiz = await Quiz.create({ ...payload, ...thumbnailPayload, createdBy: req.user._id, status: 'draft' });
   await Leaderboard.create({ quiz: quiz._id, entries: [] });
   req.flash('success', 'Quiz created. Add questions next.');
   return res.redirect(`/teacher/quizzes/${quiz._id}/edit`);
@@ -244,6 +255,19 @@ exports.updateQuiz = async (req, res) => {
     return res.redirect(`/teacher/quizzes/${quiz._id}/edit`);
   }
 
+  if (req.file) {
+    let thumbnailPayload = {};
+    try {
+      thumbnailPayload = await uploadQuizThumbnail(req.file, quiz._id);
+    } catch (error) {
+      req.flash('error', error.message || 'Thumbnail upload failed.');
+      return res.redirect(`/teacher/quizzes/${quiz._id}/edit`);
+    }
+
+    await destroyQuizThumbnail(quiz.thumbnailPublicId);
+    Object.assign(quiz, thumbnailPayload);
+  }
+
   Object.assign(quiz, payload);
   await quiz.save();
   req.flash('success', 'Quiz details updated.');
@@ -257,6 +281,7 @@ exports.deleteQuiz = async (req, res) => {
     return res.redirect('/teacher/quizzes');
   }
   await Promise.all([
+    destroyQuizThumbnail(quiz.thumbnailPublicId),
     Question.deleteMany({ quiz: quiz._id }),
     Attempt.deleteMany({ quiz: quiz._id }),
     Result.deleteMany({ quiz: quiz._id }),

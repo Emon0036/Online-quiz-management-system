@@ -73,9 +73,18 @@
               <% group.enrollments.forEach((enrollment) => { %>
                 <tr>
                   <td>
-                    <strong><%= enrollment.quiz.title %></strong>
-                    <div class="small text-muted">
-                      <%= enrollment.quiz.duration %> min · <%= enrollment.quiz.totalMarks %> marks · Pass <%= enrollment.quiz.passingMarks %>% · <%= enrollment.quiz.createdBy?.name || 'Teacher' %>
+                    <div class="quiz-table-title">
+                      <% if (enrollment.quiz.thumbnailUrl) { %>
+                        <img src="<%= enrollment.quiz.thumbnailUrl %>" alt="<%= enrollment.quiz.title %> thumbnail" loading="lazy">
+                      <% } else { %>
+                        <span class="quiz-table-title__placeholder"><i class="fas fa-image"></i></span>
+                      <% } %>
+                      <div>
+                        <strong><%= enrollment.quiz.title %></strong>
+                        <div class="small text-muted">
+                          <%= enrollment.quiz.duration %> min · <%= enrollment.quiz.totalMarks %> marks · Pass <%= enrollment.quiz.passingMarks %>% · <%= enrollment.quiz.createdBy?.name || 'Teacher' %>
+                        </div>
+                      </div>
                     </div>
                   </td>
                   <td><span class="badge text-bg-secondary"><%= examTypeLabels[enrollment.quiz.examType || 'quiz'] %></span></td>

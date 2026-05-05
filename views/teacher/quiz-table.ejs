@@ -7,8 +7,17 @@
       <% quizzes.forEach((quiz) => { %>
         <tr>
           <td>
-            <strong><%= quiz.title %></strong>
-            <div class="small text-muted"><%= quiz.duration %> minutes · <%= quiz.completedCount || 0 %> completed</div>
+            <div class="quiz-table-title">
+              <% if (quiz.thumbnailUrl) { %>
+                <img src="<%= quiz.thumbnailUrl %>" alt="<%= quiz.title %> thumbnail" loading="lazy">
+              <% } else { %>
+                <span class="quiz-table-title__placeholder"><i class="fas fa-image"></i></span>
+              <% } %>
+              <div>
+                <strong><%= quiz.title %></strong>
+                <div class="small text-muted"><%= quiz.duration %> minutes · <%= quiz.completedCount || 0 %> completed</div>
+              </div>
+            </div>
           </td>
           <td><span class="badge text-bg-secondary"><%= examTypeLabels[quiz.examType || 'quiz'] %></span></td>
           <td><%= quiz.category %></td>

@@ -93,16 +93,25 @@
             <span class="status-pill approved"><%= group.quizzes.length %> available</span>
           </div>
 
-          <div class="action-grid">
+          <div class="action-grid quiz-browse-grid">
             <% group.quizzes.forEach((quiz) => { %>
               <% const isEnrolled = (enrolledQuizIds || []).includes(String(quiz._id)); %>
               <article class="quiz-card">
+                <div class="quiz-card__thumbnail">
+                  <% if (quiz.thumbnailUrl) { %>
+                    <img src="<%= quiz.thumbnailUrl %>" alt="<%= quiz.title %> thumbnail" loading="lazy">
+                  <% } else { %>
+                    <div class="quiz-card__thumbnail-placeholder">
+                      <i class="fas fa-image"></i>
+                    </div>
+                  <% } %>
+                </div>
                 <div class="quiz-card__meta">
                   <span class="badge text-bg-light"><%= group.category %></span>
                   <span class="badge text-bg-secondary"><%= examTypeLabels[quiz.examType || 'quiz'] %></span>
                   <span class="badge text-bg-primary"><%= quiz.difficulty %></span>
                 </div>
-                <div>
+                <div class="quiz-card__copy">
                   <h2><%= quiz.title %></h2>
                   <p class="mt-2"><%= quiz.description || 'No description provided yet.' %></p>
                 </div>

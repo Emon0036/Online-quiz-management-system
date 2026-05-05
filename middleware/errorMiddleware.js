@@ -6,7 +6,10 @@ function notFound(req, res, next) {
 
 function errorHandler(error, req, res, next) {
   const status = error.status || 500;
-  console.error(error);
+  if (status >= 500) {
+    console.error(error);
+  }
+
   res.status(status).render('error', {
     title: status === 404 ? 'Page not found' : 'Server error',
     message: status === 404 ? 'The page you requested does not exist.' : 'Something went wrong. Please try again.',

@@ -61,7 +61,7 @@ exports.register = async (req, res) => {
 };
 
 exports.login = async (req, res, next) => {
-  const tabId = req.body.tab || crypto.randomBytes(8).toString('hex');
+  const tabId = req.body.tab || req.query.tab || req.currentTabId || crypto.randomBytes(8).toString('hex');
 
   passport.authenticate('local', (error, user, info) => {
     if (error) return next(error);

@@ -206,7 +206,7 @@ exports.getEnrolledQuizzes = async (req, res) => {
             .populate({
               path: 'quiz',
               match: { status: 'published' },
-              select: 'title category examType difficulty duration totalMarks passingMarks',
+              select: 'title category examType difficulty duration totalMarks passingMarks thumbnailUrl',
               populate: { path: 'createdBy', select: 'name' },
             })
             .populate({ path: 'bestAttemptId', select: 'score percentage' })

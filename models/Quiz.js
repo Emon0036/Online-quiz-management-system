@@ -5,6 +5,8 @@ const quizSchema = new mongoose.Schema(
     title: { type: String, required: true, trim: true, maxlength: 200 },
     description: { type: String, trim: true },
     category: { type: String, required: true, trim: true, default: 'General Knowledge' },
+    thumbnailUrl: { type: String, trim: true, default: '' },
+    thumbnailPublicId: { type: String, trim: true, default: '' },
     // Student dashboard grouping (Quiz / True-False / Short Question / Coding Test).
     examType: {
       type: String,

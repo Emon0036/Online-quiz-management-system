@@ -7,6 +7,9 @@
         <h1><%= quiz.title %></h1>
         <p><%= quiz.questions.length %> question<%= quiz.questions.length === 1 ? '' : 's' %> · <%= quiz.totalMarks %> marks total</p>
       </div>
+      <% if (quiz.thumbnailUrl) { %>
+        <img class="quiz-header__thumbnail" src="<%= quiz.thumbnailUrl %>" alt="<%= quiz.title %> thumbnail">
+      <% } %>
       <div class="timer" data-duration="<%= quiz.duration %>">
         <i class="fa-regular fa-clock"></i>
         <span id="timerText"><%= quiz.duration %>:00</span>

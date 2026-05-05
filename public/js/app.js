@@ -115,6 +115,14 @@
   function appendTabInput(form) {
     const action = form.getAttribute('action') || window.location.pathname;
     if (!isInternalLink(action)) return;
+    try {
+      const actionUrl = new URL(action, window.location.href);
+      if (!actionUrl.searchParams.get('tab')) {
+        actionUrl.searchParams.set('tab', tabId);
+        form.setAttribute('action', `${actionUrl.pathname}${actionUrl.search}${actionUrl.hash}`);
+      }
+    } catch {}
+
     let input = form.querySelector('input[name="tab"]');
     if (!input) {
       input = document.createElement('input');

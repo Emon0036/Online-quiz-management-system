@@ -23,6 +23,36 @@ function isGuestAuthRoute(req) {
   return GUEST_AUTH_ROUTES.has(req.path) || req.path.startsWith('/auth/reset-password/');
 }
 
+function canUseLastActiveTab(req) {
+  return req && req.method && req.method !== 'GET' && req.method !== 'HEAD' && req.method !== 'OPTIONS';
+}
+
+function hasExistingTabUsers(req) {
+  return Boolean(req.session?.tabUsers && Object.keys(req.session.tabUsers).length);
+}
+
+function canRecoverFromPassportSession(req) {
+  if (isGuestAuthRoute(req)) return false;
+  if (!req.session?.passport?.user) return false;
+  if (hasExistingTabUsers(req) && !req.session.tabUsers[req.currentTabId]) return false;
+  return Boolean(req.currentTabId || canUseLastActiveTab(req));
+}
+
+function addTabToInternalUrl(url, tabId) {
+  if (!tabId || typeof url !== 'string') return url;
+  if (!url.startsWith('/') || url.startsWith('//')) return url;
+
+  try {
+    const parsedUrl = new URL(url, 'http://quiz.local');
+    if (!parsedUrl.searchParams.has('tab')) {
+      parsedUrl.searchParams.set('tab', tabId);
+    }
+    return `${parsedUrl.pathname}${parsedUrl.search}${parsedUrl.hash}`;
+  } catch {
+    return url;
+  }
+}
+
 function attachTabUser(req, res, next) {
   const tabId = getTabId(req);
   if (!req.session) {
@@ -40,6 +70,13 @@ function attachTabUser(req, res, next) {
     req.currentTabUserId = req.session.tabUsers[tabId] || null;
   } else if (isGuestAuthRoute(req)) {
     req.currentTabId = generateTabId();
+  } else if (
+    canUseLastActiveTab(req) &&
+    req.session.lastActiveTabId &&
+    req.session.tabUsers[req.session.lastActiveTabId]
+  ) {
+    req.currentTabId = req.session.lastActiveTabId;
+    req.currentTabUserId = req.session.tabUsers[req.session.lastActiveTabId];
   }
 
   next();
@@ -47,16 +84,30 @@ function attachTabUser(req, res, next) {
 
 async function resolveTabUser(req, res, next) {
   if (!req.currentTabId) {
+    if (!canRecoverFromPassportSession(req)) {
+      req.user = null;
+      req.isAuthenticated = () => false;
+      return next();
+    }
+
+    req.currentTabId = req.session.lastActiveTabId || generateTabId();
+  }
+
+  const scopedUserId =
+    req.session?.tabUsers?.[req.currentTabId] ||
+    req.currentTabUserId ||
+    (canRecoverFromPassportSession(req) ? req.session.passport.user : null);
+
+  if (!scopedUserId) {
     req.user = null;
     req.isAuthenticated = () => false;
     return next();
   }
 
-  const scopedUserId = req.session?.tabUsers?.[req.currentTabId] || req.currentTabUserId || null;
-  if (!scopedUserId) {
-    req.user = null;
-    req.isAuthenticated = () => false;
-    return next();
+  if (req.session && req.currentTabId && !req.session.tabUsers?.[req.currentTabId]) {
+    req.session.tabUsers = req.session.tabUsers || {};
+    req.session.tabUsers[req.currentTabId] = String(scopedUserId);
+    req.session.lastActiveTabId = req.currentTabId;
   }
 
   const currentUserId = req.user && (req.user.id || req.user._id) ? String(req.user.id || req.user._id) : null;
@@ -65,6 +116,28 @@ async function resolveTabUser(req, res, next) {
   }
 
   req.isAuthenticated = () => Boolean(req.user);
+  next();
+}
+
+function preserveTabInRedirects(req, res, next) {
+  const originalRedirect = res.redirect.bind(res);
+
+  res.redirect = (statusOrUrl, maybeUrl) => {
+    const hasStatus = typeof statusOrUrl === 'number';
+    let targetUrl = hasStatus ? maybeUrl : statusOrUrl;
+
+    if (
+      typeof targetUrl === 'string' &&
+      req.currentTabId &&
+      typeof req.isAuthenticated === 'function' &&
+      req.isAuthenticated()
+    ) {
+      targetUrl = addTabToInternalUrl(targetUrl, req.currentTabId);
+    }
+
+    return hasStatus ? originalRedirect(statusOrUrl, targetUrl) : originalRedirect(targetUrl);
+  };
+
   next();
 }
 
@@ -105,6 +178,7 @@ module.exports = {
   generateTabId,
   attachTabUser,
   resolveTabUser,
+  preserveTabInRedirects,
   saveTabUser,
   removeTabUser,
 };

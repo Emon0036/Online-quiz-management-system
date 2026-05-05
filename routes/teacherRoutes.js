@@ -2,6 +2,7 @@ const express = require('express');
 const teacherController = require('../controllers/teacherController');
 const asyncHandler = require('../utils/asyncHandler');
 const { ensureTeacher } = require('../middleware/authMiddleware');
+const quizThumbnailUpload = require('../middleware/quizThumbnailUpload');
 
 const router = express.Router();
 
@@ -9,10 +10,10 @@ router.use(ensureTeacher);
 router.get('/dashboard', asyncHandler(teacherController.dashboard));
 router.get('/quizzes', asyncHandler(teacherController.listQuizzes));
 router.get('/quizzes/new', teacherController.showCreateQuiz);
-router.post('/quizzes', asyncHandler(teacherController.createQuiz));
+router.post('/quizzes', quizThumbnailUpload, asyncHandler(teacherController.createQuiz));
 router.get('/reviews', asyncHandler(teacherController.reviews));
 router.get('/quizzes/:quizId/edit', asyncHandler(teacherController.showEditQuiz));
-router.put('/quizzes/:quizId', asyncHandler(teacherController.updateQuiz));
+router.put('/quizzes/:quizId', quizThumbnailUpload, asyncHandler(teacherController.updateQuiz));
 router.delete('/quizzes/:quizId', asyncHandler(teacherController.deleteQuiz));
 router.patch('/quizzes/:quizId/publish', asyncHandler(teacherController.togglePublish));
 router.post('/quizzes/:quizId/questions', asyncHandler(teacherController.addQuestion));

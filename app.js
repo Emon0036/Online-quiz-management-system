@@ -6,7 +6,6 @@ const express = require('express');
 const mongoose = require('mongoose');
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
-const flash = require('express-flash');
 const passport = require('passport');
 const methodOverride = require('method-override');
 const engine = require('ejs-mate');
@@ -21,7 +20,8 @@ const studentRoutes = require('./routes/studentRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const { notFound, errorHandler } = require('./middleware/errorMiddleware');
 const { enforceActiveAccount } = require('./middleware/authMiddleware');
-const { attachTabUser, resolveTabUser } = require('./middleware/tabSessionMiddleware');
+const { attachTabUser, resolveTabUser, preserveTabInRedirects } = require('./middleware/tabSessionMiddleware');
+const flashMiddleware = require('./middleware/flashMiddleware');
 
 const app = express();
 const configuredMongoUri =
@@ -89,6 +89,7 @@ function configureApp(mongoUri) {
   app.use(methodOverride('_method'));
   app.use(express.static(path.join(__dirname, 'public')));
   app.get('/favicon.ico', (req, res) => res.status(204).end());
+  app.get('/.well-known/appspecific/com.chrome.devtools.json', (req, res) => res.status(204).end());
   app.get('/images/default-avatar.png', (req, res) => {
     res
       .type('image/svg+xml')
@@ -119,10 +120,11 @@ function configureApp(mongoUri) {
   );
 
   app.use(attachTabUser);
-  app.use(flash());
+  app.use(flashMiddleware);
   app.use(passport.initialize());
   app.use(passport.session());
   app.use(resolveTabUser);
+  app.use(preserveTabInRedirects);
   app.use(enforceActiveAccount);
 
   // Make auth state and flash messages available to every EJS view.

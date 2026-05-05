@@ -1,4 +1,10 @@
 <% layout('layouts/main') %>
+<%
+  const actionWithTab = (url) => {
+    if (!currentTabId) return url;
+    return `${url}${url.includes('?') ? '&' : '?'}tab=${encodeURIComponent(currentTabId)}`;
+  };
+%>
 <section class="container py-4">
   <div class="page-heading">
     <div><span class="eyebrow">Teacher</span><h1><%= title %></h1></div>
@@ -6,7 +12,7 @@
   </div>
   <div class="row g-4">
     <div class="col-lg-5">
-      <form class="form-panel quiz-details-form" action="<%= action %>" method="POST">
+      <form class="form-panel quiz-details-form" action="<%= actionWithTab(action) %>" method="POST" enctype="multipart/form-data">
         <h2 class="h5 mb-4">Quiz Details</h2>
 
         <div class="row g-3">
@@ -36,6 +42,15 @@
         <div class="form-field">
           <label class="form-label" for="quizDescription">Description</label>
           <textarea id="quizDescription" class="form-control" name="description" rows="4" placeholder="Description"><%= quiz.description || '' %></textarea>
+        </div>
+
+        <div class="form-field">
+          <label class="form-label" for="quizThumbnail">Thumbnail image</label>
+          <% if (quiz.thumbnailUrl) { %>
+            <img class="quiz-thumbnail-preview" src="<%= quiz.thumbnailUrl %>" alt="<%= quiz.title || 'Quiz thumbnail' %> thumbnail">
+          <% } %>
+          <input id="quizThumbnail" class="form-control" type="file" name="thumbnail" accept="image/jpeg,image/png,image/webp">
+          <div class="form-text">Recommended size: 1280 x 720 px (16:9). JPG, PNG, or WebP up to 5MB.</div>
         </div>
 
         <div class="form-field">
