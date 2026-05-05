@@ -40,9 +40,6 @@ function attachTabUser(req, res, next) {
     req.currentTabUserId = req.session.tabUsers[tabId] || null;
   } else if (isGuestAuthRoute(req)) {
     req.currentTabId = generateTabId();
-  } else if (req.session.lastActiveTabId && req.session.tabUsers[req.session.lastActiveTabId]) {
-    req.currentTabId = req.session.lastActiveTabId;
-    req.currentTabUserId = req.session.tabUsers[req.session.lastActiveTabId];
   }
 
   next();
@@ -50,6 +47,8 @@ function attachTabUser(req, res, next) {
 
 async function resolveTabUser(req, res, next) {
   if (!req.currentTabId) {
+    req.user = null;
+    req.isAuthenticated = () => false;
     return next();
   }
 

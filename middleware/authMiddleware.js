@@ -42,7 +42,7 @@ function enforceActiveAccount(req, res, next) {
 function ensureAuthenticated(req, res, next) {
   if (req.isAuthenticated()) return next();
   req.flash('error', 'Please log in first.');
-  return res.redirect('/auth/login');
+  return res.redirect(buildLoginRedirect(req));
 }
 
 function ensureAuthenticatedApi(req, res, next) {
@@ -69,7 +69,7 @@ function ensureRole(role) {
   return (req, res, next) => {
     if (!req.isAuthenticated()) {
       req.flash('error', 'Please log in first.');
-      return res.redirect('/auth/login');
+      return res.redirect(buildLoginRedirect(req));
     }
 
     if (req.user.role !== role) {
@@ -88,7 +88,7 @@ function ensureRole(role) {
 function ensureAdminOrTeacher(req, res, next) {
   if (!req.isAuthenticated()) {
     req.flash('error', 'Please log in first.');
-    return res.redirect('/auth/login');
+    return res.redirect(buildLoginRedirect(req));
   }
 
   if (req.user.role === 'admin') return next();

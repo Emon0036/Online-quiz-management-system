@@ -66,7 +66,7 @@
   const namedTab = window.name.startsWith(WINDOW_NAME_PREFIX)
     ? window.name.slice(WINDOW_NAME_PREFIX.length)
     : '';
-  let tabId = namedTab || storedTab || urlTab || bodyTab;
+  let tabId = urlTab || bodyTab || namedTab || storedTab;
 
   if (!tabId) {
     tabId = `tab-${Math.random().toString(36).slice(2, 10)}-${Date.now()}`;
