@@ -71,7 +71,11 @@
           <h1>Welcome back, <%= currentUser.name %>.</h1>
           <p>See your exam mix, review status, and progress from one clear dashboard.</p>
           <div class="hero-action-row mt-4">
-            <a href="/enrollments/my-quizzes" class="btn btn-primary">
+            <a href="/enrollments/browse" class="btn btn-primary">
+              <i class="fas fa-search"></i>
+              Browse exams
+            </a>
+            <a href="/enrollments/my-quizzes" class="btn btn-outline-primary">
               <i class="fas fa-book-open"></i>
               Continue my exams
             </a>
@@ -172,6 +176,7 @@
             <% } %>
           </p>
           <div class="support-list">
+            <a href="/enrollments/browse"><i class="fas fa-search"></i><span>Browse and enroll</span></a>
             <a href="/enrollments/my-quizzes"><i class="fas fa-book-open"></i><span>Open my exams</span></a>
             <a href="/student/reviews"><i class="fas fa-comments"></i><span>Check review center</span></a>
             <a href="/student/history"><i class="fas fa-clock-rotate-left"></i><span>View attempt history</span></a>

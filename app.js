@@ -88,6 +88,19 @@ function configureApp(mongoUri) {
   app.use(express.json());
   app.use(methodOverride('_method'));
   app.use(express.static(path.join(__dirname, 'public')));
+  app.get('/favicon.ico', (req, res) => res.status(204).end());
+  app.get('/images/default-avatar.png', (req, res) => {
+    res
+      .type('image/svg+xml')
+      .set('Cache-Control', 'public, max-age=86400')
+      .send(`
+        <svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128" role="img" aria-label="Default avatar">
+          <rect width="128" height="128" rx="64" fill="#dceff7"/>
+          <circle cx="64" cy="49" r="24" fill="#0e5c8b"/>
+          <path d="M25 112c6-24 21-38 39-38s33 14 39 38" fill="#1c9b8f"/>
+        </svg>
+      `);
+  });
 
   // Sessions are stored in MongoDB so logins survive server restarts.
   app.use(

@@ -11,6 +11,7 @@
 
     <form action="/teacher/attempts/<%= attempt._id %>/review?_method=PATCH" method="POST" class="form-panel">
       <% attempt.answers.forEach((answer, index) => { %>
+        <% const isManualQuestion = ['short-answer', 'coding'].includes(answer.question.type); %>
         <div class="review-item bg-white rounded-3 p-4 mb-4 shadow-sm">
           <div class="d-flex justify-content-between align-items-start mb-3">
             <div>
@@ -37,13 +38,20 @@
           <% if (answer.needsManualReview) { %>
             <div class="mb-3">
               <label class="form-label">Assign marks</label>
-              <input class="form-control" type="number" min="0" max="<%= answer.question.marks %>" name="marks[<%= index %>]" value="<%= answer.marksObtained %>">
+              <input class="form-control" type="number" min="0" max="<%= answer.question.marks %>" name="marks[<%= index %>]" value="<%= answer.marksObtained %>" required>
+            </div>
+          <% } %>
+
+          <% if (isManualQuestion) { %>
+            <div class="mb-3">
+              <label class="form-label">Right answer / reference answer</label>
+              <textarea class="form-control" name="teacherCorrectAnswers[<%= index %>]" rows="<%= answer.question.type === 'coding' ? 6 : 3 %>" placeholder="<%= answer.question.type === 'coding' ? 'Add the reference solution or expected approach' : 'Add the right answer for this written response' %>" <%= answer.needsManualReview ? 'required' : '' %>><%= answer.teacherCorrectAnswer || '' %></textarea>
             </div>
           <% } %>
 
           <div class="mb-3">
-            <label class="form-label">Review notes</label>
-            <textarea class="form-control" name="comments[<%= index %>]" rows="3" placeholder="Optional reviewer feedback"><%= answer.reviewComment || '' %></textarea>
+            <label class="form-label">Teacher comment</label>
+            <textarea class="form-control" name="comments[<%= index %>]" rows="3" placeholder="Add feedback for the student" <%= answer.needsManualReview ? 'required' : '' %>><%= answer.reviewComment || '' %></textarea>
           </div>
         </div>
       <% }) %>

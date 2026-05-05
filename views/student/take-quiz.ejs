@@ -44,12 +44,14 @@
             
             <% if (question.testCases && question.testCases.length > 0) { %>
               <div class="alert alert-info small mb-3">
-                <strong>Test Cases:</strong>
+                <strong>Sample Cases:</strong>
                 <% question.testCases.forEach((testCase, tcIndex) => { %>
                   <div class="mt-2">
-                    <strong>Test <%= tcIndex + 1 %>:</strong><br>
-                    <strong>Input:</strong> <code><%= testCase.input %></code><br>
-                    <strong>Expected Output:</strong> <code><%= testCase.expectedOutput %></code>
+                    <strong>Sample <%= tcIndex + 1 %>:</strong><br>
+                    <strong>Input:</strong>
+                    <pre class="code-block mt-1 mb-2"><code><%= testCase.input %></code></pre>
+                    <strong>Output:</strong>
+                    <pre class="code-block mt-1 mb-0"><code><%= testCase.expectedOutput %></code></pre>
                   </div>
                 <% }) %>
               </div>

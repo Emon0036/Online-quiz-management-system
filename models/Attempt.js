@@ -7,6 +7,7 @@ const answerSchema = new mongoose.Schema(
     isCorrect: { type: Boolean, default: false },
     marksObtained: { type: Number, default: 0 },
     needsManualReview: { type: Boolean, default: false },
+    teacherCorrectAnswer: { type: String, default: '' },
     reviewComment: { type: String, default: '' },
   },
   { _id: false }

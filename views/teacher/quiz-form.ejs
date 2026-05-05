@@ -62,8 +62,12 @@
       <% if (quiz._id) { %>
         <div class="form-panel mb-4">
           <h2 class="h5">Add Question</h2>
-          <p class="text-muted small mb-3">Write the question, add the required answer fields, then assign marks. The form adjusts to this exam type.</p>
+          <p class="text-muted small mb-3">Write the question, add objective answers only where required, then assign marks. Written and coding answers are reviewed after submission.</p>
           <% const lockedType = ['true-false', 'short-answer', 'coding-test'].includes(quiz.examType) ? quiz.examType : null; %>
+          <% const startsTrueFalse = lockedType === 'true-false'; %>
+          <% const startsCoding = lockedType === 'coding-test'; %>
+          <% const startsManualReview = lockedType === 'short-answer' || lockedType === 'coding-test'; %>
+          <% const startsMultipleChoice = !lockedType; %>
           <form action="/teacher/quizzes/<%= quiz._id %>/questions" method="POST" class="vstack gap-3 modern-question-form">
             <label class="form-label fw-semibold mb-1" for="questionTitle">Question Title</label>
             <input class="form-control" name="questionTitle" id="questionTitle" type="text" placeholder="Enter a short title for this question" required>
@@ -86,46 +90,50 @@
               <% } %>
             </select>
             
-            <div class="options-box" id="optionsBox">
+            <div class="options-box <%= startsMultipleChoice ? '' : 'd-none' %>" id="optionsBox">
               <label class="form-label fw-semibold mb-1">Options</label>
-              <input class="form-control mb-2" name="options[]" placeholder="Option 1">
-              <input class="form-control mb-2" name="options[]" placeholder="Option 2">
-              <input class="form-control mb-2" name="options[]" placeholder="Option 3">
-              <input class="form-control mb-2" name="options[]" placeholder="Option 4">
+              <input class="form-control mb-2" name="options[]" placeholder="Option 1" <%= startsMultipleChoice ? 'required' : 'disabled' %>>
+              <input class="form-control mb-2" name="options[]" placeholder="Option 2" <%= startsMultipleChoice ? 'required' : 'disabled' %>>
+              <input class="form-control mb-2" name="options[]" placeholder="Option 3" <%= startsMultipleChoice ? 'required' : 'disabled' %>>
+              <input class="form-control mb-2" name="options[]" placeholder="Option 4" <%= startsMultipleChoice ? 'required' : 'disabled' %>>
             </div>
             
-            <label class="form-label fw-semibold mb-1" for="correctAnswerField">Correct option / expected answer</label>
-            <input class="form-control" id="correctAnswerField" name="correctAnswer" placeholder="Enter exact correct answer" required>
-            <select class="form-select d-none" id="trueFalseAnswerField" name="correctAnswer" disabled>
-              <option value="True">True</option>
-              <option value="False">False</option>
-            </select>
-            <div class="form-text" id="correctAnswerHelp">For multiple choice, this must match one option exactly.</div>
+            <div id="correctAnswerGroup" class="<%= startsManualReview ? 'd-none' : '' %>">
+              <label class="form-label fw-semibold mb-1" for="correctAnswerField">Correct option / answer</label>
+              <input class="form-control <%= startsTrueFalse ? 'd-none' : '' %>" id="correctAnswerField" name="correctAnswer" placeholder="Enter exact correct answer" <%= startsTrueFalse || startsManualReview ? 'disabled' : 'required' %>>
+              <select class="form-select <%= startsTrueFalse ? '' : 'd-none' %>" id="trueFalseAnswerField" name="correctAnswer" <%= startsTrueFalse ? 'required' : 'disabled' %>>
+                <option value="True">True</option>
+                <option value="False">False</option>
+              </select>
+              <div class="form-text" id="correctAnswerHelp"><%= startsTrueFalse ? 'Choose the correct truth value.' : 'For multiple choice, this must match one option exactly.' %></div>
+            </div>
             
-            <div id="codingFields" class="d-none">
+            <div id="codingFields" class="<%= startsCoding ? '' : 'd-none' %>">
               <div class="mb-3">
                 <h3 class="h6 fw-semibold mb-1">Coding Question Details</h3>
-                <p class="text-muted small mb-0">Provide the language, code template, and test cases for student submissions.</p>
+                <p class="text-muted small mb-0">Provide the language, plus optional starter code or sample cases for student submissions.</p>
               </div>
 
               <label class="form-label">Programming Language</label>
-              <input class="form-control" type="text" name="language" id="language" placeholder="Any programming language, e.g. JavaScript, Python, C++, Java" required>
+              <input class="form-control" type="text" name="language" id="language" placeholder="Any programming language, e.g. JavaScript, Python, C++, Java" <%= startsCoding ? 'required' : 'disabled' %>>
               
               <label class="form-label mt-3">Code Template (Optional)</label>
-              <textarea class="form-control" name="codeTemplate" id="codeTemplate" rows="4" placeholder="// Starter code template for students"></textarea>
+              <textarea class="form-control" name="codeTemplate" id="codeTemplate" rows="4" placeholder="// Starter code template for students" <%= startsCoding ? '' : 'disabled' %>></textarea>
               
-              <label class="form-label mt-3">Test Cases</label>
+              <label class="form-label mt-3">Sample Cases (Optional)</label>
               <div id="testCasesContainer">
                 <div class="test-case mb-3">
-                  <input class="form-control mb-2" name="testCaseInputs[]" placeholder="Test Input 1">
-                  <textarea class="form-control" name="testCaseOutputs[]" rows="2" placeholder="Expected Output 1"></textarea>
+                  <textarea class="form-control mb-2" name="testCaseInputs[]" rows="3" placeholder="Sample Input 1" <%= startsCoding ? '' : 'disabled' %>></textarea>
+                  <textarea class="form-control" name="testCaseOutputs[]" rows="2" placeholder="Sample Output 1" <%= startsCoding ? '' : 'disabled' %>></textarea>
                 </div>
               </div>
               <button type="button" class="btn btn-sm btn-outline-secondary" id="addQuizTestCase">+ Add Test Case</button>
             </div>
             
-            <!-- Explanation Field: Will be displayed to students after quiz submission -->
-            <textarea class="form-control mt-3" name="explanation" rows="2" placeholder="Explanation (optional - shown to students after quiz submission)"></textarea>
+            <div id="explanationGroup" class="<%= startsManualReview ? 'd-none' : '' %>">
+              <label class="form-label fw-semibold mb-1" for="explanationField">Explanation</label>
+              <textarea class="form-control" id="explanationField" name="explanation" rows="2" placeholder="Optional explanation shown to students after auto-graded quiz submission" <%= startsManualReview ? 'disabled' : '' %>></textarea>
+            </div>
             
             <!-- Marks for this question -->
             <input class="form-control mt-3" type="number" min="1" name="marks" value="1" placeholder="Marks" required>

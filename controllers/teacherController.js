@@ -83,7 +83,7 @@ function buildQuestionPayload(quiz, body) {
     quiz: quiz._id,
     questionText: cleanText(body.questionText),
     type,
-    explanation: cleanText(body.explanation),
+    explanation: '',
     marks,
   };
   const errors = [];
@@ -104,20 +104,20 @@ function buildQuestionPayload(quiz, body) {
     }
     payload.options = options;
     payload.correctAnswer = correctAnswer;
+    payload.explanation = cleanText(body.explanation);
   } else if (type === 'true-false') {
     const correctAnswer = normalizeTrueFalseAnswer(body.correctAnswer);
     if (!correctAnswer) errors.push('True/False questions require True or False as the correct answer.');
     payload.options = ['True', 'False'];
     payload.correctAnswer = correctAnswer;
+    payload.explanation = cleanText(body.explanation);
   } else if (type === 'short-answer') {
     payload.options = [];
-    payload.correctAnswer = cleanText(body.correctAnswer);
+    payload.correctAnswer = '';
   } else if (type === 'coding') {
     const testCases = parseCodingTestCases(body);
-    const incompleteTestCase = testCases.some((testCase) => !testCase.expectedOutput);
-    if (!testCases.length) errors.push('Add at least one test case for coding questions.');
-    if (incompleteTestCase) errors.push('Every coding test case needs an expected output.');
     payload.language = cleanText(body.language);
+    if (!payload.language) errors.push('Programming language is required for coding questions.');
     payload.codeTemplate = cleanText(body.codeTemplate);
     payload.testCases = testCases;
   }
@@ -365,15 +365,46 @@ exports.updateReview = async (req, res) => {
     return res.redirect('/teacher/quizzes');
   }
 
+  const reviewErrors = [];
   attempt.answers.forEach((answer, index) => {
+    if (!answer.needsManualReview) return;
+
+    const submittedMarks = Number(req.body.marks?.[index]);
+    const teacherCorrectAnswer = cleanText(req.body.teacherCorrectAnswers?.[index]);
+    const reviewComment = cleanText(req.body.comments?.[index]);
+    const isManualQuestion = ['short-answer', 'coding'].includes(answer.question.type);
+
+    if (!Number.isFinite(submittedMarks)) {
+      reviewErrors.push(`Assign marks for question ${index + 1}.`);
+    }
+    if (isManualQuestion && !teacherCorrectAnswer) {
+      reviewErrors.push(`Add the right answer for question ${index + 1}.`);
+    }
+    if (!reviewComment) {
+      reviewErrors.push(`Add a teacher comment for question ${index + 1}.`);
+    }
+  });
+
+  if (reviewErrors.length) {
+    req.flash('error', reviewErrors[0]);
+    return res.redirect(`/teacher/attempts/${attempt._id}/review`);
+  }
+
+  attempt.answers.forEach((answer, index) => {
+    const isManualQuestion = ['short-answer', 'coding'].includes(answer.question.type);
+
     if (answer.needsManualReview) {
-      const submittedMarks = Number(req.body.marks?.[index] || 0);
+      const submittedMarks = Number(req.body.marks?.[index]);
       const marks = Number.isFinite(submittedMarks) ? submittedMarks : 0;
       answer.marksObtained = Math.max(0, Math.min(marks, answer.question.marks));
       answer.isCorrect = answer.marksObtained === answer.question.marks;
       answer.needsManualReview = false;
     }
-    answer.reviewComment = String(req.body.comments?.[index] || '').trim();
+
+    if (isManualQuestion) {
+      answer.teacherCorrectAnswer = cleanText(req.body.teacherCorrectAnswers?.[index]);
+    }
+    answer.reviewComment = cleanText(req.body.comments?.[index]);
   });
 
   attempt.score = attempt.answers.reduce((sum, answer) => sum + answer.marksObtained, 0);

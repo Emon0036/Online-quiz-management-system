@@ -19,6 +19,7 @@
       </div>
 
       <% attempt.answers.forEach((answer, index) => { %>
+        <% const isManualQuestion = ['short-answer', 'coding'].includes(answer.question.type); %>
         <div class="review-item mb-4 p-4 rounded-3 shadow-sm">
           <div class="d-flex align-items-start justify-content-between mb-3 gap-3">
             <div>
@@ -44,13 +45,24 @@
             </div>
           <% } %>
 
-          <% if (!answer.needsManualReview && !answer.isCorrect && answer.question.type !== 'coding') { %>
+          <% if (!answer.needsManualReview && isManualQuestion && answer.teacherCorrectAnswer && answer.teacherCorrectAnswer.trim()) { %>
+            <div class="alert alert-info mb-3">
+              <strong>Right answer:</strong>
+              <% if (answer.question.type === 'coding') { %>
+                <pre class="code-block mt-2 mb-0"><code><%= answer.teacherCorrectAnswer %></code></pre>
+              <% } else { %>
+                <p class="mb-0 mt-2"><%= answer.teacherCorrectAnswer %></p>
+              <% } %>
+            </div>
+          <% } %>
+
+          <% if (!answer.needsManualReview && !answer.isCorrect && !isManualQuestion) { %>
             <div class="alert alert-info mb-3">
               <strong>Correct answer:</strong> <%= answer.question.correctAnswer %>
             </div>
           <% } %>
 
-          <% if (answer.question.explanation && answer.question.explanation.trim()) { %>
+          <% if (!isManualQuestion && answer.question.explanation && answer.question.explanation.trim()) { %>
             <div class="alert alert-light border border-secondary mb-3">
               <strong>Explanation:</strong>
               <p class="mb-0 mt-2"><%= answer.question.explanation %></p>

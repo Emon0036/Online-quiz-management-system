@@ -141,12 +141,16 @@
   const questionTypeField = form.querySelector('.question-type');
   const optionsBox = form.querySelector('#optionsBox');
   const codingFields = form.querySelector('#codingFields');
+  const correctAnswerGroup = form.querySelector('#correctAnswerGroup');
   const textAnswerField = form.querySelector('#correctAnswerField');
   const trueFalseAnswerField = form.querySelector('#trueFalseAnswerField');
   const correctAnswerHelp = form.querySelector('#correctAnswerHelp');
+  const explanationGroup = form.querySelector('#explanationGroup');
+  const explanationField = form.querySelector('#explanationField');
   const optionInputs = Array.from(form.querySelectorAll('#optionsBox input'));
   const addQuizTestCaseButton = form.querySelector('#addQuizTestCase');
   const testCasesContainer = form.querySelector('#testCasesContainer');
+  const languageField = form.querySelector('#language');
 
   if (!questionTypeField) return;
 
@@ -161,21 +165,33 @@
     field.required = enabled && field.dataset.optional !== 'true';
   }
 
+  function setCodingFieldsEnabled(enabled) {
+    if (!codingFields) return;
+    codingFields.querySelectorAll('input, textarea, select').forEach((field) => {
+      field.disabled = !enabled;
+    });
+    if (languageField) languageField.required = enabled;
+  }
+
   function applyQuestionMode() {
     const type = questionTypeField.value;
     const isCoding = type === 'coding';
     const isShortAnswer = type === 'short-answer';
     const isTrueFalse = type === 'true-false';
     const isMultipleChoice = type === 'multiple-choice';
+    const isManualReview = isShortAnswer || isCoding;
 
     setElementVisible(optionsBox, isMultipleChoice);
     setElementVisible(codingFields, isCoding);
-    setElementVisible(textAnswerField, !isCoding && !isTrueFalse);
+    setElementVisible(correctAnswerGroup, !isManualReview);
+    setElementVisible(explanationGroup, !isManualReview);
+    setElementVisible(textAnswerField, isMultipleChoice);
     setElementVisible(trueFalseAnswerField, isTrueFalse);
 
-    setFieldEnabled(textAnswerField, !isCoding && !isTrueFalse);
+    setFieldEnabled(textAnswerField, isMultipleChoice);
     setFieldEnabled(trueFalseAnswerField, isTrueFalse);
-    if (textAnswerField) textAnswerField.required = isMultipleChoice;
+    if (explanationField) explanationField.disabled = isManualReview;
+    setCodingFieldsEnabled(isCoding);
 
     optionInputs.forEach((input) => {
       input.required = isMultipleChoice;
@@ -184,14 +200,11 @@
 
     if (correctAnswerHelp) {
       if (isMultipleChoice) correctAnswerHelp.textContent = 'For multiple choice, this must match one option exactly.';
-      else if (isShortAnswer) correctAnswerHelp.textContent = 'Optional teacher note or expected answer for manual review.';
       else if (isTrueFalse) correctAnswerHelp.textContent = 'Choose the correct truth value.';
-      else correctAnswerHelp.textContent = 'Coding questions are marked from submitted code and test cases.';
     }
 
     if (textAnswerField) {
       if (isMultipleChoice) textAnswerField.placeholder = 'Enter the exact correct option text';
-      else if (isShortAnswer) textAnswerField.placeholder = 'Expected answer or teacher notes';
     }
   }
 
@@ -201,8 +214,8 @@
     const wrapper = document.createElement('div');
     wrapper.className = 'test-case mb-3';
     wrapper.innerHTML = `
-      <input class="form-control mb-2" name="testCaseInputs[]" placeholder="Test Input ${testCaseCount + 1}">
-      <textarea class="form-control" name="testCaseOutputs[]" rows="2" placeholder="Expected Output ${testCaseCount + 1}"></textarea>
+      <textarea class="form-control mb-2" name="testCaseInputs[]" rows="3" placeholder="Sample Input ${testCaseCount + 1}"></textarea>
+      <textarea class="form-control" name="testCaseOutputs[]" rows="2" placeholder="Sample Output ${testCaseCount + 1}"></textarea>
     `;
     testCasesContainer.appendChild(wrapper);
   }

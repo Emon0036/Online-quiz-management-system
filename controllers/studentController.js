@@ -173,14 +173,12 @@ exports.submitQuiz = async (req, res) => {
   return res.redirect(`/student/results/${attempt._id}`);
 };
 
-// Fetch student's specific quiz attempt and populate all related question data
-// This allows us to display the correct answer and explanation for each question
+// Fetch student's specific quiz attempt and populate the question data needed for result review.
 exports.result = async (req, res) => {
   const attempt = await Attempt.findOne({ _id: req.params.attemptId, student: req.user._id })
     .populate('quiz')
     .populate({
       path: 'answers.question',
-      // Populate the full question data including explanation and correct answer
       select: 'questionText type options correctAnswer explanation marks'
     });
   
@@ -189,7 +187,6 @@ exports.result = async (req, res) => {
     return res.redirect('/student/history');
   }
   
-  // Send attempt data to result view where correct answers and explanations will be displayed
   return res.render('student/result', { title: 'Quiz Result', attempt });
 };
 
