@@ -7,6 +7,25 @@ const Enrollment = require('../models/Enrollment');
 const Progress = require('../models/Progress');
 const { finalizeQuizAttempt } = require('../utils/quizProgress');
 
+function getAutoSubmitMessage(reason) {
+  const messages = {
+    clipboard_copy: 'you tried to copy during the exam',
+    clipboard_copy_shortcut: 'you used a copy shortcut during the exam',
+    clipboard_cut: 'you tried to cut text during the exam',
+    clipboard_cut_shortcut: 'you used a cut shortcut during the exam',
+    clipboard_paste: 'you tried to paste during the exam',
+    clipboard_paste_shortcut: 'you used a paste shortcut during the exam',
+    dev_tools_attempted: 'developer tools were opened or attempted',
+    focus_lost: 'you left the quiz tab/window',
+    page_hide: 'the quiz page was hidden or closed',
+    tab_hidden: 'you switched away from the quiz tab',
+    time_up: 'time ran out',
+    window_blur: 'you switched away from the quiz window',
+  };
+
+  return messages[reason] || 'the exam security rules were triggered';
+}
+
 exports.dashboard = async (req, res) => {
   const [recentAttempts, availableQuizCount, completedCount, enrollments, progress, pendingReviewCount] = await Promise.all([
     Attempt.find({ student: req.user._id }).populate('quiz', 'title category examType').sort('-submittedAt').limit(5),
@@ -156,15 +175,19 @@ exports.submitQuiz = async (req, res) => {
   enrollment.status = hasManualReview ? 'pending-review' : 'completed';
   await enrollment.save();
 
+  const autoSubmitMessage = getAutoSubmitMessage(attempt.autoSubmitReason);
+
   if (!hasManualReview) {
     const { pointsEarned } = await finalizeQuizAttempt(attempt._id);
     if (attempt.autoSubmitted) {
-      req.flash('error', `Quiz auto-submitted because you left the quiz tab/window. Points earned: +${pointsEarned}.`);
+      req.flash('error', `Quiz auto-submitted because ${autoSubmitMessage}. Points earned: +${pointsEarned}.`);
     } else {
       req.flash('success', `Quiz submitted successfully. Points earned: +${pointsEarned}.`);
     }
   } else {
-    if (hasCodingQuestions) {
+    if (attempt.autoSubmitted) {
+      req.flash('error', `Exam auto-submitted because ${autoSubmitMessage}. Answers are waiting for teacher review.`);
+    } else if (hasCodingQuestions) {
       req.flash('success', 'Exam submitted. Coding submissions are being evaluated.');
     } else {
       req.flash('success', 'Quiz submitted. Answers are waiting for teacher review.');

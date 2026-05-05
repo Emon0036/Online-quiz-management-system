@@ -10,7 +10,11 @@ if (timer && quizForm && timerText) {
   const startedAt = Date.now();
   let remaining = totalSeconds;
   let alreadySubmitted = false;
-  let focusLost = false;
+  const clipboardShortcutReasons = {
+    c: 'clipboard_copy_shortcut',
+    v: 'clipboard_paste_shortcut',
+    x: 'clipboard_cut_shortcut',
+  };
 
   function syncTimeSpent() {
     if (!timeSpent) return;
@@ -31,6 +35,11 @@ if (timer && quizForm && timerText) {
     // Use native submit for automatic submission so required validation does not block it.
     quizForm.noValidate = true;
     quizForm.submit();
+  }
+
+  function submitForSecurityEvent(event, reason) {
+    if (event) event.preventDefault();
+    submitNow(reason);
   }
 
   // Timer countdown
@@ -63,7 +72,6 @@ if (timer && quizForm && timerText) {
   // Tab visibility change - auto submit when tab hidden
   document.addEventListener('visibilitychange', () => {
     if (document.hidden && !alreadySubmitted) {
-      focusLost = true;
       submitNow('tab_hidden');
     }
   });
@@ -71,7 +79,6 @@ if (timer && quizForm && timerText) {
   // Window blur - auto submit when user switches window
   window.addEventListener('blur', () => {
     if (!alreadySubmitted) {
-      focusLost = true;
       submitNow('window_blur');
     }
   });
@@ -83,12 +90,64 @@ if (timer && quizForm && timerText) {
 
   // Prevent right-click and developer tools opening
   document.addEventListener('keydown', (e) => {
+    const key = String(e.key || '').toLowerCase();
+
     // F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+Shift+C
-    if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C'))) {
-      e.preventDefault();
-      submitNow('dev_tools_attempted');
+    if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && ['i', 'j', 'c'].includes(key))) {
+      submitForSecurityEvent(e, 'dev_tools_attempted');
+      return;
+    }
+
+    // Copy, cut, and paste shortcuts are treated as exam security violations.
+    if ((e.ctrlKey || e.metaKey) && clipboardShortcutReasons[key]) {
+      submitForSecurityEvent(e, clipboardShortcutReasons[key]);
+      return;
+    }
+
+    // Common alternate clipboard shortcuts on Windows/Linux keyboards.
+    if (e.shiftKey && key === 'insert') {
+      submitForSecurityEvent(e, 'clipboard_paste_shortcut');
+      return;
+    }
+
+    if (e.ctrlKey && key === 'insert') {
+      submitForSecurityEvent(e, 'clipboard_copy_shortcut');
     }
   });
+
+  document.addEventListener(
+    'copy',
+    (e) => {
+      submitForSecurityEvent(e, 'clipboard_copy');
+    },
+    true
+  );
+
+  document.addEventListener(
+    'cut',
+    (e) => {
+      submitForSecurityEvent(e, 'clipboard_cut');
+    },
+    true
+  );
+
+  document.addEventListener(
+    'paste',
+    (e) => {
+      submitForSecurityEvent(e, 'clipboard_paste');
+    },
+    true
+  );
+
+  document.addEventListener(
+    'beforeinput',
+    (e) => {
+      if (['insertFromPaste', 'insertFromPasteAsQuotation'].includes(e.inputType)) {
+        submitForSecurityEvent(e, 'clipboard_paste');
+      }
+    },
+    true
+  );
 
   document.addEventListener('contextmenu', (e) => {
     e.preventDefault();
