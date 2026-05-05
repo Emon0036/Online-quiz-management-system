@@ -2252,33 +2252,6 @@ pre {
   font-size: 1.05rem;
 }
 
-.auth-social-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.85rem;
-  width: 100%;
-  min-height: 3.6rem;
-  border: 1px solid rgba(67, 108, 140, 0.16);
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.92);
-  color: var(--text-strong);
-  font-weight: 700;
-  box-shadow: var(--shadow-card);
-  transition: transform 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
-}
-
-.auth-social-btn:hover {
-  transform: translateY(-1px);
-  border-color: rgba(14, 92, 139, 0.28);
-  background: #fff;
-}
-
-.auth-social-btn .fa-google {
-  color: #ea4335;
-  font-size: 1.15rem;
-}
-
 .auth-subtle-link {
   color: var(--brand);
   font-weight: 700;
@@ -2307,21 +2280,6 @@ pre {
   margin: 0.45rem 0 0;
   color: var(--muted);
   font-size: 0.92rem;
-}
-
-.divider {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  color: var(--muted);
-}
-
-.divider::before,
-.divider::after {
-  content: "";
-  flex: 1;
-  height: 1px;
-  background: var(--border);
 }
 
 .theme-toggle {
@@ -2715,7 +2673,6 @@ html.theme-dark .result-hero,
 html.theme-dark .footer-shell,
 html.theme-dark .auth-stage,
 html.theme-dark .auth-form-panel,
-html.theme-dark .auth-social-btn,
 html.theme-dark .auth-helper-card,
 html.theme-dark .profile-menu,
 html.theme-dark .coding-panel,

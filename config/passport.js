@@ -1,5 +1,4 @@
 const LocalStrategy = require('passport-local').Strategy;
-const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const User = require('../models/User');
 
 module.exports = (passport) => {
@@ -20,47 +19,6 @@ module.exports = (passport) => {
         return done(error);
       }
     })
-  );
-
-  passport.use(
-    new GoogleStrategy(
-      {
-        clientID: process.env.GOOGLE_CLIENT_ID || 'missing-client-id',
-        clientSecret: process.env.GOOGLE_CLIENT_SECRET || 'missing-client-secret',
-        callbackURL: process.env.GOOGLE_CALLBACK_URL || '/auth/google/callback',
-        passReqToCallback: true,
-      },
-      async (req, accessToken, refreshToken, profile, done) => {
-        try {
-          const email = profile.emails?.[0]?.value?.toLowerCase();
-          if (!email) return done(null, false, { message: 'Google account has no public email.' });
-
-          let user = await User.findOne({ $or: [{ googleId: profile.id }, { email }] });
-          if (user) {
-            if (user.accountStatus === 'blocked') {
-              return done(null, false, { message: 'Your account has been blocked. Please contact an administrator.' });
-            }
-            user.googleId = user.googleId || profile.id;
-            user.profileImage = profile.photos?.[0]?.value || user.profileImage;
-            await user.save();
-            return done(null, user);
-          }
-
-          user = await User.create({
-            name: profile.displayName,
-            email,
-            googleId: profile.id,
-            profileImage: profile.photos?.[0]?.value,
-            role: 'student',
-            teacherStatus: 'none',
-          });
-
-          return done(null, user);
-        } catch (error) {
-          return done(error);
-        }
-      }
-    )
   );
 
   passport.serializeUser((user, done) => done(null, user.id));

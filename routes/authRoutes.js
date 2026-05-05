@@ -17,7 +17,4 @@ router.post('/forgot-password', ensureGuest, asyncHandler(authController.forgotP
 router.get('/reset-password/:token', ensureGuest, asyncHandler(authController.showResetPassword));
 router.post('/reset-password/:token', ensureGuest, asyncHandler(authController.resetPassword));
 
-router.get('/google', authController.startGoogle);
-router.get('/google/callback', authController.googleCallback);
-
 module.exports = router;

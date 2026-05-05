@@ -100,33 +100,6 @@ exports.logout = (req, res, next) => {
   return res.redirect(`/auth/login${tabId ? `?tab=${encodeURIComponent(tabId)}` : ''}`);
 };
 
-exports.startGoogle = (req, res, next) => {
-  if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
-    req.flash('error', 'Google login is not configured yet.');
-    return res.redirect('/auth/login');
-  }
-
-  const authOptions = {
-    scope: ['profile', 'email'],
-    state: req.query.tab ? String(req.query.tab) : undefined,
-  };
-
-  passport.authenticate('google', authOptions)(req, res, next);
-};
-
-exports.googleCallback = [
-  passport.authenticate('google', {
-    failureRedirect: '/auth/login',
-    failureFlash: true,
-  }),
-  (req, res) => {
-    const tabId = req.query.state || req.currentTabId || crypto.randomBytes(8).toString('hex');
-    saveTabUser(req, req.user.id, tabId);
-    req.flash('success', `Welcome, ${req.user.name}.`);
-    res.redirect(`${dashboardPathFor(req.user)}?tab=${encodeURIComponent(tabId)}`);
-  },
-];
-
 exports.forgotPassword = async (req, res) => {
   const user = await User.findOne({ email: String(req.body.email || '').toLowerCase() });
   if (!user) {

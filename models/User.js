@@ -7,7 +7,6 @@ const userSchema = new mongoose.Schema(
     name: { type: String, required: true, trim: true, maxlength: 100 },
     email: { type: String, required: true, unique: true, lowercase: true, trim: true },
     password: { type: String, minlength: 6, select: false },
-    googleId: { type: String, unique: true, sparse: true },
     role: { type: String, enum: ['admin', 'teacher', 'student'], required: true, default: 'student' },
     teacherStatus: { type: String, enum: ['none', 'pending', 'approved', 'rejected'], default: 'none' },
     accountStatus: { type: String, enum: ['active', 'blocked'], default: 'active' },

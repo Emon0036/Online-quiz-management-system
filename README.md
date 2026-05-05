@@ -42,7 +42,6 @@ Main dependencies used in this project include:
 - `ejs-mate`
 - `passport`
 - `passport-local`
-- `passport-google-oauth20`
 - `bcryptjs`
 - `express-session`
 - `connect-mongo`
@@ -74,15 +73,9 @@ Then update the values inside `.env` if needed:
 MONGODB_URI=mongodb://127.0.0.1:27017/quiz-management-system
 SESSION_SECRET=your_session_secret_key_here_change_in_production
 
-GOOGLE_CLIENT_ID=your_google_client_id
-GOOGLE_CLIENT_SECRET=your_google_client_secret
-GOOGLE_CALLBACK_URL=http://localhost:3000/auth/google/callback
-
 PORT=3000
 NODE_ENV=development
 ```
-
-Google OAuth values are optional unless you want to use Google login.
 
 ## Database Setup
 
